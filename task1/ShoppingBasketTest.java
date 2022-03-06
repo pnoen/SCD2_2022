@@ -208,5 +208,19 @@ public class ShoppingBasketTest {
         assertNull(shoppingBasket.getValue(), "Doesn't start as an empty list, cost not null.");
     }
 
+    @Test
+    public void clearEmptyBasket() {
+        shoppingBasket.clear();
+        assertEquals(0, shoppingBasket.getItems().size(), "Doesn't clear when the basket is empty.");
+    }
+
+    @Test
+    public void clear() {
+        shoppingBasket.addItem("apple", 1);
+
+        shoppingBasket.clear();
+        assertEquals(0, shoppingBasket.getItems().size(), "Doesn't clear when the basket has items.");
+    }
+
 
 }
