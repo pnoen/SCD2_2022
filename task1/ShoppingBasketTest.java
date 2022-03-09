@@ -269,15 +269,13 @@ public class ShoppingBasketTest {
 
     @Test
     public void removeItemNullItem() {
-        assertThrows(IllegalArgumentException.class, () -> {shoppingBasket.removeItem(null, 1);},
-                "Didn't return false for a null item in removeItem.");
+        assertFalse(shoppingBasket.removeItem(null, 1), "Didn't return false for a null item in removeItem.");
     }
 
     @Test
     public void removeItemNullItemNonEmptyBasket() {
         shoppingBasket.addItem("apple", 1);
-        assertThrows(IllegalArgumentException.class, () -> {shoppingBasket.removeItem(null, 1);},
-                "Didn't return false for a null item in removeItem.");
+        assertFalse(shoppingBasket.removeItem(null, 1), "Didn't return false for a null item in removeItem.");
 
         assertEquals(2.5, shoppingBasket.getValue(), "Removed item cost when a null was provided.");
 
@@ -297,15 +295,13 @@ public class ShoppingBasketTest {
 
     @Test
     public void removeItemNonMatchingItem() {
-        assertThrows(IllegalArgumentException.class, () -> {shoppingBasket.removeItem("persimmons", 1);},
-                "Didn't return false for a non matching item in removeItem.");
+        assertFalse(shoppingBasket.removeItem("persimmons", 1), "Didn't return false for a non matching item in removeItem.");
     }
 
     @Test
     public void removeItemNonMatchingItemNonEmptyBasket() {
         shoppingBasket.addItem("apple", 1);
-        assertThrows(IllegalArgumentException.class, () -> {shoppingBasket.removeItem("persimmons", 1);},
-                "Didn't return false for a non matching item in removeItem.");
+        assertFalse(shoppingBasket.removeItem("persimmons", 1), "Didn't return false for a non matching item in removeItem.");
 
         assertEquals(2.5, shoppingBasket.getValue(), "Removed item cost when a non matching item was provided.");
 
