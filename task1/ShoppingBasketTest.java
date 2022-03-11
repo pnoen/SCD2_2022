@@ -136,6 +136,22 @@ public class ShoppingBasketTest {
     }
 
     @Test
+    public void addItemNullItemOutOfRangeCount() {
+        assertThrows(IllegalArgumentException.class, () -> {shoppingBasket.addItem(null, 0);},
+                "Didn't throw IllegalArgumentException for null item and out of range count for addItem.");
+        assertNull(shoppingBasket.getValue(), "Added item cost when a null item and out of range count was provided");
+
+        int count = 0;
+
+        List<Pair<String, Integer>> basket = shoppingBasket.getItems();
+        for (Pair<String, Integer> pair : basket) {
+            count += pair.getValue();
+        }
+
+        assertEquals(0, count, "Added item to the basket when a null item and out of range count was provided");
+    }
+
+    @Test
     public void addItemCaseInsensitiveItem() {
         shoppingBasket.addItem("Apple", 1);
         assertEquals(2.5, shoppingBasket.getValue(), "Didn't add apple to the total cost (Case Insensitive).");
@@ -209,6 +225,42 @@ public class ShoppingBasketTest {
     }
 
     @Test
+    public void addItemSameItem() {
+        shoppingBasket.addItem("apple", 1);
+        shoppingBasket.addItem("apple", 1);
+        assertEquals(5.0, shoppingBasket.getValue(), "Didn't add 2 apples to the total cost.");
+
+        boolean foundApple = false;
+        int apple = 0;
+
+        List<Pair<String, Integer>> basket = shoppingBasket.getItems();
+        for (Pair<String, Integer> pair : basket) {
+            if (pair.getKey().equals("apple")) {
+                foundApple = true;
+                apple += pair.getValue();
+            }
+        }
+        assertTrue(foundApple, "Didn't add apple to the basket when apple was added twice in different instances.");
+        assertEquals(2, apple, "Didn't add the correct number of apples when it was added twice in different instances.");
+    }
+
+    @Test
+    public void addItemEmptyItem() {
+        assertThrows(IllegalArgumentException.class, () -> {shoppingBasket.addItem("", 1);},
+                "Didn't throw IllegalArgumentException for an empty item in addItem.");
+        assertNull(shoppingBasket.getValue(), "Added item cost when an empty item was provided.");
+
+        int count = 0;
+
+        List<Pair<String, Integer>> basket = shoppingBasket.getItems();
+        for (Pair<String, Integer> pair : basket) {
+            count += pair.getValue();
+        }
+
+        assertEquals(0, count, "Added item to the basket when an empty item was provided.");
+    }
+
+    @Test
     public void removeItem() {
         shoppingBasket.addItem("apple", 2);
         shoppingBasket.addItem("orange", 2);
@@ -265,6 +317,30 @@ public class ShoppingBasketTest {
         assertEquals(1, orange, "Didn't remove the correct number of oranges from the basket.");
         assertEquals(1, pear, "Didn't remove the correct number of pears to from basket.");
         assertEquals(1, banana, "Didn't remove the correct number of bananas from the basket.");
+    }
+
+    @Test
+    public void removeItemToZero() {
+        shoppingBasket.addItem("apple", 1);
+        shoppingBasket.addItem("orange", 1);
+        shoppingBasket.addItem("pear", 1);
+        shoppingBasket.addItem("banana", 1);
+
+        assertTrue(shoppingBasket.removeItem("apple", 1), "Didn't remove apple when the count is the same as the existing count.");
+        assertTrue(shoppingBasket.removeItem("orange", 1), "Didn't remove orange when the count is the same as the existing count.");
+        assertTrue(shoppingBasket.removeItem("pear", 1), "Didn't remove pear when the count is the same as the existing count.");
+        assertTrue(shoppingBasket.removeItem("banana", 1), "Didn't remove banana when the count is the same as the existing count.");
+
+        assertEquals(0.0, shoppingBasket.getValue(), "Didn't reduce the total cost when the count is the same as the existing count.");
+
+        int count = 0;
+
+        List<Pair<String, Integer>> basket = shoppingBasket.getItems();
+        for (Pair<String, Integer> pair : basket) {
+            count += pair.getValue();
+        }
+
+        assertEquals(0, count, "Didn't remove the correct number of items when the count is the same as the existing count.");
     }
 
     @Test
@@ -368,6 +444,27 @@ public class ShoppingBasketTest {
     }
 
     @Test
+    public void removeItemNullItemOutOfRangeCount() {
+        shoppingBasket.addItem("apple", 1);
+        assertThrows(IllegalArgumentException.class, () -> {shoppingBasket.removeItem(null, 0);},
+                "Didn't throw IllegalArgumentException for a null item and out of range count in removeItem.");
+        assertEquals(2.5, shoppingBasket.getValue(), "Removed item cost when a null item and out of range count was provided.");
+
+        boolean foundApple = false;
+        int apple = 0;
+
+        List<Pair<String, Integer>> basket = shoppingBasket.getItems();
+        for (Pair<String, Integer> pair : basket) {
+            if (pair.getKey().equals("apple")) {
+                foundApple = true;
+                apple += pair.getValue();
+            }
+        }
+        assertTrue(foundApple, "Removed apple from the basket when a null item and out of range cost count was provided.");
+        assertEquals(1, apple, "Removed item from the basket when a null item and out of range count was provided.");
+    }
+
+    @Test
     public void removeItemCaseInsensitiveItem() {
         shoppingBasket.addItem("apple", 2);
         shoppingBasket.addItem("orange", 2);
@@ -444,6 +541,19 @@ public class ShoppingBasketTest {
 
         assertTrue(shoppingBasket.removeItem("pear", 2), "Didn't remove the pears when the count was less than the existing amount.");
         assertEquals(3.0, shoppingBasket.getValue(), "Didn't reduce the total cost when the count was less than the existing amount.");
+
+        boolean foundPear = false;
+        int pear = 0;
+
+        List<Pair<String, Integer>> basket = shoppingBasket.getItems();
+        for (Pair<String, Integer> pair : basket) {
+            if (pair.getKey().equals("pear")) {
+                foundPear = true;
+                pear += pair.getValue();
+            }
+        }
+        assertTrue(foundPear, "Removed pear from the basket when the count was less than the existing count.");
+        assertEquals(1, pear, "Removed item from the basket when when the count was less than the existing count.");
     }
 
     @Test
@@ -451,6 +561,52 @@ public class ShoppingBasketTest {
         shoppingBasket.addItem("pear", 1);
 
         assertFalse(shoppingBasket.removeItem("apple", 1), "Removed missing item from the basket.");
+    }
+
+    @Test
+    public void removeItemSameItem() {
+        shoppingBasket.addItem("apple", 3);
+
+        assertTrue(shoppingBasket.removeItem("apple", 1), "Didn't remove apple.");
+        assertTrue(shoppingBasket.removeItem("apple", 1), "Didn't remove apple when performed again");
+
+        assertEquals(2.5, shoppingBasket.getValue(), "Didn't remove the apples when performed twice.");
+
+        boolean foundApple = false;
+        int apple = 0;
+
+        List<Pair<String, Integer>> basket = shoppingBasket.getItems();
+        for (Pair<String, Integer> pair : basket) {
+            if (pair.getKey().equals("apple")) {
+                foundApple = true;
+                apple += pair.getValue();
+            }
+        }
+
+        assertTrue(foundApple, "Removed apple from the basket when there is a larger existing amount.");
+        assertEquals(1, apple, "Removed incorrect amount of apples when performed twice.");
+    }
+
+    @Test
+    public void removeItemEmptyItem() {
+        shoppingBasket.addItem("apple", 1);
+        assertFalse(shoppingBasket.removeItem("", 1), "Removed apple when an empty item was provided.");
+
+        assertEquals(2.5, shoppingBasket.getValue(), "Reduced the total cost when an empty item was provided.");
+
+        boolean foundApple = false;
+        int apple = 0;
+
+        List<Pair<String, Integer>> basket = shoppingBasket.getItems();
+        for (Pair<String, Integer> pair : basket) {
+            if (pair.getKey().equals("apple")) {
+                foundApple = true;
+                apple += pair.getValue();
+            }
+        }
+
+        assertTrue(foundApple, "Removed apple from the basket when an empty item was provided.");
+        assertEquals(1, apple, "Removed apple from the basket when an empty item was provided.");
     }
 
     @Test
@@ -474,6 +630,7 @@ public class ShoppingBasketTest {
     @Test
     public void clearEmptyBasket() {
         shoppingBasket.clear();
+        assertNull(shoppingBasket.getValue(), "Total cost not zero when basket cleared.");
 
         int count = 0;
 
@@ -489,6 +646,7 @@ public class ShoppingBasketTest {
     public void clear() {
         shoppingBasket.addItem("apple", 1);
         shoppingBasket.clear();
+        assertNull(shoppingBasket.getValue(), "Total cost not zero when basket cleared.");
 
         int count = 0;
 
@@ -499,4 +657,107 @@ public class ShoppingBasketTest {
 
         assertEquals(0, count, "Didn't clear when the basket has items.");
     }
+
+    @Test
+    public void clearAddItem() {
+        shoppingBasket.clear();
+        shoppingBasket.addItem("apple", 1);
+
+        assertEquals(2.5, shoppingBasket.getValue(), "Didn't add the cost when item was added after clearing.");
+
+        boolean foundApple = false;
+        int apple = 0;
+
+        List<Pair<String, Integer>> basket = shoppingBasket.getItems();
+        for (Pair<String, Integer> pair : basket) {
+            if (pair.getKey().equals("apple")) {
+                foundApple = true;
+                apple += pair.getValue();
+            }
+        }
+
+        assertTrue(foundApple, "Didn't add apple when item was added after clearing.");
+        assertEquals(1, apple, "Didn't add apple when the item was added after clearing.");
+    }
+
+    @Test
+    public void clearAddItemRemoveItem() {
+        shoppingBasket.clear();
+        shoppingBasket.addItem("apple", 1);
+        assertTrue(shoppingBasket.removeItem("apple", 1), "Didn't remove item when removing after clearing.");
+        assertNull(shoppingBasket.getValue(), "Didn't remove item cost when removing after clearing.");
+
+        int count = 0;
+
+        List<Pair<String, Integer>> basket = shoppingBasket.getItems();
+        for (Pair<String, Integer> pair : basket) {
+            count += pair.getValue();
+        }
+
+        assertEquals(0, count, "Didn't remove item from the basket when removing after clearing.");
+    }
+
+    @Test
+    public void clearRemoveItem() {
+        shoppingBasket.addItem("apple", 1);
+        shoppingBasket.clear();
+        assertFalse(shoppingBasket.removeItem("apple", 1), "Removed item from an empty basket after clearing.");
+        assertNull(shoppingBasket.getValue(), "Total cost not empty after clearing and removing an item.");
+
+        int count = 0;
+
+        List<Pair<String, Integer>> basket = shoppingBasket.getItems();
+        for (Pair<String, Integer> pair : basket) {
+            count += pair.getValue();
+        }
+
+        assertEquals(0, count, "Removed item from an empty basket after clearing.");
+    }
+
+    @Test
+    public void addItemRemoveItemAddItem() {
+        shoppingBasket.addItem("apple", 2);
+        assertTrue(shoppingBasket.removeItem("apple", 1), "Didn't remove the apple from the basket.");
+        shoppingBasket.addItem("apple", 4);
+
+        assertEquals(12.5, shoppingBasket.getValue(), "Didn't add apple costs after removing");
+
+        boolean foundApple = false;
+        int apple = 0;
+
+        List<Pair<String, Integer>> basket = shoppingBasket.getItems();
+        for (Pair<String, Integer> pair : basket) {
+            if (pair.getKey().equals("apple")) {
+                foundApple = true;
+                apple += pair.getValue();
+            }
+        }
+
+        assertTrue(foundApple, "Didn't add apple when item was added after removing.");
+        assertEquals(5, apple, "Didn't add apple when the item was added after removing.");
+    }
+
+    @Test
+    public void addItemRemoveItemToZeroAddItem() {
+        shoppingBasket.addItem("apple", 1);
+        assertTrue(shoppingBasket.removeItem("apple", 1), "Didn't remove the apple from the basket.");
+        shoppingBasket.addItem("apple", 5);
+
+        assertEquals(12.5, shoppingBasket.getValue(), "Didn't add apple costs after removing to 0");
+
+        boolean foundApple = false;
+        int apple = 0;
+
+        List<Pair<String, Integer>> basket = shoppingBasket.getItems();
+        for (Pair<String, Integer> pair : basket) {
+            if (pair.getKey().equals("apple")) {
+                foundApple = true;
+                apple += pair.getValue();
+            }
+        }
+
+        assertTrue(foundApple, "Didn't add apple when item was added after removing to zero.");
+        assertEquals(5, apple, "Didn't add apple when the item was added after removing to zero.");
+    }
+
 }
