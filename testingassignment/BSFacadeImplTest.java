@@ -1,6 +1,9 @@
 package au.edu.sydney.soft3202.reynholm.erp.billingsystem;
 
 import au.edu.sydney.soft3202.reynholm.erp.cheatmodule.ERPCheatFactory;
+import au.edu.sydney.soft3202.reynholm.erp.client.ClientReporting;
+import au.edu.sydney.soft3202.reynholm.erp.compliance.ComplianceReporting;
+import au.edu.sydney.soft3202.reynholm.erp.permissions.AuthToken;
 import au.edu.sydney.soft3202.reynholm.erp.permissions.AuthenticationModule;
 import au.edu.sydney.soft3202.reynholm.erp.permissions.AuthorisationModule;
 import au.edu.sydney.soft3202.reynholm.erp.project.Project;
@@ -12,7 +15,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -20,8 +23,6 @@ public class BSFacadeImplTest {
     BSFacade bsFacade;
     AuthenticationModule authenticationModule;
     AuthorisationModule authorisationModule;
-    AuthenticationModule authenticationModuleMock;
-    AuthorisationModule authorisationModuleMock;
 
     @BeforeEach
     public void setup() {
@@ -29,35 +30,22 @@ public class BSFacadeImplTest {
         ERPCheatFactory erpCheatFactory = new ERPCheatFactory();
         this.authenticationModule = erpCheatFactory.getAuthenticationModule();
         this.authorisationModule = erpCheatFactory.getAuthorisationModule();
-        this.authenticationModuleMock = mock(AuthenticationModule.class);
-        this.authorisationModuleMock = mock(AuthorisationModule.class);
-
     }
 
     @Test
     public void addProject() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
 
         assertThat(bsFacade.getAllProjects().size(), equalTo(1));
-        boolean foundProject = false;
-        int project = 0;
-
-        for (Project proj : bsFacade.getAllProjects()) {
-            if (proj.getName().equals("Project") && proj.getOverDifference() == 1.0 && proj.getStandardRate() == 1.0) {
-                foundProject = true;
-                project += 1;
-            }
-        }
-
-        assertTrue(foundProject);
-        assertThat(project, equalTo(1));
+        assertThat(bsFacade.getAllProjects(), containsInAnyOrder(proj));
     }
 
     @Test
     public void addProjectNullName() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
+        bsFacade.login("user", "password");
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject(null, "John", 1.0, 2.0),
                 "Didn't throw IllegalArgumentException when addProject is provided a null name.");
         assertThat(bsFacade.getAllProjects().size(), equalTo(0));
@@ -74,6 +62,7 @@ public class BSFacadeImplTest {
     @Test
     public void addProjectNullClient() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
+        bsFacade.login("user", "password");
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", null, 1.0, 2.0),
                 "Didn't throw IllegalArgumentException when addProject is provided a null client.");
         assertThat(bsFacade.getAllProjects().size(), equalTo(0));
@@ -90,6 +79,7 @@ public class BSFacadeImplTest {
     @Test
     public void addProjectSmallerThanRangeStandardRate() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
+        bsFacade.login("user", "password");
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 0.0, 2.0),
                 "Didn't throw IllegalArgumentException when addProject is provided a standardRate smaller than the range.");
         assertThat(bsFacade.getAllProjects().size(), equalTo(0));
@@ -98,6 +88,7 @@ public class BSFacadeImplTest {
     @Test
     public void addProjectLargerThanRangeStandardRate() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
+        bsFacade.login("user", "password");
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 100.1, 2.0),
                 "Didn't throw IllegalArgumentException when addProject is provided a standardRate larger than the range.");
         assertThat(bsFacade.getAllProjects().size(), equalTo(0));
@@ -106,6 +97,7 @@ public class BSFacadeImplTest {
     @Test
     public void addProjectSmallerThanRangeOverRate() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
+        bsFacade.login("user", "password");
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 5.0, 0.0),
                 "Didn't throw IllegalArgumentException when addProject is provided a overRate smaller than the range.");
         assertThat(bsFacade.getAllProjects().size(), equalTo(0));
@@ -114,6 +106,7 @@ public class BSFacadeImplTest {
     @Test
     public void addProjectLargerThanRangeOverRate() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
+        bsFacade.login("user", "password");
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 5.0, 100.1),
                 "Didn't throw IllegalArgumentException when addProject is provided overRate larger than the range.");
         assertThat(bsFacade.getAllProjects().size(), equalTo(0));
@@ -122,155 +115,14 @@ public class BSFacadeImplTest {
     @Test
     public void addProjectOverRateLessThanPercentage() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
+        bsFacade.login("user", "password");
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 5.0, 5.1),
                 "Didn't throw IllegalArgumentException when addProject is provided overRate that is not 10% larger.");
         assertThat(bsFacade.getAllProjects().size(), equalTo(0));
     }
 
     @Test
-    public void addProjectNullNameNoModules() {
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject(null, "John", 1.0, 2.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a null name (No Auth).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectEmptyNameNoModule() {
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("", "John", 1.0, 2.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a empty name (No Auth).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectNullClientNoModules() {
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", null, 1.0, 2.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a null client (No Auth).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectEmptyClientNoModules() {
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "", 1.0, 2.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a empty client (No Auth).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectSmallerThanRangeStandardRateNoModules() {
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 0.0, 2.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a standardRate smaller than the range (No Auth).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectLargerThanRangeStandardRateNoModules() {
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 100.1, 2.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a standardRate larger than the range (No Auth).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectSmallerThanRangeOverRateNoModules() {
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 5.0, 0.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a overRate smaller than the range (No Auth).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectLargerThanRangeOverRateNoModules() {
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 5.0, 100.1),
-                "Didn't throw IllegalArgumentException when addProject is provided overRate larger than the range (No Auth).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectOverRateLessThanPercentageNoModules() {
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 5.0, 5.1),
-                "Didn't throw IllegalArgumentException when addProject is provided overRate that is not 10% larger (No Auth).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectNullNameLoggedIn() {
-        bsFacade.injectAuth(authenticationModule, authorisationModule);
-        bsFacade.login("user", "password");
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject(null, "John", 1.0, 2.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a null name (Logged in).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectEmptyNameLoggedIn() {
-        bsFacade.injectAuth(authenticationModule, authorisationModule);
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("", "John", 1.0, 2.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a empty name (Logged in).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectNullClientLoggedIn() {
-        bsFacade.injectAuth(authenticationModule, authorisationModule);
-        bsFacade.login("user", "password");
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", null, 1.0, 2.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a null client (Logged in).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectEmptyClientLoggedIn() {
-        bsFacade.injectAuth(authenticationModule, authorisationModule);
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "", 1.0, 2.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a empty client (Logged in).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectSmallerThanRangeStandardRateLoggedIn() {
-        bsFacade.injectAuth(authenticationModule, authorisationModule);
-        bsFacade.login("user", "password");
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 0.0, 2.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a standardRate smaller than the range (Logged in).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectLargerThanRangeStandardRateLoggedIn() {
-        bsFacade.injectAuth(authenticationModule, authorisationModule);
-        bsFacade.login("user", "password");
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 100.1, 2.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a standardRate larger than the range (Logged in).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectSmallerThanRangeOverRateLoggedIn() {
-        bsFacade.injectAuth(authenticationModule, authorisationModule);
-        bsFacade.login("user", "password");
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 5.0, 0.0),
-                "Didn't throw IllegalArgumentException when addProject is provided a overRate smaller than the range (Logged in).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectLargerThanRangeOverRateLoggedIn() {
-        bsFacade.injectAuth(authenticationModule, authorisationModule);
-        bsFacade.login("user", "password");
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 5.0, 100.1),
-                "Didn't throw IllegalArgumentException when addProject is provided overRate larger than the range (Logged in).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectOverRateLessThanPercentageLoggedIn() {
-        bsFacade.injectAuth(authenticationModule, authorisationModule);
-        bsFacade.login("user", "password");
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "John", 5.0, 5.1),
-                "Didn't throw IllegalArgumentException when addProject is provided overRate that is not 10% larger (Logged in).");
-        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-    }
-
-    @Test
-    public void addProjectNoModule() {
+    public void addProjectNoAuthModule() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
         bsFacade.injectAuth(null, null);
@@ -278,18 +130,6 @@ public class BSFacadeImplTest {
                 "Didn't throw IllegalStateException when addProject has no auth module.");
 
         assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-        boolean foundProject = false;
-        int project = 0;
-
-        for (Project proj : bsFacade.getAllProjects()) {
-            if (proj.getName().equals("Project") && proj.getOverDifference() == 1.0 && proj.getStandardRate() == 1.0) {
-                foundProject = true;
-                project += 1;
-            }
-        }
-
-        assertFalse(foundProject);
-        assertThat(project, equalTo(0));
     }
 
     @Test
@@ -329,32 +169,21 @@ public class BSFacadeImplTest {
     public void removeProjectIncorrectId() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         assertThrows(IllegalStateException.class, () -> bsFacade.removeProject(id + 10),
                 "Didn't throw IllegalStateException when removeProject is provided an incorrect id.");
 
         assertThat(bsFacade.getAllProjects().size(), equalTo(1));
-        boolean foundProject = false;
-        int project = 0;
-
-        for (Project proj : bsFacade.getAllProjects()) {
-            if (proj.getName().equals("Project") && proj.getOverDifference() == 1.0 && proj.getStandardRate() == 1.0) {
-                foundProject = true;
-                project += 1;
-            }
-        }
-
-        assertTrue(foundProject);
-        assertThat(project, equalTo(1));
+        assertThat(bsFacade.getAllProjects(), containsInAnyOrder(proj));
     }
 
     @Test
     public void addTask() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         assertTrue(bsFacade.addTask(id, "Description", 100, false), "Failed to add task to the project.");
     }
 
@@ -362,8 +191,8 @@ public class BSFacadeImplTest {
     public void addTaskForce() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         assertTrue(bsFacade.addTask(id, "Description", 90, true), "Failed to add task to the project (Force enabled).");
     }
 
@@ -371,8 +200,8 @@ public class BSFacadeImplTest {
     public void addTaskNullDescription() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addTask(id, null, 90, false),
                 "Didn't throw IllegalArgumentException when addTask is provided a null description.");
 
@@ -384,8 +213,8 @@ public class BSFacadeImplTest {
     public void addTaskEmptyDescription() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addTask(id, "", 90, false),
                 "Didn't throw IllegalArgumentException when addTask is provided an empty description.");
 
@@ -397,8 +226,8 @@ public class BSFacadeImplTest {
     public void addTaskSmallerThanRangeHours() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addTask(id, "Description", 0, false),
                 "Didn't throw IllegalArgumentException when addTask is provided a task hour smaller than the range.");
 
@@ -410,8 +239,8 @@ public class BSFacadeImplTest {
     public void addTaskLargerThanRangeHours() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addTask(id, "Description", 120, false),
                 "Didn't throw IllegalArgumentException when addTask is provided a task hour larger than the range.");
 
@@ -423,8 +252,8 @@ public class BSFacadeImplTest {
     public void addTaskNegativeHours() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addTask(id, "Description", -50, false),
                 "Didn't throw IllegalArgumentException when addTask is provided a negative task hour.");
 
@@ -436,8 +265,8 @@ public class BSFacadeImplTest {
     public void addTaskIncorrectProjectId() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         assertThrows(IllegalStateException.class, () -> bsFacade.addTask(id + 10, "Description", 50, false),
                 "Didn't throw IllegalStateException when addTask is provided an incorrect id.");
     }
@@ -446,8 +275,8 @@ public class BSFacadeImplTest {
     public void addTaskNoLogin() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         bsFacade.logout();
         assertThrows(IllegalStateException.class, () -> bsFacade.addTask(id, "Description", 50, false),
                 "Didn't throw IllegalStateException when addTask is used without being logged in.");
@@ -457,8 +286,8 @@ public class BSFacadeImplTest {
     public void addTaskForceOverHours() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         bsFacade.addTask(id, "Description", 50, false);
         assertTrue(bsFacade.addTask(id, "Description", 70, true),
                 "Failed to add task to the project when hours over project ceiling (Force enabled).");
@@ -468,8 +297,8 @@ public class BSFacadeImplTest {
     public void addTaskNoForceOverHours() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         bsFacade.addTask(id, "Description", 50, false);
         assertFalse(bsFacade.addTask(id, "Description", 70, false),
                 "Failed to add task to the project when hours over project ceiling.");
@@ -482,8 +311,8 @@ public class BSFacadeImplTest {
     public void addTaskNoModule() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         bsFacade.injectAuth(null, null);
         assertThrows(IllegalStateException.class, () -> bsFacade.addTask(id, "Description", 50, false),
                 "Didn't throw IllegalStateException when addTask is used with no auth module.");
@@ -493,8 +322,8 @@ public class BSFacadeImplTest {
     public void setProjectCeiling() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         bsFacade.setProjectCeiling(id, 70);
         bsFacade.addTask(id, "Description", 80, false);
         assertFalse(bsFacade.addTask(id, "Description", 70, false),
@@ -505,8 +334,8 @@ public class BSFacadeImplTest {
     public void setProjectCeilingSmallerThanRangeCeiling() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         assertThrows(IllegalArgumentException.class, () -> bsFacade.setProjectCeiling(id, 0),
                 "Didn't throw IllegalArgumentException when setProjectCeiling is provided a smaller than range ceiling.");
     }
@@ -515,8 +344,8 @@ public class BSFacadeImplTest {
     public void setProjectCeilingLargerThanRangeCeiling() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         assertThrows(IllegalArgumentException.class, () -> bsFacade.setProjectCeiling(id, 1001),
                 "Didn't throw IllegalArgumentException when setProjectCeiling is provided a larger than range ceiling.");
     }
@@ -525,8 +354,8 @@ public class BSFacadeImplTest {
     public void setProjectCeilingNoModule() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         bsFacade.injectAuth(null, null);
         assertThrows(IllegalStateException.class, () -> bsFacade.setProjectCeiling(id, 50),
                 "Didn't throw IllegalStateException when setProjectCeiling is used with no auth module.");
@@ -536,8 +365,8 @@ public class BSFacadeImplTest {
     public void setProjectCeilingIncorrectProjectId() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         assertThrows(IllegalStateException.class, () -> bsFacade.setProjectCeiling(id + 10, 50),
                 "Didn't throw IllegalStateException when setProjectCeiling is provided an incorrect id.");
     }
@@ -546,11 +375,20 @@ public class BSFacadeImplTest {
     public void setProjectCeilingNoLogin() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         bsFacade.logout();
         assertThrows(IllegalStateException.class, () -> bsFacade.setProjectCeiling(id, 50),
                 "Didn't throw IllegalStateException when setProjectCeiling is used without being logged in.");
+    }
+
+    @Test
+    public void findProjectID() {
+        bsFacade.injectAuth(authenticationModule, authorisationModule);
+        bsFacade.login("user", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = bsFacade.findProjectID("Project", "John");
+        assertThat(id, equalTo(proj.getId()));
     }
 
     @Test
@@ -611,4 +449,322 @@ public class BSFacadeImplTest {
         assertThrows(IllegalStateException.class, () -> bsFacade.searchProjects(null),
                 "Didn't throw IllegalStateException when searchProjects is provided a null client.");
     }
+
+    @Test
+    public void audit() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, anyBoolean())).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        ComplianceReporting complianceReportingMock = mock(ComplianceReporting.class);
+        bsFacade.injectCompliance(complianceReportingMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        Project proj2 = bsFacade.addProject("Project2", "Billy", 2.0, 4.0);
+        Project proj3 = bsFacade.addProject("Project3", "Smith", 1.5, 3.0);
+        bsFacade.addTask(proj.getId(), "Description", 120, true);
+        bsFacade.addTask(proj2.getId(), "Description", 50, false);
+        bsFacade.addTask(proj3.getId(), "Description", 110, true);
+
+        bsFacade.audit();
+        verify(complianceReportingMock, times(2)).sendReport(anyString(), anyInt(), authTokenMock);
+    }
+
+    @Test
+    public void auditNoAuthModule() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, anyBoolean())).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        ComplianceReporting complianceReportingMock = mock(ComplianceReporting.class);
+        bsFacade.injectCompliance(complianceReportingMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        bsFacade.addTask(proj.getId(), "Description", 120, true);
+
+        bsFacade.injectAuth(null, null);
+        assertThrows(IllegalStateException.class, () -> bsFacade.audit(),
+                "Didn't throw IllegalStateException when no authentication module has been set for audit.");
+    }
+
+    @Test
+    public void auditNoCompliance() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, anyBoolean())).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        bsFacade.addTask(proj.getId(), "Description", 120, true);
+
+        assertThrows(IllegalStateException.class, () -> bsFacade.audit(),
+                "Didn't throw IllegalStateException when no compliance module has been set for audit.");
+    }
+
+    @Test
+    public void auditNoSecureUser() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, false)).thenReturn(true);
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        ComplianceReporting complianceReportingMock = mock(ComplianceReporting.class);
+        bsFacade.injectCompliance(complianceReportingMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        bsFacade.addTask(proj.getId(), "Description", 120, true);
+
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(false);
+        assertThrows(IllegalStateException.class, () -> bsFacade.audit(),
+                "Didn't throw IllegalStateException when not using a secure user for audit.");
+    }
+
+    @Test
+    public void finaliseProject() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, anyBoolean())).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        ClientReporting clientReportingMock = mock(ClientReporting.class);
+        bsFacade.injectClient(clientReportingMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+
+        bsFacade.finaliseProject(proj.getId());
+        verify(clientReportingMock, times(1)).sendReport("John", anyString(), authTokenMock);
+    }
+
+    @Test
+    public void finaliseProjectNoAuthModule() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, anyBoolean())).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        ClientReporting clientReportingMock = mock(ClientReporting.class);
+        bsFacade.injectClient(clientReportingMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+
+        bsFacade.injectAuth(null, null);
+        assertThrows(IllegalStateException.class, () -> bsFacade.finaliseProject(proj.getId()),
+                "Didn't throw IllegalStateException when no authentication module has been set for finaliseProject.");
+    }
+
+    @Test
+    public void finaliseProjectNoClient() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, anyBoolean())).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+
+        bsFacade.injectAuth(null, null);
+        assertThrows(IllegalStateException.class, () -> bsFacade.finaliseProject(proj.getId()),
+                "Didn't throw IllegalStateException when no client reporting module has been set for finaliseProject.");
+    }
+
+    @Test
+    public void finaliseProjectNoSecureUser() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, false)).thenReturn(true);
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        ClientReporting clientReportingMock = mock(ClientReporting.class);
+        bsFacade.injectClient(clientReportingMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(false);
+        assertThrows(IllegalStateException.class, () -> bsFacade.finaliseProject(proj.getId()),
+                "Didn't throw IllegalStateException when not using a secure user for finaliseProject.");
+    }
+
+    @Test
+    public void injectAuthNullAuthentication() {
+        assertThrows(IllegalArgumentException.class, () -> bsFacade.injectAuth(null, authorisationModule),
+                "Didn't throw IllegalArgumentException when only authentication was provided a null for finaliseProject.");
+    }
+
+    @Test
+    public void injectAuthNullAuthorisation() {
+        assertThrows(IllegalArgumentException.class, () -> bsFacade.injectAuth(authenticationModule, null),
+                "Didn't throw IllegalArgumentException when only authorisation was provided a null for finaliseProject.");
+    }
+
+    @Test
+    public void login() {
+        bsFacade.injectAuth(authenticationModule, authorisationModule);
+        assertTrue(bsFacade.login("user", "password"), "Failed to login with correct credentials.");
+    }
+
+    @Test
+    public void loginIncorrect() {
+        bsFacade.injectAuth(authenticationModule, authorisationModule);
+        assertFalse(bsFacade.login("username", "pass"), "Logged in with incorrect credentials.");
+    }
+
+    @Test
+    public void loginNullUsername() {
+        bsFacade.injectAuth(authenticationModule, authorisationModule);
+        assertThrows(IllegalArgumentException.class, () -> bsFacade.login(null, "password"),
+                "Didn't throw IllegalArgumentException when username is null for login.");
+    }
+
+    @Test
+    public void loginNullPassword() {
+        bsFacade.injectAuth(authenticationModule, authorisationModule);
+        assertThrows(IllegalArgumentException.class, () -> bsFacade.login("user", null),
+                "Didn't throw IllegalArgumentException when username is null for login.");
+    }
+
+    @Test
+    public void loginNoAuthModule() {
+        assertThrows(IllegalStateException.class, () -> bsFacade.login("user", "password"),
+                "Didn't throw IllegalStateException when the authentication module has not be set for login.");
+    }
+
+    @Test
+    public void LoginWhileLoggedIn() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthToken authTokenMock2 = mock(AuthToken.class);
+        when(authTokenMock2.getToken()).thenReturn("token2");
+        when(authTokenMock2.getUsername()).thenReturn("test");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login("username", anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.login("test", anyString())).thenReturn(authTokenMock2);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+        when(authenticationModuleMock.authenticate(authTokenMock2)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, anyBoolean())).thenReturn(true);
+        when(authorisationModuleMock.authorise(authTokenMock2, anyBoolean())).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+        bsFacade.login("username", "password");
+        assertTrue(bsFacade.login("test", "test"),
+                "Failed to login when provided correct login credentials while already logged in.");
+
+        verify(authenticationModuleMock, times(1)).logout(authTokenMock);
+    }
+
+    @Test
+    public void logout() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, anyBoolean())).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+        bsFacade.logout();
+        verify(authenticationModuleMock, times(1)).logout(authTokenMock);
+    }
+
+    @Test
+    public void logoutNotLoggedIn() {
+        bsFacade.injectAuth(authenticationModule, authorisationModule);
+        assertThrows(IllegalStateException.class, () -> bsFacade.logout(),
+                "Didn't throw IllegalStateException when logout was used with no logged in user.");
+    }
+
+    @Test
+    public void logoutNoAuthModule() {
+        bsFacade.injectAuth(authenticationModule, authorisationModule);
+        bsFacade.login("user", "password");
+        bsFacade.injectAuth(null, null);
+        assertThrows(IllegalStateException.class, () -> bsFacade.logout(),
+                "Didn't throw IllegalStateException when logout was used with no auth modules.");
+    }
+
 }
