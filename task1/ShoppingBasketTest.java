@@ -331,7 +331,7 @@ public class ShoppingBasketTest {
         assertTrue(shoppingBasket.removeItem("pear", 1), "Didn't remove pear when the count is the same as the existing count.");
         assertTrue(shoppingBasket.removeItem("banana", 1), "Didn't remove banana when the count is the same as the existing count.");
 
-        assertEquals(0.0, shoppingBasket.getValue(), "Didn't reduce the total cost when the count is the same as the existing count.");
+        assertNull(shoppingBasket.getValue(), "Didn't reduce the total cost when the count is the same as the existing count.");
 
         int count = 0;
 
