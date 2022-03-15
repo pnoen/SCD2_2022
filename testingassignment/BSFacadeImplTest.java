@@ -54,6 +54,7 @@ public class BSFacadeImplTest {
     @Test
     public void addProjectEmptyName() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
+        bsFacade.login("user", "password");
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("", "John", 1.0, 2.0),
                 "Didn't throw IllegalArgumentException when addProject is provided a empty name.");
         assertThat(bsFacade.getAllProjects().size(), equalTo(0));
@@ -71,6 +72,7 @@ public class BSFacadeImplTest {
     @Test
     public void addProjectEmptyClient() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
+        bsFacade.login("user", "password");
         assertThrows(IllegalArgumentException.class, () -> bsFacade.addProject("Project", "", 1.0, 2.0),
                 "Didn't throw IllegalArgumentException when addProject is provided a empty client.");
         assertThat(bsFacade.getAllProjects().size(), equalTo(0));
@@ -133,26 +135,66 @@ public class BSFacadeImplTest {
     }
 
     @Test
+    public void addProjectBasicUser() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, false)).thenReturn(true);
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(false);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+
+        assertThat(bsFacade.getAllProjects().size(), equalTo(1));
+        assertThat(bsFacade.getAllProjects(), containsInAnyOrder(proj));
+    }
+
+    @Test
+    public void addProjectNoBasicUser() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, anyBoolean())).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+
+        when(authorisationModuleMock.authorise(authTokenMock, anyBoolean())).thenReturn(false);
+        assertThrows(IllegalStateException.class, () -> bsFacade.addProject("Project", "John", 1.0, 2.0),
+                "Didn't throw IllegalStateException when addProject is used with no basic user.");
+    }
+
+    @Test
+    public void addProjectNoLogin() {
+        bsFacade.injectAuth(authenticationModule, authorisationModule);
+        assertThrows(IllegalStateException.class, () -> bsFacade.addProject("Project", "John", 1.0, 2.0),
+                "Didn't throw IllegalStateException when addProject is used with no user logged in.");
+    }
+
+    @Test
     public void removeProject() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
-        int id = bsFacade.findProjectID("Project", "John");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
         bsFacade.removeProject(id);
 
         assertThat(bsFacade.getAllProjects().size(), equalTo(0));
-        boolean foundProject = false;
-        int project = 0;
-
-        for (Project proj : bsFacade.getAllProjects()) {
-            if (proj.getName().equals("Project") && proj.getOverDifference() == 1.0 && proj.getStandardRate() == 1.0) {
-                foundProject = true;
-                project += 1;
-            }
-        }
-
-        assertFalse(foundProject);
-        assertThat(project, equalTo(0));
     }
 
     @Test
@@ -176,6 +218,63 @@ public class BSFacadeImplTest {
 
         assertThat(bsFacade.getAllProjects().size(), equalTo(1));
         assertThat(bsFacade.getAllProjects(), containsInAnyOrder(proj));
+    }
+
+    @Test
+    public void removeProjectSecureUser() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, false)).thenReturn(true);
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
+        bsFacade.removeProject(id);
+
+        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
+    }
+
+    @Test
+    public void removeProjectBasicUser() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, false)).thenReturn(true);
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(false);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
+        assertThrows(IllegalStateException.class, () -> bsFacade.removeProject(id),
+                "Didn't throw IllegalStateException when removeProject using a basic user.");
+    }
+    @Test
+    public void removeProjectNoUser() {
+        bsFacade.injectAuth(authenticationModule, authorisationModule);
+        bsFacade.login("user", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        bsFacade.logout();
+        int id = proj.getId();
+        assertThrows(IllegalStateException.class, () -> bsFacade.removeProject(id),
+                "Didn't throw IllegalStateException when removeProject is used with no logged in user.");
     }
 
     @Test
@@ -319,6 +418,95 @@ public class BSFacadeImplTest {
     }
 
     @Test
+    public void addTaskBasicUser() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, false)).thenReturn(true);
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(false);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
+        assertTrue(bsFacade.addTask(id, "Description", 100, false), "Failed to add task to the project using a basic user.");
+    }
+
+    @Test
+    public void addTaskBasicUserForce() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, false)).thenReturn(true);
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(false);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
+        assertThrows(IllegalStateException.class, () -> bsFacade.addTask(id, "Description", 100, true),
+                "Didn't throw IllegalStateException when addTask force is used with a basic user.");
+    }
+
+    @Test
+    public void addTaskSecureUser() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, false)).thenReturn(true);
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
+        assertTrue(bsFacade.addTask(id, "Description", 100, false), "Failed to add task to the project using a secure user.");
+    }
+
+    @Test
+    public void addTaskSecureUserForce() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, false)).thenReturn(true);
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
+        assertTrue(bsFacade.addTask(id, "Description", 100, true), "Failed to add task to the project using a secure user.");
+    }
+
+    @Test
     public void setProjectCeiling() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
         bsFacade.login("user", "password");
@@ -380,6 +568,53 @@ public class BSFacadeImplTest {
         bsFacade.logout();
         assertThrows(IllegalStateException.class, () -> bsFacade.setProjectCeiling(id, 50),
                 "Didn't throw IllegalStateException when setProjectCeiling is used without being logged in.");
+    }
+
+    @Test
+    public void setProjectCeilingBasicUser() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, false)).thenReturn(true);
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(false);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
+        assertThrows(IllegalStateException.class, () -> bsFacade.setProjectCeiling(id, 50),
+                "Didn't throw IllegalStateException when setProjectCeiling is used with basic user.");
+    }
+
+    @Test
+    public void setProjectCeilingSecureUser() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, false)).thenReturn(true);
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(true);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+        int id = proj.getId();
+        bsFacade.setProjectCeiling(id, 50);
+        assertFalse(bsFacade.addTask(id, "Description", 70, false),
+                "Failed to add task to the project after changing ceiling as secure user.");
     }
 
     @Test
