@@ -1272,8 +1272,7 @@ public class BSFacadeImplTest {
     @Test
     public void loginIncorrect() {
         bsFacade.injectAuth(authenticationModule, authorisationModule);
-        assertThrows(IllegalArgumentException.class, () -> bsFacade.login("username", "pass"),
-                "Logged in with incorrect credentials.");
+        assertFalse(bsFacade.login("username", "pass"), "Logged in with incorrect credentials.");
     }
 
     @Test
