@@ -836,7 +836,7 @@ public class BSFacadeImplTest {
         bsFacade.login("username", "password");
         Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
         int id = proj.getId();
-        when(authorisationModuleMock.authorise(eq(authTokenMock), eq(false))).thenReturn(true);
+        when(authorisationModuleMock.authorise(eq(authTokenMock), eq(false))).thenReturn(false);
         bsFacade.logout();
         assertThrows(IllegalStateException.class, () -> bsFacade.setProjectCeiling(id, 50),
                 "Didn't throw IllegalStateException when setProjectCeiling is used without being logged in.");
