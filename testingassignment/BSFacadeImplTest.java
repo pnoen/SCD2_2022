@@ -323,7 +323,7 @@ public class BSFacadeImplTest {
         Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
         int id = proj.getId();
         when(authorisationModuleMock.authorise(eq(authTokenMock), eq(false))).thenReturn(false);
-        assertThrows(IllegalStateException.class, () -> bsFacade.addTask(id, "Description", 100, true),
+        assertThrows(IllegalStateException.class, () -> bsFacade.addTask(id, "Description", 100, false),
                 "Didn't throw IllegalStateException when addTask is used with a secure user.");
     }
 
@@ -715,7 +715,7 @@ public class BSFacadeImplTest {
         when(authorisationModuleMock.authorise(eq(authTokenMock), eq(false))).thenReturn(false);
         bsFacade.setProjectCeiling(id, 70);
         when(authorisationModuleMock.authorise(eq(authTokenMock), eq(false))).thenReturn(true);
-        bsFacade.addTask(id, "Description", 80, false);
+        bsFacade.addTask(id, "Description", 60, false);
         assertFalse(bsFacade.addTask(id, "Description", 70, false),
                 "Failed to add task to the project after changing ceiling when using a secure user.");
     }
