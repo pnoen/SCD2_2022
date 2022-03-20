@@ -32,15 +32,31 @@ public class BSFacadeImplTest {
         this.authorisationModule = erpCheatFactory.getAuthorisationModule();
     }
 
-//    @Test
-//    public void addProject() {
-//        bsFacade.injectAuth(authenticationModule, authorisationModule);
-//        bsFacade.login("user", "password");
-//        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
-//
-//        assertThat(bsFacade.getAllProjects().size(), equalTo(1));
-//        assertThat(bsFacade.getAllProjects(), containsInAnyOrder(proj));
-//    }
+    @Test
+    public void addProject() {
+        AuthToken authTokenMock = mock(AuthToken.class);
+        when(authTokenMock.getToken()).thenReturn("token");
+        when(authTokenMock.getUsername()).thenReturn("username");
+
+        AuthenticationModule authenticationModuleMock = mock(AuthenticationModule.class);
+        when(authenticationModuleMock.login(anyString(), anyString())).thenReturn(authTokenMock);
+        when(authenticationModuleMock.authenticate(authTokenMock)).thenReturn(true);
+
+        AuthorisationModule authorisationModuleMock = mock(AuthorisationModule.class);
+        when(authorisationModuleMock.authorise(authTokenMock, false)).thenReturn(true);
+        when(authorisationModuleMock.authorise(authTokenMock, true)).thenReturn(false);
+
+        bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
+
+        bsFacade.login("username", "password");
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
+
+        assertThat(bsFacade.getAllProjects().size(), equalTo(1));
+        assertThat(bsFacade.getAllProjects(), containsInAnyOrder(proj));
+        assertThat(proj.getName(), equalTo("Project"));
+        assertThat(proj.getStandardRate(), equalTo(1.0));
+        assertThat(proj.getOverDifference(), equalTo(1.0));
+    }
 
     @Test
     public void addProjectNullName() {
@@ -968,10 +984,11 @@ public class BSFacadeImplTest {
         bsFacade.injectAuth(authenticationModuleMock, authorisationModuleMock);
 
         bsFacade.login("username", "password");
-        bsFacade.addProject("Project", "John", 1.0, 2.0);
+        Project proj = bsFacade.addProject("Project", "John", 1.0, 2.0);
         bsFacade.addProject("Project2", "Billy", 2.0, 4.0);
         List<Project> projects = bsFacade.searchProjects("John");
         assertThat(projects.size(), equalTo(1));
+        assertThat(projects, containsInAnyOrder(proj));
     }
 
     @Test
@@ -1146,6 +1163,7 @@ public class BSFacadeImplTest {
 
         bsFacade.finaliseProject(proj.getId());
         verify(clientReportingMock, times(1)).sendReport(eq("John"), anyString(), eq(authTokenMock));
+        assertThat(bsFacade.getAllProjects().size(), equalTo(0));
     }
 
     @Test
@@ -1173,6 +1191,7 @@ public class BSFacadeImplTest {
         when(authorisationModuleMock.authorise(eq(authTokenMock), eq(false))).thenReturn(false);
         assertThrows(IllegalStateException.class, () -> bsFacade.finaliseProject(proj.getId()),
                 "Didn't throw IllegalStateException when not using a secure user for finaliseProject.");
+        assertThat(bsFacade.getAllProjects().size(), equalTo(1));
     }
 
     @Test
@@ -1199,6 +1218,7 @@ public class BSFacadeImplTest {
         bsFacade.injectAuth(null, null);
         assertThrows(IllegalStateException.class, () -> bsFacade.finaliseProject(proj.getId()),
                 "Didn't throw IllegalStateException when no authentication module has been set for finaliseProject.");
+        assertThat(bsFacade.getAllProjects().size(), equalTo(1));
     }
 
     @Test
@@ -1222,6 +1242,7 @@ public class BSFacadeImplTest {
         bsFacade.injectAuth(null, null);
         assertThrows(IllegalStateException.class, () -> bsFacade.finaliseProject(proj.getId()),
                 "Didn't throw IllegalStateException when no client reporting module has been set for finaliseProject.");
+        assertThat(bsFacade.getAllProjects().size(), equalTo(1));
     }
 
     @Test
@@ -1249,6 +1270,7 @@ public class BSFacadeImplTest {
         when(authorisationModuleMock.authorise(eq(authTokenMock), eq(true))).thenReturn(false);
         assertThrows(IllegalStateException.class, () -> bsFacade.finaliseProject(proj.getId()),
                 "Didn't throw IllegalStateException when using a basic user for finaliseProject.");
+        assertThat(bsFacade.getAllProjects().size(), equalTo(1));
     }
 
     @Test
