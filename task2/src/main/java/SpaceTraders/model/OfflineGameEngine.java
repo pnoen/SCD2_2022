@@ -2,12 +2,14 @@ package SpaceTraders.model;
 
 import javafx.scene.paint.Color;
 
+import java.util.List;
+
 public class OfflineGameEngine implements GameEngine {
     private String status;
     private Color statusIconColour;
 
-    public OfflineGameEngine(String status) {
-        this.status = status;
+    public OfflineGameEngine() {
+        this.status = "Offline";
         this.statusIconColour = Color.RED;
     }
 
@@ -17,5 +19,21 @@ public class OfflineGameEngine implements GameEngine {
 
     public Color getStatusIconColour() {
         return this.statusIconColour;
+    }
+
+    public List<String> register(String username) {
+        return null;
+    }
+
+    public List<String> login(String authToken) {
+        return null;
+    }
+
+    public Token getCurrentToken() {
+        return null;
+    }
+
+    public void logout() {
+
     }
 }

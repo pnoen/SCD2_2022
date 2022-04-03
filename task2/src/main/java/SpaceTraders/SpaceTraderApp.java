@@ -26,6 +26,8 @@ public class SpaceTraderApp extends Application {
 
         primaryStage.setTitle("Space Traders");
         primaryStage.setScene(gameWindow.getScene());
+        primaryStage.setMinHeight(180);
+        primaryStage.setMinWidth(300);
         primaryStage.show();
 
         gameWindow.draw();
@@ -35,10 +37,10 @@ public class SpaceTraderApp extends Application {
     public GameEngine getEngine(List<String> args) {
         if (args.size() == 1) {
             if (args.get(0).equals("offline")) {
-                return new OfflineGameEngine(args.get(0));
+                return new OfflineGameEngine();
             }
             else if (args.get(0).equals("online")) {
-                return new OnlineGameEngine(args.get(0));
+                return new OnlineGameEngine();
             }
         }
         return null;
