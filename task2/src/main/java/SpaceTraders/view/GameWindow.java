@@ -210,7 +210,7 @@ public class GameWindow {
         Button login = new Button("Login");
         login.setOnAction((event -> {
             String authToken = authInput.getText();
-            List<String> msg = this.model.login(authToken);
+            List<String> msg = this.model.getAccountDetails(authToken);
             if (msg.size() > 0) {
                 Alert alert = new Alert(AlertType.ERROR);
                 alert.setTitle("Login");
@@ -224,6 +224,7 @@ public class GameWindow {
             }
             else {
                 createSideButtons();
+                System.out.println();
                 accountInfo();
                 this.borderPane.setRight(null);
             }
@@ -255,6 +256,19 @@ public class GameWindow {
         this.centerVbox.getChildren().clear();
 
         setCenterVboxTitle("Account details");
+
+        List<String> msg = this.model.getAccountDetails(this.model.getCurrentToken().getToken());
+        if (msg.size() > 0) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Account Details");
+            alert.setHeaderText("An error has occurred!");
+            String content = "Error code: " + msg.get(0);
+            if (msg.get(1) != null) {
+                content += "\n" + msg.get(1);
+            }
+            alert.setContentText(content);
+            alert.showAndWait();
+        }
 
         String token = this.model.getCurrentToken().getToken();
         User user = this.model.getCurrentToken().getUser();

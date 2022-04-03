@@ -11,11 +11,12 @@ public interface GameEngine {
 
     List<String> register(String username);
 
-    List<String> login(String authToken);
+    List<String> getAccountDetails(String authToken);
 
     Token getCurrentToken();
 
     void logout();
+
 
 
 }

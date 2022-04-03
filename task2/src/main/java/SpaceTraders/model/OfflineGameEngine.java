@@ -25,7 +25,7 @@ public class OfflineGameEngine implements GameEngine {
         return null;
     }
 
-    public List<String> login(String authToken) {
+    public List<String> getAccountDetails(String authToken) {
         return null;
     }
 

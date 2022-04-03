@@ -78,7 +78,7 @@ public class OnlineGameEngine implements GameEngine{
         return msg;
     }
 
-    public List<String> login(String authToken) {
+    public List<String> getAccountDetails(String authToken) {
         List<String> msg = new ArrayList<String>();
         try {
             String uri = "https://api.spacetraders.io/my/account?token=" + authToken;
@@ -100,9 +100,8 @@ public class OnlineGameEngine implements GameEngine{
                 token.setToken(authToken);
                 this.currentToken = token;
                 System.out.println(token);
-
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 500) {
+            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
                 Map<String, Map<String, Object>> errorMap = gson.fromJson(response.body(), Map.class);
 
                 String code = String.valueOf(errorMap.get("error").get("code"));
@@ -131,4 +130,5 @@ public class OnlineGameEngine implements GameEngine{
     public void logout() {
         this.currentToken = null;
     }
+
 }
