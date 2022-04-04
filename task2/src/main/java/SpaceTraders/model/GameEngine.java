@@ -17,6 +17,10 @@ public interface GameEngine {
 
     void logout();
 
+    List<String> getAvailableLoans();
 
+    List<Loan> getAvailableLoansList();
+
+    List<String> takeLoan(String loanType);
 
 }

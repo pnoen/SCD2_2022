@@ -36,4 +36,18 @@ public class OfflineGameEngine implements GameEngine {
     public void logout() {
 
     }
+
+    public List<String> getAvailableLoans() {
+        return null;
+    }
+
+    public List<Loan> getAvailableLoansList() {
+        return null;
+    }
+
+    public List<String> takeLoan(String loanType) {
+        return null;
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package SpaceTraders.view;
 // 01d12489-f16b-4f66-96a1-ad06e3231a0b
 import SpaceTraders.model.GameEngine;
+import SpaceTraders.model.Loan;
 import SpaceTraders.model.User;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -13,6 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.text.FontPosture;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,42 +138,34 @@ public class GameWindow {
         register.setOnAction((event -> {
             String username = usernameInput.getText();
             List<String> msg = this.model.register(username);
-            AlertType alertType = AlertType.INFORMATION;
-            String title = "Registration";
-            String header = "Success!";
-            String content = "Token - " + msg.get(0);
+
 
             ButtonType copy = new ButtonType("Copy token");
 
-            Alert alert;
+
             if (msg.size() > 1) {
-                alertType = AlertType.ERROR;
-                header = "An error has occurred!";
-                content = "Error code: " + msg.get(0);
-                if (msg.get(1) != null) {
-                    content += "\n" + msg.get(1);
-                }
-                alert = new Alert(alertType);
+                handleError(msg);
             }
             else {
-                alert = new Alert(alertType);
+                String title = "Registration";
+                String header = "Success!";
+                String content = "Token - " + msg.get(0);
+                Alert alert = new Alert(AlertType.INFORMATION);
                 alert.getButtonTypes().add(copy);
-            }
+                alert.setTitle(title);
+                alert.setHeaderText(header);
+                alert.setContentText(content);
 
-            alert.setTitle(title);
-            alert.setHeaderText(header);
-            alert.setContentText(content);
+                Optional<ButtonType> result = alert.showAndWait();
 
-            Optional<ButtonType> result = alert.showAndWait();
-
-            if (result.orElse(ButtonType.OK) == copy) {
+                if (result.orElse(ButtonType.OK) == copy) {
 //                System.out.println("copy");
-                Clipboard clipboard = Clipboard.getSystemClipboard();
-                ClipboardContent clipboardContent = new ClipboardContent();
-                clipboardContent.putString(msg.get(0));
-                clipboard.setContent(clipboardContent);
+                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                    ClipboardContent clipboardContent = new ClipboardContent();
+                    clipboardContent.putString(msg.get(0));
+                    clipboard.setContent(clipboardContent);
+                }
             }
-
         }));
         register.setPrefWidth(60);
 
@@ -212,15 +206,7 @@ public class GameWindow {
             String authToken = authInput.getText();
             List<String> msg = this.model.getAccountDetails(authToken);
             if (msg.size() > 0) {
-                Alert alert = new Alert(AlertType.ERROR);
-                alert.setTitle("Login");
-                alert.setHeaderText("An error has occurred!");
-                String content = "Error code: " + msg.get(0);
-                if (msg.get(1) != null) {
-                    content += "\n" + msg.get(1);
-                }
-                alert.setContentText(content);
-                alert.showAndWait();
+                handleError(msg);
             }
             else {
                 createSideButtons();
@@ -259,78 +245,71 @@ public class GameWindow {
 
         List<String> msg = this.model.getAccountDetails(this.model.getCurrentToken().getToken());
         if (msg.size() > 0) {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setTitle("Account Details");
-            alert.setHeaderText("An error has occurred!");
-            String content = "Error code: " + msg.get(0);
-            if (msg.get(1) != null) {
-                content += "\n" + msg.get(1);
-            }
-            alert.setContentText(content);
-            alert.showAndWait();
+            handleError(msg);
         }
+        else {
+            String token = this.model.getCurrentToken().getToken();
+            User user = this.model.getCurrentToken().getUser();
+            String username = user.getUsername();
+            int credits = user.getCredits();
+            String joinedAt = user.getJoinedAt();
+            int shipCount = user.getShipCount();
+            int structureCount = user.getStructureCount();
 
-        String token = this.model.getCurrentToken().getToken();
-        User user = this.model.getCurrentToken().getUser();
-        String username = user.getUsername();
-        int credits = user.getCredits();
-        String joinedAt = user.getJoinedAt();
-        int shipCount = user.getShipCount();
-        int structureCount = user.getStructureCount();
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            ClipboardContent clipboardContent = new ClipboardContent();
 
-        Clipboard clipboard = Clipboard.getSystemClipboard();
-        ClipboardContent clipboardContent = new ClipboardContent();
+            Label tokenLbl = new Label("Authentication token: " + token);
+            tokenLbl.setOnMouseClicked((event -> {
+                clipboardContent.putString(token);
+                clipboard.setContent(clipboardContent);
+            }));
+            tokenLbl.setWrapText(true);
 
-        Label tokenLbl = new Label("Authentication token: " + token);
-        tokenLbl.setOnMouseClicked((event -> {
-            clipboardContent.putString(token);
-            clipboard.setContent(clipboardContent);
-        }));
-        tokenLbl.setWrapText(true);
+            Label usernameLbl = new Label("Username: " + username);
+            usernameLbl.setOnMouseClicked((event -> {
+                clipboardContent.putString(username);
+                clipboard.setContent(clipboardContent);
+            }));
+            usernameLbl.setWrapText(true);
 
-        Label usernameLbl = new Label("Username: " + username);
-        usernameLbl.setOnMouseClicked((event -> {
-            clipboardContent.putString(username);
-            clipboard.setContent(clipboardContent);
-        }));
-        usernameLbl.setWrapText(true);
+            Label creditsLbl = new Label("Credits: " + credits);
+            creditsLbl.setOnMouseClicked((event -> {
+                clipboardContent.putString(String.valueOf(credits));
+                clipboard.setContent(clipboardContent);
+            }));
+            creditsLbl.setWrapText(true);
 
-        Label creditsLbl = new Label("Credits: " + credits);
-        creditsLbl.setOnMouseClicked((event -> {
-            clipboardContent.putString(String.valueOf(credits));
-            clipboard.setContent(clipboardContent);
-        }));
-        creditsLbl.setWrapText(true);
+            Label joinedLbl = new Label("Joined at: " + joinedAt);
+            joinedLbl.setOnMouseClicked((event -> {
+                clipboardContent.putString(joinedAt);
+                clipboard.setContent(clipboardContent);
+            }));
+            joinedLbl.setWrapText(true);
 
-        Label joinedLbl = new Label("Joined at: " + joinedAt);
-        joinedLbl.setOnMouseClicked((event -> {
-            clipboardContent.putString(joinedAt);
-            clipboard.setContent(clipboardContent);
-        }));
-        joinedLbl.setWrapText(true);
+            Label shipLbl = new Label("Ship count: " + shipCount);
+            shipLbl.setOnMouseClicked((event -> {
+                clipboardContent.putString(String.valueOf(shipCount));
+                clipboard.setContent(clipboardContent);
+            }));
+            shipLbl.setWrapText(true);
 
-        Label shipLbl = new Label("Ship count: " + shipCount);
-        shipLbl.setOnMouseClicked((event -> {
-            clipboardContent.putString(String.valueOf(shipCount));
-            clipboard.setContent(clipboardContent);
-        }));
-        shipLbl.setWrapText(true);
+            Label structureLbl = new Label("Structure count: " + structureCount);
+            structureLbl.setOnMouseClicked((event -> {
+                clipboardContent.putString(String.valueOf(structureCount));
+                clipboard.setContent(clipboardContent);
+            }));
+            structureLbl.setWrapText(true);
 
-        Label structureLbl = new Label("Structure count: " + structureCount);
-        structureLbl.setOnMouseClicked((event -> {
-            clipboardContent.putString(String.valueOf(structureCount));
-            clipboard.setContent(clipboardContent);
-        }));
-        structureLbl.setWrapText(true);
-
-        Pane spacer = new Pane();
-        spacer.setPrefHeight(20);
-        Label infoLbl = new Label("Click on the text to copy the values.");
-        infoLbl.setWrapText(true);
+            Pane spacer = new Pane();
+            spacer.setPrefHeight(20);
+            Label infoLbl = new Label("Click on the text to copy the values.");
+            infoLbl.setWrapText(true);
 
 
-        this.centerVbox.getChildren().addAll(tokenLbl, usernameLbl, creditsLbl, joinedLbl, shipLbl, structureLbl,
-                spacer, infoLbl);
+            this.centerVbox.getChildren().addAll(tokenLbl, usernameLbl, creditsLbl, joinedLbl, shipLbl, structureLbl,
+                    spacer, infoLbl);
+        }
     }
 
     public void createSideButtons() {
@@ -370,13 +349,13 @@ public class GameWindow {
                 Button availLoansBtn = new Button("Available loans");
                 availLoansBtn.setPrefWidth(subBtnWidth);
                 availLoansBtn.setOnAction((subEvent) -> {
-
+                    getAvailableLoans();
                 });
 
                 Button obtainLoansBtn = new Button("Obtain loan");
                 obtainLoansBtn.setPrefWidth(subBtnWidth);
                 obtainLoansBtn.setOnAction((subEvent) -> {
-
+                    takeLoan();
                 });
 
                 Button activeLoansBtn = new Button("Active loans");
@@ -518,6 +497,100 @@ public class GameWindow {
         this.leftVbox.getChildren().clear();
         this.borderPane.setRight(this.rightVbox);
         createAuthLogin();
+    }
+
+    public void getAvailableLoans() {
+        this.centerVbox.getChildren().clear();
+
+        setCenterVboxTitle("Available Loans");
+
+        List<String> msg = this.model.getAvailableLoans();
+        if (msg.size() > 0) {
+            handleError(msg);
+        }
+        else {
+            List<Loan> loans = this.model.getAvailableLoansList();
+            for (int i = 0; i < loans.size(); i++) {
+                String type = loans.get(i).getType();
+                int amount =  loans.get(i).getAmount();
+                int rate = loans.get(i).getRate();
+                int termInDays = loans.get(i).getTermInDays();
+                boolean collateralRequired = loans.get(i).isCollateralRequired();
+
+                Label loanLbl = new Label("Loan " + (i+1));
+                loanLbl.setWrapText(true);
+                Label typeLbl = new Label("Type: " + type);
+                typeLbl.setWrapText(true);
+                Label amountLbl = new Label("Amount: " + amount);
+                amountLbl.setWrapText(true);
+                Label rateLbl = new Label("Rate: " + rate);
+                rateLbl.setWrapText(true);
+                Label termInDaysLbl = new Label("Term in Days: " + termInDays);
+                termInDaysLbl.setWrapText(true);
+                Label collReqLbl = new Label("Collateral Required: " + collateralRequired);
+                collReqLbl.setWrapText(true);
+
+                VBox loanContentVbox = new VBox(typeLbl, amountLbl, rateLbl, termInDaysLbl, collReqLbl);
+                loanContentVbox.setPadding(new Insets(5, 0, 15, 10));
+
+                this.centerVbox.getChildren().addAll(loanLbl, loanContentVbox);
+            }
+        }
+    }
+
+    public void handleError(List<String> msg) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("An error has occurred!");
+        String content = "Error code: " + msg.get(0);
+        if (msg.size() > 1) {
+            for (int i = 1; i < msg.size(); i++) {
+                if (msg.get(i) != null) {
+                    content += "\n" + msg.get(i);
+                }
+            }
+
+        }
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    public void takeLoan() {
+        this.centerVbox.getChildren().clear();
+
+        setCenterVboxTitle("Take Loan");
+
+        Label loanTypeLbl = new Label("Enter loan type: ");
+        loanTypeLbl.setWrapText(true);
+        TextField typeInput = new TextField();
+        Button obtainBtn = new Button("Obtain");
+        obtainBtn.setOnAction((event -> {
+            String loanType = typeInput.getText();
+            List<String> msg = this.model.takeLoan(loanType);
+
+            if (msg.size() > 0) {
+                handleError(msg);
+            }
+            else {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                String title = "Take Loan";
+                String header = "Success!";
+                String content = "Loan obtained";
+                alert.setTitle(title);
+                alert.setHeaderText(header);
+                alert.setContentText(content);
+
+                alert.showAndWait();
+            }
+        }));
+        HBox inputBtns = new HBox(obtainBtn);
+        inputBtns.setAlignment(Pos.CENTER);
+
+        this.centerVbox.getChildren().addAll(loanTypeLbl, typeInput, inputBtns);
+    }
+
+    public void getActiveLoans() {
+
     }
 
 

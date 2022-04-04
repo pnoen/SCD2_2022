@@ -7,7 +7,8 @@ public class User {
     private int structureCount;
     private String username;
     private String[] ships;
-    private String[] loans;
+    private Loan[] loans;
+    private Loan loan;
 
     public User(int credits, String joinedAt, int shipCount, int structureCount, String username) {
         this.credits = credits;
@@ -17,7 +18,7 @@ public class User {
         this.username = username;
 
         this.ships = new String[0];
-        this.loans = new String[0];
+        this.loans = new Loan[0];
     }
 
     public int getCredits() {
@@ -38,6 +39,10 @@ public class User {
 
     public String getUsername() {
         return username;
+    }
+
+    public Loan getLoan() {
+        return loan;
     }
 
     @Override

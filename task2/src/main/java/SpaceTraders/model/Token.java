@@ -16,6 +16,10 @@ public class Token {
         this.token = token;
     }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     @Override
     public String toString() {
         return token + " " + user.toString();
