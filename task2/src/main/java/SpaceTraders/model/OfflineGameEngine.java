@@ -49,5 +49,9 @@ public class OfflineGameEngine implements GameEngine {
         return null;
     }
 
+    public List<String> activeLoans() {
+        return null;
+    }
+
 
 }

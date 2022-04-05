@@ -1,5 +1,8 @@
 package SpaceTraders.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class User {
     private int credits;
     private String joinedAt;
@@ -7,7 +10,7 @@ public class User {
     private int structureCount;
     private String username;
     private String[] ships;
-    private Loan[] loans;
+    private List<Loan> loans;
     private Loan loan;
 
     public User(int credits, String joinedAt, int shipCount, int structureCount, String username) {
@@ -18,7 +21,7 @@ public class User {
         this.username = username;
 
         this.ships = new String[0];
-        this.loans = new Loan[0];
+        this.loans = new ArrayList<Loan>();
     }
 
     public int getCredits() {
@@ -43,6 +46,10 @@ public class User {
 
     public Loan getLoan() {
         return loan;
+    }
+
+    public List<Loan> getLoans() {
+        return this.loans;
     }
 
     @Override

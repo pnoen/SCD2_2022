@@ -17,6 +17,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.text.FontPosture;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -352,19 +353,13 @@ public class GameWindow {
                     getAvailableLoans();
                 });
 
-                Button obtainLoansBtn = new Button("Obtain loan");
-                obtainLoansBtn.setPrefWidth(subBtnWidth);
-                obtainLoansBtn.setOnAction((subEvent) -> {
-                    takeLoan();
-                });
-
                 Button activeLoansBtn = new Button("Active loans");
                 activeLoansBtn.setPrefWidth(subBtnWidth);
                 activeLoansBtn.setOnAction((subEvent) -> {
-
+                    getActiveLoans();
                 });
 
-                loansSubBtnsVbox.getChildren().addAll(availLoansBtn, obtainLoansBtn, activeLoansBtn);
+                loansSubBtnsVbox.getChildren().addAll(availLoansBtn, activeLoansBtn);
             }
             else {
                 loansSubBtnsVbox.getChildren().clear();
@@ -534,32 +529,13 @@ public class GameWindow {
                 loanContentVbox.setPadding(new Insets(5, 0, 15, 10));
 
                 this.centerVbox.getChildren().addAll(loanLbl, loanContentVbox);
+
+                takeLoan();
             }
         }
-    }
-
-    public void handleError(List<String> msg) {
-        Alert alert = new Alert(AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText("An error has occurred!");
-        String content = "Error code: " + msg.get(0);
-        if (msg.size() > 1) {
-            for (int i = 1; i < msg.size(); i++) {
-                if (msg.get(i) != null) {
-                    content += "\n" + msg.get(i);
-                }
-            }
-
-        }
-        alert.setContentText(content);
-        alert.showAndWait();
     }
 
     public void takeLoan() {
-        this.centerVbox.getChildren().clear();
-
-        setCenterVboxTitle("Take Loan");
-
         Label loanTypeLbl = new Label("Enter loan type: ");
         loanTypeLbl.setWrapText(true);
         TextField typeInput = new TextField();
@@ -589,8 +565,60 @@ public class GameWindow {
         this.centerVbox.getChildren().addAll(loanTypeLbl, typeInput, inputBtns);
     }
 
-    public void getActiveLoans() {
+    public void handleError(List<String> msg) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("An error has occurred!");
+//        String content = "Error code: " + msg.get(0);
+        String content = "";
+        for (int i = 0; i < msg.size(); i++) {
+            if (msg.get(i) != null) {
+                content += "\n" + msg.get(i);
+            }
+        }
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
 
+
+
+    public void getActiveLoans() {
+        this.centerVbox.getChildren().clear();
+
+        setCenterVboxTitle("Active Loans");
+
+        List<String> msg = this.model.activeLoans();
+        if (msg.size() > 0) {
+            handleError(msg);
+        }
+        else {
+            List<Loan> loans = this.model.getCurrentToken().getUser().getLoans();
+            for (int i = 0; i < loans.size(); i++) {
+                String id = loans.get(i).getId();
+                String due = loans.get(i).getDue();
+                int amount = loans.get(i).getAmount();
+                String status = loans.get(i).getStatus();
+                String type = loans.get(i).getType();
+
+                Label loanLbl = new Label("Loan " + (i+1));
+                loanLbl.setWrapText(true);
+                Label idLbl = new Label("ID: " + id);
+                idLbl.setWrapText(true);
+                Label dueLbl = new Label("Due: " + due);
+                dueLbl.setWrapText(true);
+                Label amountLbl = new Label("Repayment amount: " + amount);
+                amountLbl.setWrapText(true);
+                Label statusLbl = new Label("Status: " + status);
+                statusLbl.setWrapText(true);
+                Label typeLbl = new Label("Type: " + type);
+                typeLbl.setWrapText(true);
+
+                VBox loanContentVbox = new VBox(idLbl, dueLbl, amountLbl, statusLbl, typeLbl);
+                loanContentVbox.setPadding(new Insets(5, 0, 15, 10));
+
+                this.centerVbox.getChildren().addAll(loanLbl, loanContentVbox);
+            }
+        }
     }
 
 

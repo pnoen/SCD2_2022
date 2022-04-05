@@ -23,4 +23,6 @@ public interface GameEngine {
 
     List<String> takeLoan(String loanType);
 
+    List<String> activeLoans();
+
 }

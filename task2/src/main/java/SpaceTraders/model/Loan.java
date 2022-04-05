@@ -34,6 +34,18 @@ public class Loan {
         return this.collateralRequired;
     }
 
+    public String getDue() {
+        return this.due;
+    }
+
+    public String getId() {
+        return this.id;
+    }
+
+    public String getStatus() {
+        return this.status;
+    }
+
     @Override
     public String toString() {
         return this.type + " " + amount;
