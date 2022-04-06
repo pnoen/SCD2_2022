@@ -1,5 +1,5 @@
 package SpaceTraders.view;
-// 01d12489-f16b-4f66-96a1-ad06e3231a0b
+
 import SpaceTraders.model.GameEngine;
 import SpaceTraders.model.Loan;
 import SpaceTraders.model.User;
@@ -14,7 +14,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.text.FontPosture;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -505,6 +504,7 @@ public class GameWindow {
         }
         else {
             List<Loan> loans = this.model.getAvailableLoansList();
+            List<String> loanTypes = new ArrayList<String>();
             for (int i = 0; i < loans.size(); i++) {
                 String type = loans.get(i).getType();
                 int amount =  loans.get(i).getAmount();
@@ -530,39 +530,60 @@ public class GameWindow {
 
                 this.centerVbox.getChildren().addAll(loanLbl, loanContentVbox);
 
-                takeLoan();
+                loanTypes.add(type);
             }
+
+            takeLoan(loanTypes);
         }
     }
 
-    public void takeLoan() {
-        Label loanTypeLbl = new Label("Enter loan type: ");
+    public void takeLoan(List<String> loanTypes) {
+        Label loanTypeLbl = new Label("Select a loan to obtain: ");
         loanTypeLbl.setWrapText(true);
-        TextField typeInput = new TextField();
+
+        VBox radioBtnsVbox = new VBox();
+        radioBtnsVbox.setPadding(new Insets(5, 0, 10, 10));
+
+        ToggleGroup radioGroup = new ToggleGroup();
+        for (int i = 0; i < loanTypes.size(); i++) {
+            Label loanLbl = new Label("Loan " + (i+1));
+            loanLbl.setWrapText(true);
+            RadioButton radioBtn = new RadioButton(loanTypes.get(i));
+            radioBtn.setToggleGroup(radioGroup);
+            radioBtnsVbox.getChildren().addAll(loanLbl, radioBtn);
+        }
+
+//        TextField typeInput = new TextField();
         Button obtainBtn = new Button("Obtain");
         obtainBtn.setOnAction((event -> {
-            String loanType = typeInput.getText();
-            List<String> msg = this.model.takeLoan(loanType);
-
-            if (msg.size() > 0) {
+            RadioButton selRadio = (RadioButton) radioGroup.getSelectedToggle();
+            if (selRadio == null) {
+                List<String> msg = new ArrayList<String>();
+                msg.add("Loan was not selected.");
                 handleError(msg);
             }
             else {
-                Alert alert = new Alert(AlertType.INFORMATION);
-                String title = "Take Loan";
-                String header = "Success!";
-                String content = "Loan obtained";
-                alert.setTitle(title);
-                alert.setHeaderText(header);
-                alert.setContentText(content);
+                String loanType = selRadio.getText();
+                List<String> msg = this.model.takeLoan(loanType);
 
-                alert.showAndWait();
+                if (msg.size() > 0) {
+                    handleError(msg);
+                }
+                else {
+                    Alert alert = new Alert(AlertType.INFORMATION);
+                    String title = "Take Loan";
+                    String header = "Success!";
+                    String content = "Loan obtained";
+                    alert.setTitle(title);
+                    alert.setHeaderText(header);
+                    alert.setContentText(content);
+
+                    alert.showAndWait();
+                }
             }
         }));
-        HBox inputBtns = new HBox(obtainBtn);
-        inputBtns.setAlignment(Pos.CENTER);
 
-        this.centerVbox.getChildren().addAll(loanTypeLbl, typeInput, inputBtns);
+        this.centerVbox.getChildren().addAll(loanTypeLbl, radioBtnsVbox, obtainBtn);
     }
 
     public void handleError(List<String> msg) {
