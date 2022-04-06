@@ -25,4 +25,10 @@ public interface GameEngine {
 
     List<String> activeLoans();
 
+    List<String> availableShips(String shipClass);
+
+    List<Ship> getAvailableShips();
+
+    List<String> purchaseShip(String location, String type);
+
 }

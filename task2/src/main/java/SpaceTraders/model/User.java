@@ -9,7 +9,7 @@ public class User {
     private int shipCount;
     private int structureCount;
     private String username;
-    private String[] ships;
+    private List<Ship> ships;
     private List<Loan> loans;
     private Loan loan;
 
@@ -20,7 +20,7 @@ public class User {
         this.structureCount = structureCount;
         this.username = username;
 
-        this.ships = new String[0];
+        this.ships = new ArrayList<Ship>();
         this.loans = new ArrayList<Loan>();
     }
 
@@ -51,6 +51,7 @@ public class User {
     public List<Loan> getLoans() {
         return this.loans;
     }
+
 
     @Override
     public String toString() {

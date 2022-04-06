@@ -53,5 +53,16 @@ public class OfflineGameEngine implements GameEngine {
         return null;
     }
 
+    public List<String> availableShips(String shipClass) {
+        return null;
+    }
+
+    public List<Ship> getAvailableShips() {
+        return null;
+    }
+
+    public List<String> purchaseShip(String location, String type) {
+        return null;
+    }
 
 }

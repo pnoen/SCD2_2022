@@ -19,11 +19,14 @@ public class OnlineGameEngine implements GameEngine{
     private Color statusIconColour;
     private Token currentToken;
     private List<Loan> availableLoans;
+    private List<Ship> availableShips;
+    private Ship ship;
 
     public OnlineGameEngine() {
         this.status = "Online";
         this.statusIconColour = Color.web("#01c629");
         this.availableLoans = new ArrayList<Loan>();
+        this.availableShips = new ArrayList<Ship>();
     }
 
     public String getStatus() {
@@ -281,11 +284,124 @@ public class OnlineGameEngine implements GameEngine{
         if (errorMap.get("error").get("data") != null) {
             String data = gson.toJson(errorMap.get("error").get("data"));
             Map<String, List<String>> map = gson.fromJson(data, Map.class);
-            System.out.println(map.get("type").size());
-            for (String type : map.get("type")) {
-                System.out.println(type);
-                msg.add(type);
+            if (map.get("type") != null) {
+                System.out.println(map.get("type").size());
+                for (String type : map.get("type")) {
+                    System.out.println(type);
+                    msg.add(type);
+                }
             }
+            if (map.get("class") != null) {
+                for (String cl : map.get("class")) {
+                    System.out.println(cl);
+                    msg.add(cl);
+                }
+            }
+            if (map.get("location") != null) {
+                for (String location : map.get("location")) {
+                    System.out.println(location);
+                    msg.add(location);
+                }
+            }
+        }
+        return msg;
+    }
+
+    public List<String> availableShips(String shipClass) {
+        List<String> msg = new ArrayList<String>();
+        String authToken = this.currentToken.getToken();
+
+        try {
+            String uri = "https://api.spacetraders.io/systems/OE/ship-listings?token=" + authToken;
+            if (shipClass.length() != 0) {
+                uri += "&class=" + shipClass;
+            }
+            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
+                    .GET()
+                    .build();
+
+            HttpClient client = HttpClient.newBuilder().build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("Response status code was: " + response.statusCode());
+//            System.out.println("Response headers were: " + response.headers());
+            System.out.println("Response body was:\n" + response.body());
+            Gson gson = new Gson();
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
+//                System.out.println(map.get("shipListings"));
+
+                Ship[] ships  = gson.fromJson(String.valueOf(map.get("shipListings")), Ship[].class);
+                this.availableShips = Arrays.asList(ships);
+//                for (Ship ship : this.availableShips) {
+//                    System.out.println(ship);
+//                }
+
+            }
+            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
+                msg = handleErrorReq(response.body());
+            }
+
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Something went wrong with our request!");
+//            System.out.println(e.getMessage());
+            msg.add("Something went wrong with our request!");
+            msg.add(e.getMessage());
+        } catch (URISyntaxException ignored) {
+            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
+            // hard-coded and so needs a way to be checked for correctness at runtime.
+            msg.add("Something went wrong.");
+            msg.add(ignored.getMessage());
+        }
+        return msg;
+    }
+
+    public List<Ship> getAvailableShips() {
+        return this.availableShips;
+    }
+
+    public List<String> purchaseShip(String location, String type) {
+        List<String> msg = new ArrayList<String>();
+        String authToken = this.currentToken.getToken();
+        try {
+            String uri = "https://api.spacetraders.io/my/ships?token=" + authToken + "&location=" + location + "&type=" + type;
+            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .build();
+
+            HttpClient client = HttpClient.newBuilder().build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("Response status code was: " + response.statusCode());
+            System.out.println("Response body was:\n" + response.body());
+            Gson gson = new Gson();
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
+
+                User user  = gson.fromJson(String.valueOf(map.get("user")), User.class);
+                this.currentToken.setUser(user);
+
+                Ship ship  = gson.fromJson(String.valueOf(map.get("ship")), Ship.class);
+                this.ship = ship;
+            }
+            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
+                msg = handleErrorReq(response.body());
+            }
+
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Something went wrong with our request!");
+//            System.out.println(e.getMessage());
+            msg.add("Something went wrong with our request!");
+            msg.add(e.getMessage());
+        } catch (URISyntaxException ignored) {
+            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
+            // hard-coded and so needs a way to be checked for correctness at runtime.
+            msg.add("Something went wrong.");
+            msg.add(ignored.getMessage());
         }
         return msg;
     }
