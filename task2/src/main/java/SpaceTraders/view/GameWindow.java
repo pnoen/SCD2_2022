@@ -13,7 +13,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.control.Alert.AlertType;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -101,7 +100,7 @@ public class GameWindow {
 
     public void status() {
         String status = this.model.getStatus();
-        Color statusColour = this.model.getStatusIconColour();
+        Color statusColour = Color.web(this.model.getStatusIconColour());
 
         Circle statusIcon = new Circle(5, statusColour);
         Label statusLbl = new Label(status);
@@ -145,14 +144,11 @@ public class GameWindow {
                 handleError(msg);
             }
             else {
-                String title = "Registration";
-                String header = "Success!";
-                String content = "Token - " + msg.get(0);
                 Alert alert = new Alert(AlertType.INFORMATION);
                 alert.getButtonTypes().add(copy);
-                alert.setTitle(title);
-                alert.setHeaderText(header);
-                alert.setContentText(content);
+                alert.setTitle("Registration");
+                alert.setHeaderText("Success!");
+                alert.setContentText("Token - " + msg.get(0));
 
                 Optional<ButtonType> result = alert.showAndWait();
 
@@ -375,19 +371,13 @@ public class GameWindow {
                     availableShips("");
                 });
 
-                Button yourShipsBtn = new Button("Your ships");
+                Button yourShipsBtn = new Button("My ships");
                 yourShipsBtn.setPrefWidth(subBtnWidth);
                 yourShipsBtn.setOnAction((subEvent) -> {
-
+                    getUserShips();
                 });
 
-                Button shipFuelBtn = new Button("Buy ship fuel");
-                shipFuelBtn.setPrefWidth(subBtnWidth);
-                shipFuelBtn.setOnAction((subEvent) -> {
-
-                });
-
-                shipsSubBtnsVbox.getChildren().addAll(availShipsBtn, yourShipsBtn, shipFuelBtn);
+                shipsSubBtnsVbox.getChildren().addAll(availShipsBtn, yourShipsBtn);
             }
             else {
                 shipsSubBtnsVbox.getChildren().clear();
@@ -403,26 +393,22 @@ public class GameWindow {
                 Button viewMarketplaceBtn = new Button("View marketplace");
                 viewMarketplaceBtn.setPrefWidth(subBtnWidth);
                 viewMarketplaceBtn.setOnAction((subEvent) -> {
-
+                    viewMarketPlace("");
                 });
 
-                Button buyGoodsBtn = new Button("Buy goods");
-                buyGoodsBtn.setPrefWidth(subBtnWidth);
-                buyGoodsBtn.setOnAction((subEvent) -> {
-
-                });
 
                 Button sellGoodsBtn = new Button("Sell goods");
                 sellGoodsBtn.setPrefWidth(subBtnWidth);
                 sellGoodsBtn.setOnAction((subEvent) -> {
-
+                    getShipCargo("");
                 });
 
-                marketplaceSubBtnsVbox.getChildren().addAll(viewMarketplaceBtn, buyGoodsBtn, sellGoodsBtn);
+                marketplaceSubBtnsVbox.getChildren().addAll(viewMarketplaceBtn, sellGoodsBtn);
             }
             else {
                 marketplaceSubBtnsVbox.getChildren().clear();
             }
+
         });
         marketplaceBtn.setPrefWidth(btnWidth);
 
@@ -562,12 +548,26 @@ public class GameWindow {
                     handleError(msg);
                 }
                 else {
+                    User user = this.model.getCurrentToken().getUser();
+                    int credits = user.getCredits();
+                    String content = "Credits: " + credits;
+
+                    Loan loan = this.model.getCurrentToken().getUser().getLoan();
+                    content += "\nLoan";
+                    String due = loan.getDue();
+                    content += "\n\tDue: " + due;
+                    String id = loan.getId();
+                    content += "\n\tID: " + id;
+                    int repaymentAmount = loan.getAmount();
+                    content += "\n\tRepayment amount: " + repaymentAmount;
+                    String status = loan.getStatus();
+                    content += "\n\tStatus: " + status;
+                    String type = loan.getType();
+                    content += "\n\tType: " + type;
+
                     Alert alert = new Alert(AlertType.INFORMATION);
-                    String title = "Take Loan";
-                    String header = "Success!";
-                    String content = "Loan obtained";
-                    alert.setTitle(title);
-                    alert.setHeaderText(header);
+                    alert.setTitle("Take Loan");
+                    alert.setHeaderText("Loan obtained!");
                     alert.setContentText(content);
 
                     alert.showAndWait();
@@ -722,7 +722,6 @@ public class GameWindow {
 
                         shipContentVbox.getChildren().add(restrictedGoodsVbox);
                     }
-
                 }
 
                 this.centerVbox.getChildren().addAll(shipCountLbl, shipContentVbox);
@@ -804,12 +803,53 @@ public class GameWindow {
                     handleError(msg);
                 }
                 else {
+//                    User user = this.model.getCurrentToken().getUser();
+//                    int credits = user.getCredits();
+//                    String content = "Credits: " + credits;
+                    String content = "Credits: ";
+
+                    Ship ship = this.model.getShip();
+                    content += "\nShip";
+                    String id = ship.getId();
+                    content += "\n\tID: " + id;
+                    String location = ship.getLocation();
+                    content += "\n\tLocation: " + location;
+                    int x = ship.getX();
+                    content += "\n\tX: " + x;
+                    int y = ship.getY();
+                    content += "\n\tY: " + y;
+                    List<Cargo> cargo = ship.getCargo();
+                    content += "\n\tCargo: ";
+                    for (Cargo item : cargo) {
+                        String good = item.getGood();
+                        content += "\n\t\tGood: " + good;
+                        int quantity = item.getQuantity();
+                        content += "\n\t\tQuantity: " + quantity;
+                        int totalVolume = item.getTotalVolume();
+                        content += "\n\t\tTotal volume: " + totalVolume;
+                    }
+                    int spaceAvailable = ship.getSpaceAvailable();
+                    content += "\n\tSpace available: " + spaceAvailable;
+                    String type = ship.getType();
+                    content += "\n\tType: " + type;
+                    String shipClass = ship.getShipClass();
+                    content += "\n\tClass: " + shipClass;
+                    int maxCargo = ship.getMaxCargo();
+                    content += "\n\tMax cargo: " + maxCargo;
+                    int loadingSpeed = ship.getLoadingSpeed();
+                    content += "\n\tLoading speed: " + loadingSpeed;
+                    int speed = ship.getSpeed();
+                    content += "\n\tSpeed: " + speed;
+                    String manufacturer = ship.getManufacturer();
+                    content += "\n\tManufacturer: " + manufacturer;
+                    int plating = ship.getPlating();
+                    content += "\n\tPlating: " + plating;
+                    int weapons = ship.getWeapons();
+                    content += "\n\tWeapons: " + weapons;
+
                     Alert alert = new Alert(AlertType.INFORMATION);
-                    String title = "Purchase ship";
-                    String header = "Success!";
-                    String content = "Ship purchased";
-                    alert.setTitle(title);
-                    alert.setHeaderText(header);
+                    alert.setTitle("Purchase ship");
+                    alert.setHeaderText("Success!");
                     alert.setContentText(content);
 
                     alert.showAndWait();
@@ -827,7 +867,471 @@ public class GameWindow {
         purchaseMenuVbox.setPadding(new Insets(0, 0, 0, 10));
 
         this.centerVbox.getChildren().addAll(purchaseLbl, purchaseMenuVbox);
+    }
 
+    public void getUserShips() {
+        this.centerVbox.getChildren().clear();
+
+        setCenterVboxTitle("My ships");
+
+        List<String> msg = this.model.getUserShips();
+        if (msg.size() > 0) {
+            handleError(msg);
+        }
+        else {
+            List<Ship> ships = this.model.getCurrentToken().getUser().getShips();
+            List<String> shipIds = new ArrayList<String>();
+
+            for (int i = 0; i < ships.size(); i++) {
+                String id = ships.get(i).getId();
+                String location = ships.get(i).getLocation();
+                int x = ships.get(i).getX();
+                int y = ships.get(i).getY();
+                List<Cargo> cargo = ships.get(i).getCargo();
+                int spaceAvailable = ships.get(i).getSpaceAvailable();
+                String type = ships.get(i).getType();
+                String shipClass = ships.get(i).getShipClass();
+                int maxCargo = ships.get(i).getMaxCargo();
+                int loadingSpeed = ships.get(i).getLoadingSpeed();
+                int speed = ships.get(i).getSpeed();
+                String manufacturer = ships.get(i).getManufacturer();
+                int plating = ships.get(i).getPlating();
+                int weapons = ships.get(i).getWeapons();
+
+                Label shipCountLbl = new Label("Ship " + (i+1));
+                shipCountLbl.setWrapText(true);
+                Label idLbl = new Label("ID: " + id);
+                idLbl.setWrapText(true);
+                Label locationLbl = new Label("Location: " + location);
+                locationLbl.setWrapText(true);
+                Label xLbl = new Label("X: " + x);
+                xLbl.setWrapText(true);
+                Label yLbl = new Label("Y: " + y);
+                yLbl.setWrapText(true);
+                Label spaceAvailableLbl = new Label("Space available: " + spaceAvailable);
+                spaceAvailableLbl.setWrapText(true);
+                Label typeLbl = new Label("Type: " + type);
+                typeLbl.setWrapText(true);
+                Label shipClassLbl = new Label("Class: " + shipClass);
+                shipClassLbl.setWrapText(true);
+                Label maxCargoLbl = new Label("Max cargo: " + maxCargo);
+                maxCargoLbl.setWrapText(true);
+                Label loadingSpeedLbl = new Label("Loading speed: " + loadingSpeed);
+                loadingSpeedLbl.setWrapText(true);
+                Label speedLbl = new Label("Speed: " + speed);
+                speedLbl.setWrapText(true);
+                Label manufacturerLbl = new Label("Manufacturer: " + manufacturer);
+                manufacturerLbl.setWrapText(true);
+                Label platingLbl = new Label("Plating: " + plating);
+                platingLbl.setWrapText(true);
+                Label weaponsLbl = new Label("Weapons: " + weapons);
+                weaponsLbl.setWrapText(true);
+                Label cargoLbl = new Label ("Cargo: ");
+                cargoLbl.setWrapText(true);
+
+                VBox shipContentVbox = new VBox(idLbl, xLbl, yLbl, spaceAvailableLbl, typeLbl, shipClassLbl,
+                        maxCargoLbl, loadingSpeedLbl, speedLbl, manufacturerLbl, platingLbl, weaponsLbl, cargoLbl);
+                shipContentVbox.setPadding(new Insets(5, 0, 15, 10));
+
+                for (Cargo goodCargo : cargo) {
+                    String good = goodCargo.getGood();
+                    int quantity = goodCargo.getQuantity();
+                    int totalVolume = goodCargo.getTotalVolume();
+
+                    Label goodLbl = new Label("Good: " + good);
+                    goodLbl.setWrapText(true);
+                    Label quantityLbl = new Label("Quantity: " + quantity);
+                    quantityLbl.setWrapText(true);
+                    Label totalVolumeLbl = new Label("Total volume: " + totalVolume);
+                    totalVolumeLbl.setWrapText(true);
+
+                    VBox cargoVbox = new VBox(goodLbl, quantityLbl, totalVolumeLbl);
+                    cargoVbox.setPadding(new Insets(0, 0, 5, 10));
+
+                    shipContentVbox.getChildren().addAll(cargoVbox);
+                }
+
+                this.centerVbox.getChildren().addAll(shipCountLbl, shipContentVbox);
+
+                shipIds.add(id);
+            }
+
+            purchaseShipFuel(shipIds);
+        }
+    }
+
+    public void purchaseShipFuel(List<String> shipIds) {
+        Label purchaseLbl = new Label("Purchase ship fuel: ");
+        purchaseLbl.setWrapText(true);
+
+        Label shipIdLbl = new Label("Select ship id: ");
+        shipIdLbl.setWrapText(true);
+
+        ComboBox<String> shipIdsMenu = new ComboBox<String>();
+        shipIdsMenu.getItems().addAll(shipIds);
+
+        HBox shipIdsHbox = new HBox(shipIdLbl, shipIdsMenu);
+
+        Label quantityLbl = new Label("Enter quantity: ");
+        quantityLbl.setWrapText(true);
+
+        TextField quantityTxt = new TextField();
+
+        HBox quantityHbox = new HBox(quantityLbl, quantityTxt);
+
+        Button purchaseBtn = new Button("Purchase fuel");
+        purchaseBtn.setOnAction((event -> {
+            if (shipIdsMenu.getValue() == null) {
+                List<String> msg = new ArrayList<String>();
+                msg.add("Ship ID was not selected for ship fuel purchase.");
+                handleError(msg);
+            }
+            else {
+//                List<String> msg = this.model.purchaseShipFuel(shipIdsMenu.getValue(), quantityTxt.getText());
+                List<String> msg = this.model.purchaseGoods(shipIdsMenu.getValue(), "FUEL", quantityTxt.getText());
+                if (msg.size() > 0) {
+                    handleError(msg);
+                }
+                else {
+//                    credits, order, ship
+                    Ship ship = this.model.getShip();
+
+                    Alert alert = new Alert(AlertType.INFORMATION);
+                    alert.setTitle("Purchase ship fuel");
+                    alert.setHeaderText("Success!");
+                    alert.setContentText("Ship fuel purchased.\nShip ID: " + ship.getId());
+
+                    alert.showAndWait();
+                }
+            }
+        }));
+
+        Pane menuSpacer = new Pane();
+        menuSpacer.setPrefHeight(5);
+
+        Pane btnSpacer = new Pane();
+        btnSpacer.setPrefHeight(10);
+
+        VBox purchaseMenuVbox = new VBox(shipIdsHbox, menuSpacer, quantityHbox, btnSpacer, purchaseBtn);
+        purchaseMenuVbox.setPadding(new Insets(0, 0, 0, 10));
+
+        this.centerVbox.getChildren().addAll(purchaseLbl, purchaseMenuVbox);
+    }
+
+    public void viewMarketPlace(String location) {
+        this.centerVbox.getChildren().clear();
+
+        if (location.equals("")) {
+            setCenterVboxTitle("Market Place");
+        }
+        else {
+            setCenterVboxTitle("Market Place - " + location);
+        }
+
+        List<String> msg = this.model.getUserShips();
+        if (msg.size() > 0) {
+            handleError(msg);
+        }
+        else {
+            List<Ship> ships = this.model.getCurrentToken().getUser().getShips();
+            List<String> shipLocations = new ArrayList<String>();
+            List<String> shipIds = new ArrayList<String>();
+            for (Ship ship : ships) {
+                String shipLocation = ship.getLocation();
+                if (!shipLocations.contains(shipLocation)) {
+                    shipLocations.add(shipLocation);
+                }
+
+                if (shipLocation.equals(location)) {
+                    shipIds.add(ship.getId());
+                }
+            }
+
+            Label shipLocationLbl = new Label("Select location: ");
+            shipLocationLbl.setWrapText(true);
+
+            ComboBox<String> shipLocationMenu = new ComboBox<String>();
+            shipLocationMenu.getItems().addAll(shipLocations);
+
+            Button shipLocationBtn = new Button("Search");
+            shipLocationBtn.setOnAction((event) -> {
+                if (shipLocationMenu.getValue() == null) {
+                    List<String> errorMsg = new ArrayList<String>();
+                    errorMsg.add("Location was not selected for locating market place.");
+                    handleError(errorMsg);
+                }
+                else {
+                    viewMarketPlace(shipLocationMenu.getValue());
+                }
+            });
+
+            HBox shipLocationsHbox = new HBox(shipLocationLbl, shipLocationMenu, shipLocationBtn);
+
+            this.centerVbox.getChildren().add(shipLocationsHbox);
+
+            if (!location.equals("")) {
+                msg = this.model.viewMarketPlace(location);
+                if (msg.size() > 0) {
+                    handleError(msg);
+                }
+                else {
+                    List<Goods> goods = this.model.getGoods();
+                    List<String> goodSymbols = new ArrayList<String>();
+
+                    for (int i = 0; i < goods.size(); i++) {
+                        int pricePerUnit = goods.get(i).getPricePerUnit();
+                        int purchasePricePerUnit = goods.get(i).getPurchasePricePerUnit();
+                        int quantityAvailable = goods.get(i).getQuantityAvailable();
+                        int sellPricePerUnit = goods.get(i).getSellPricePerUnit();
+                        int spread = goods.get(i).getSpread();
+                        String symbol = goods.get(i).getSymbol();
+                        int volumePerUnit = goods.get(i).getVolumePerUnit();
+
+                        Label goodCountLbl = new Label("Good " + (i+1));
+                        goodCountLbl.setWrapText(true);
+                        Label pricePerUnitLbl = new Label("Price per unit: " + pricePerUnit);
+                        pricePerUnitLbl.setWrapText(true);
+                        Label purchasePricePerUnitLbl = new Label("Purchase price per unit: " + purchasePricePerUnit);
+                        purchasePricePerUnitLbl.setWrapText(true);
+                        Label quantityAvailableLbl = new Label("Quantity available: " + quantityAvailable);
+                        quantityAvailableLbl.setWrapText(true);
+                        Label sellPricePerUnitLbl = new Label("Sell price per unit: " + sellPricePerUnit);
+                        sellPricePerUnitLbl.setWrapText(true);
+                        Label spreadLbl = new Label("Spread: " + spread);
+                        spreadLbl.setWrapText(true);
+                        Label symbolLbl = new Label("Symbol: " + symbol);
+                        symbolLbl.setWrapText(true);
+                        Label volumePerUnitLbl = new Label("Volume per unit: " + volumePerUnit);
+                        volumePerUnitLbl.setWrapText(true);
+
+                        VBox goodsContentVbox = new VBox(pricePerUnitLbl, purchasePricePerUnitLbl, quantityAvailableLbl,
+                                sellPricePerUnitLbl, spreadLbl, symbolLbl, volumePerUnitLbl);
+                        goodsContentVbox.setPadding(new Insets(5, 0, 15, 10));
+
+                        this.centerVbox.getChildren().addAll(goodCountLbl, goodsContentVbox);
+
+                        goodSymbols.add(symbol);
+                    }
+
+                    makePurchaseOrder(shipIds, goodSymbols);
+                }
+            }
+
+
+        }
+    }
+
+    public void makePurchaseOrder(List<String> shipIds, List<String> goods) {
+        Label purchaseLabel = new Label("Purchase good");
+        purchaseLabel.setWrapText(true);
+
+        Label shipIdLbl = new Label("Select ship id: ");
+        shipIdLbl.setWrapText(true);
+
+        ComboBox<String> shipIdsMenu = new ComboBox<String>();
+        shipIdsMenu.getItems().addAll(shipIds);
+
+        HBox shipIdsHbox = new HBox(shipIdLbl, shipIdsMenu);
+
+        Label goodsLbl = new Label("Select a good: ");
+        goodsLbl.setWrapText(true);
+
+        ComboBox<String> goodsMenu = new ComboBox<String>();
+        goodsMenu.getItems().addAll(goods);
+
+        HBox goodsHbox = new HBox(goodsLbl, goodsMenu);
+
+        Label quantityLbl = new Label("Enter quantity: ");
+        quantityLbl.setWrapText(true);
+
+        TextField quantityTxt = new TextField();
+
+        HBox quantityHbox = new HBox(quantityLbl, quantityTxt);
+
+        Button purchaseBtn = new Button("Purchase goods");
+        purchaseBtn.setOnAction((event -> {
+            if (shipIdsMenu.getValue() == null || goodsMenu.getValue() == null) {
+                List<String> msg = new ArrayList<String>();
+                if (shipIdsMenu.getValue() == null) {
+                    msg.add("Ship ID was not selected for goods purchase.");
+                }
+                if (goodsMenu.getValue() == null) {
+                    msg.add("Good was not selected for goods purchase.");
+                }
+                handleError(msg);
+            }
+            else {
+                List<String> msg = this.model.purchaseGoods(shipIdsMenu.getValue(), goodsMenu.getValue(), quantityTxt.getText());
+                if (msg.size() > 0) {
+                    handleError(msg);
+                }
+                else {
+//                    credits, order, ship
+                    Ship ship = this.model.getShip();
+
+                    Alert alert = new Alert(AlertType.INFORMATION);
+                    alert.setTitle("Purchase market place goods");
+                    alert.setHeaderText("Success!");
+                    alert.setContentText("Goods purchased.\nShip ID: " + ship.getId());
+
+                    alert.showAndWait();
+                }
+            }
+        }));
+
+        Pane menuSpacer = new Pane();
+        menuSpacer.setPrefHeight(5);
+
+        Pane tFieldSpacer = new Pane();
+        tFieldSpacer.setPrefHeight(5);
+
+        Pane btnSpacer = new Pane();
+        btnSpacer.setPrefHeight(10);
+
+        VBox purchaseMenuVbox = new VBox(shipIdsHbox, menuSpacer, goodsHbox, tFieldSpacer,
+                quantityHbox, btnSpacer, purchaseBtn);
+        purchaseMenuVbox.setPadding(new Insets(0, 0, 0, 10));
+
+        this.centerVbox.getChildren().addAll(purchaseLabel, purchaseMenuVbox);
+    }
+
+    public void getShipCargo(String shipId) {
+        this.centerVbox.getChildren().clear();
+
+        if (shipId.equals("")) {
+            setCenterVboxTitle("Sell goods");
+        }
+        else {
+            setCenterVboxTitle("Sell goods - Ship " + shipId);
+        }
+
+        List<String> msg = this.model.getUserShips();
+        if (msg.size() > 0) {
+            handleError(msg);
+        }
+        else {
+            List<Ship> ships = this.model.getCurrentToken().getUser().getShips();
+            List<String> shipIds = new ArrayList<String>();
+            for (Ship ship : ships) {
+                if (ship.getCargo().size() > 0) {
+                    shipIds.add(ship.getId());
+                }
+            }
+
+            Label shipIdLbl = new Label("Select ship: ");
+            shipIdLbl.setWrapText(true);
+
+            ComboBox<String> shipIdMenu = new ComboBox<String>();
+            shipIdMenu.getItems().addAll(shipIds);
+
+            Button shipIdBtn = new Button("Get goods");
+            shipIdBtn.setOnAction((event) -> {
+                if (shipIdMenu.getValue() == null) {
+                    List<String> errorMsg = new ArrayList<String>();
+                    errorMsg.add("Ship was not selected for selling goods.");
+                    handleError(errorMsg);
+                }
+                else {
+                    getShipCargo(shipIdMenu.getValue());
+                }
+            });
+
+            HBox shipLocationsHbox = new HBox(shipIdLbl, shipIdMenu, shipIdBtn);
+
+            this.centerVbox.getChildren().add(shipLocationsHbox);
+
+            if (!shipId.equals("")) {
+                msg = this.model.getShipInfo(shipId);
+                if (msg.size() > 0) {
+                    handleError(msg);
+                }
+                else {
+                    List<Cargo> cargo = this.model.getShip().getCargo();
+                    List<String> goodsSymbols = new ArrayList<String>();
+
+                    for (int i = 0; i < cargo.size(); i++) {
+                        String good = cargo.get(i).getGood();
+                        int quantity = cargo.get(i).getQuantity();
+                        int totalVolume = cargo.get(i).getTotalVolume();
+
+                        Label goodCountLbl = new Label("Item " + (i+1));
+                        goodCountLbl.setWrapText(true);
+                        Label goodLbl =  new Label("Good: " + good);
+                        goodLbl.setWrapText(true);
+                        Label quantityLbl = new Label("Quantity: " + quantity);
+                        quantityLbl.setWrapText(true);
+                        Label totalVolumeLbl = new Label("Total volume: " + totalVolume);
+                        totalVolumeLbl.setWrapText(true);
+
+
+                        VBox goodsContentVbox = new VBox(goodLbl, quantityLbl, totalVolumeLbl);
+                        goodsContentVbox.setPadding(new Insets(5, 0, 15, 10));
+
+                        this.centerVbox.getChildren().addAll(goodCountLbl, goodsContentVbox);
+
+                        goodsSymbols.add(good);
+                    }
+                    sellGoods(shipId, goodsSymbols);
+
+
+                }
+            }
+        }
+    }
+
+    public void sellGoods(String shipId, List<String> goods) {
+        Label goodsLbl = new Label("Select a good: ");
+        goodsLbl.setWrapText(true);
+
+        ComboBox<String> goodsMenu = new ComboBox<String>();
+        goodsMenu.getItems().addAll(goods);
+
+        HBox goodsHbox = new HBox(goodsLbl, goodsMenu);
+
+        Label quantityLbl = new Label("Enter quantity: ");
+        quantityLbl.setWrapText(true);
+
+        TextField quantityTxt = new TextField();
+
+        HBox quantityHbox = new HBox(quantityLbl, quantityTxt);
+
+        Button sellBtn = new Button("Sell goods");
+        sellBtn.setOnAction((event -> {
+            if (goodsMenu.getValue() == null) {
+                List<String> msg = new ArrayList<String>();
+                msg.add("Good was not selected for goods purchase.");
+                handleError(msg);
+            }
+            else {
+                List<String> msg = this.model.sellGoods(shipId, goodsMenu.getValue(), quantityTxt.getText());
+                if (msg.size() > 0) {
+                    handleError(msg);
+                }
+                else {
+//                    credits, order, ship
+                    Ship ship = this.model.getShip();
+
+                    Alert alert = new Alert(AlertType.INFORMATION);
+                    alert.setTitle("Sell goods");
+                    alert.setHeaderText("Success!");
+                    alert.setContentText("Goods sold.\nShip ID: " + ship.getId());
+
+                    alert.showAndWait();
+                }
+            }
+        }));
+
+        Pane menuSpacer = new Pane();
+        menuSpacer.setPrefHeight(5);
+
+        Pane btnSpacer = new Pane();
+        btnSpacer.setPrefHeight(10);
+
+        VBox sellMenuVbox = new VBox(goodsHbox, menuSpacer, quantityHbox, btnSpacer, sellBtn);
+        sellMenuVbox.setPadding(new Insets(0, 0, 0, 10));
+
+        this.centerVbox.getChildren().addAll(sellMenuVbox);
     }
 
 }
+

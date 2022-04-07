@@ -12,6 +12,7 @@ public class User {
     private List<Ship> ships;
     private List<Loan> loans;
     private Loan loan;
+    private Ship ship;
 
     public User(int credits, String joinedAt, int shipCount, int structureCount, String username) {
         this.credits = credits;
@@ -49,9 +50,16 @@ public class User {
     }
 
     public List<Loan> getLoans() {
-        return this.loans;
+        return loans;
     }
 
+    public List<Ship> getShips() {
+        return ships;
+    }
+
+    public Ship getShip() {
+        return ship;
+    }
 
     @Override
     public String toString() {

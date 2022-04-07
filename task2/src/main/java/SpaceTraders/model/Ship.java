@@ -21,6 +21,8 @@ public class Ship {
     private int spaceAvailable;
     private int x;
     private int y;
+    private String location;
+    private String flightPlanId;
 
 
     public String getShipClass() {
@@ -81,6 +83,10 @@ public class Ship {
 
     public int getY() {
         return y;
+    }
+
+    public String getLocation() {
+        return location;
     }
 
     @Override

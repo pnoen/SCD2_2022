@@ -7,7 +7,7 @@ import java.util.List;
 public interface GameEngine {
     String getStatus();
 
-    Color getStatusIconColour();
+    String getStatusIconColour();
 
     List<String> register(String username);
 
@@ -30,5 +30,23 @@ public interface GameEngine {
     List<Ship> getAvailableShips();
 
     List<String> purchaseShip(String location, String type);
+
+    Ship getShip();
+
+    List<String> getUserShips();
+
+//    List<String> purchaseShipFuel(String shipId, String quantity);
+
+    List<String> viewMarketPlace(String location);
+
+    List<Goods> getGoods();
+
+    List<String> purchaseGoods(String shipId, String good, String quantity);
+
+    Order getOrder();
+
+    List<String> sellGoods(String shipId, String good, String quantity);
+
+    List<String> getShipInfo(String shipId);
 
 }

@@ -1,23 +1,21 @@
 package SpaceTraders.model;
 
-import javafx.scene.paint.Color;
-
 import java.util.List;
 
 public class OfflineGameEngine implements GameEngine {
     private String status;
-    private Color statusIconColour;
+    private String statusIconColour;
 
     public OfflineGameEngine() {
         this.status = "Offline";
-        this.statusIconColour = Color.RED;
+        this.statusIconColour = "FF0000";
     }
 
     public String getStatus() {
         return this.status;
     }
 
-    public Color getStatusIconColour() {
+    public String getStatusIconColour() {
         return this.statusIconColour;
     }
 
@@ -62,6 +60,42 @@ public class OfflineGameEngine implements GameEngine {
     }
 
     public List<String> purchaseShip(String location, String type) {
+        return null;
+    }
+
+    public Ship getShip() {
+        return null;
+    }
+
+    public List<String> getUserShips() {
+        return null;
+    }
+
+//    public List<String> purchaseShipFuel(String shipId, String quantity) {
+//        return null;
+//    }
+
+    public List<String> viewMarketPlace(String location) {
+        return null;
+    }
+
+    public List<Goods> getGoods() {
+        return null;
+    }
+
+    public List<String> purchaseGoods(String shipId, String goods, String quantity) {
+        return null;
+    }
+
+    public Order getOrder() {
+        return null;
+    }
+
+    public List<String> sellGoods(String shipId, String goods, String quantity) {
+        return null;
+    }
+
+    public List<String> getShipInfo(String shipId) {
         return null;
     }
 
