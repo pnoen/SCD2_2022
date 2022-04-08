@@ -1,7 +1,5 @@
 package SpaceTraders.model;
 
-import javafx.scene.paint.Color;
-
 import java.util.List;
 
 public interface GameEngine {
@@ -31,11 +29,7 @@ public interface GameEngine {
 
     List<String> purchaseShip(String location, String type);
 
-    Ship getShip();
-
     List<String> getUserShips();
-
-//    List<String> purchaseShipFuel(String shipId, String quantity);
 
     List<String> viewMarketPlace(String location);
 
@@ -43,10 +37,21 @@ public interface GameEngine {
 
     List<String> purchaseGoods(String shipId, String good, String quantity);
 
-    Order getOrder();
-
     List<String> sellGoods(String shipId, String good, String quantity);
 
     List<String> getShipInfo(String shipId);
 
+    List<String> findNearbyLocations(String type);
+
+    List<Location> getLocations();
+
+    List<String> createFlightPlan(String shipId, String destination);
+
+    FlightPlan getFlightPlan();
+
+    List<String> viewFlightPlan(String flightId);
+
+    List<String> checkServerStatus();
+
+    Status getServerStatus();
 }

@@ -13,6 +13,7 @@ public class User {
     private List<Loan> loans;
     private Loan loan;
     private Ship ship;
+    private Order order;
 
     public User(int credits, String joinedAt, int shipCount, int structureCount, String username) {
         this.credits = credits;
@@ -59,6 +60,10 @@ public class User {
 
     public Ship getShip() {
         return ship;
+    }
+
+    public Order getOrder() {
+        return order;
     }
 
     @Override

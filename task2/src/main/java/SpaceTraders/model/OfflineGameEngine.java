@@ -63,17 +63,9 @@ public class OfflineGameEngine implements GameEngine {
         return null;
     }
 
-    public Ship getShip() {
-        return null;
-    }
-
     public List<String> getUserShips() {
         return null;
     }
-
-//    public List<String> purchaseShipFuel(String shipId, String quantity) {
-//        return null;
-//    }
 
     public List<String> viewMarketPlace(String location) {
         return null;
@@ -87,10 +79,6 @@ public class OfflineGameEngine implements GameEngine {
         return null;
     }
 
-    public Order getOrder() {
-        return null;
-    }
-
     public List<String> sellGoods(String shipId, String goods, String quantity) {
         return null;
     }
@@ -99,4 +87,31 @@ public class OfflineGameEngine implements GameEngine {
         return null;
     }
 
+    public List<String> findNearbyLocations(String type) {
+        return null;
+    }
+
+    public List<Location> getLocations() {
+        return null;
+    }
+
+    public List<String> createFlightPlan(String shipId, String destination) {
+        return null;
+    }
+
+    public FlightPlan getFlightPlan() {
+        return null;
+    }
+
+    public List<String> viewFlightPlan(String flightId) {
+        return null;
+    }
+
+    public List<String> checkServerStatus() {
+        return null;
+    }
+
+    public Status getServerStatus() {
+        return null;
+    }
 }

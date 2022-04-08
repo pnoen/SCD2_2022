@@ -106,7 +106,29 @@ public class GameWindow {
         Label statusLbl = new Label(status);
         statusLbl.setPadding(new Insets(0, 0, 0, 3));
 
-        this.bottomHbox.getChildren().addAll(statusIcon, statusLbl);
+        Pane spacer = new Pane();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        spacer.setMinSize(1, 1);
+
+        Button serverStatusBtn = new Button("Check server status");
+        serverStatusBtn.setOnAction((event -> {
+            List<String> msg = this.model.checkServerStatus();
+            if (msg.size() > 0) {
+                handleError(msg);
+            }
+            else {
+                Status serverStatus = this.model.getServerStatus();
+
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Server status");
+                alert.setHeaderText("Server status");
+                alert.setContentText(serverStatus.getStatus());
+
+                alert.showAndWait();
+            }
+        }));
+
+        this.bottomHbox.getChildren().addAll(statusIcon, statusLbl, spacer, serverStatusBtn);
     }
 
     public void setCenterVboxTitle(String title) {
@@ -414,7 +436,7 @@ public class GameWindow {
 
         Button locationsBtn = new Button("Locations");
         locationsBtn.setOnAction((event) -> {
-
+            findNearbyLocations("");
         });
         locationsBtn.setPrefWidth(btnWidth);
 
@@ -426,13 +448,13 @@ public class GameWindow {
                 Button createFlightBtn = new Button("Create flight");
                 createFlightBtn.setPrefWidth(subBtnWidth);
                 createFlightBtn.setOnAction((subEvent) -> {
-
+                    createFlightPlan();
                 });
 
                 Button viewFlightBtn = new Button("View flight");
                 viewFlightBtn.setPrefWidth(subBtnWidth);
                 viewFlightBtn.setOnAction((subEvent) -> {
-
+                    viewFlightPlan();
                 });
 
                 flightsSubBtnsVbox.getChildren().addAll(createFlightBtn, viewFlightBtn);
@@ -484,23 +506,20 @@ public class GameWindow {
             List<Loan> loans = this.model.getAvailableLoansList();
             List<String> loanTypes = new ArrayList<String>();
             for (int i = 0; i < loans.size(); i++) {
-                String type = loans.get(i).getType();
-                int amount =  loans.get(i).getAmount();
-                int rate = loans.get(i).getRate();
-                int termInDays = loans.get(i).getTermInDays();
-                boolean collateralRequired = loans.get(i).isCollateralRequired();
+                Loan loan = loans.get(i);
+                String type = loan.getType();
 
                 Label loanLbl = new Label("Loan " + (i+1));
                 loanLbl.setWrapText(true);
                 Label typeLbl = new Label("Type: " + type);
                 typeLbl.setWrapText(true);
-                Label amountLbl = new Label("Amount: " + amount);
+                Label amountLbl = new Label("Amount: " + loan.getAmount());
                 amountLbl.setWrapText(true);
-                Label rateLbl = new Label("Rate: " + rate);
+                Label rateLbl = new Label("Rate: " + loan.getRate());
                 rateLbl.setWrapText(true);
-                Label termInDaysLbl = new Label("Term in Days: " + termInDays);
+                Label termInDaysLbl = new Label("Term in Days: " + loan.getTermInDays());
                 termInDaysLbl.setWrapText(true);
-                Label collReqLbl = new Label("Collateral Required: " + collateralRequired);
+                Label collReqLbl = new Label("Collateral Required: " + loan.isCollateralRequired());
                 collReqLbl.setWrapText(true);
 
                 VBox loanContentVbox = new VBox(typeLbl, amountLbl, rateLbl, termInDaysLbl, collReqLbl);
@@ -531,7 +550,6 @@ public class GameWindow {
             radioBtnsVbox.getChildren().addAll(loanLbl, radioBtn);
         }
 
-//        TextField typeInput = new TextField();
         Button obtainBtn = new Button("Obtain");
         obtainBtn.setOnAction((event -> {
             RadioButton selRadio = (RadioButton) radioGroup.getSelectedToggle();
@@ -549,21 +567,15 @@ public class GameWindow {
                 }
                 else {
                     User user = this.model.getCurrentToken().getUser();
-                    int credits = user.getCredits();
-                    String content = "Credits: " + credits;
+                    String content = "Credits: " + user.getCredits();
 
                     Loan loan = this.model.getCurrentToken().getUser().getLoan();
                     content += "\nLoan";
-                    String due = loan.getDue();
-                    content += "\n\tDue: " + due;
-                    String id = loan.getId();
-                    content += "\n\tID: " + id;
-                    int repaymentAmount = loan.getAmount();
-                    content += "\n\tRepayment amount: " + repaymentAmount;
-                    String status = loan.getStatus();
-                    content += "\n\tStatus: " + status;
-                    String type = loan.getType();
-                    content += "\n\tType: " + type;
+                    content += "\n\tDue: " + loan.getDue();
+                    content += "\n\tID: " + loan.getId();
+                    content += "\n\tRepayment amount: " + loan.getAmount();
+                    content += "\n\tStatus: " + loan.getStatus();
+                    content += "\n\tType: " + loan.getType();
 
                     Alert alert = new Alert(AlertType.INFORMATION);
                     alert.setTitle("Take Loan");
@@ -605,23 +617,19 @@ public class GameWindow {
         else {
             List<Loan> loans = this.model.getCurrentToken().getUser().getLoans();
             for (int i = 0; i < loans.size(); i++) {
-                String id = loans.get(i).getId();
-                String due = loans.get(i).getDue();
-                int amount = loans.get(i).getAmount();
-                String status = loans.get(i).getStatus();
-                String type = loans.get(i).getType();
+                Loan loan = loans.get(i);
 
                 Label loanLbl = new Label("Loan " + (i+1));
                 loanLbl.setWrapText(true);
-                Label idLbl = new Label("ID: " + id);
+                Label idLbl = new Label("ID: " + loan.getId());
                 idLbl.setWrapText(true);
-                Label dueLbl = new Label("Due: " + due);
+                Label dueLbl = new Label("Due: " + loan.getDue());
                 dueLbl.setWrapText(true);
-                Label amountLbl = new Label("Repayment amount: " + amount);
+                Label amountLbl = new Label("Repayment amount: " + loan.getAmount());
                 amountLbl.setWrapText(true);
-                Label statusLbl = new Label("Status: " + status);
+                Label statusLbl = new Label("Status: " + loan.getStatus());
                 statusLbl.setWrapText(true);
-                Label typeLbl = new Label("Type: " + type);
+                Label typeLbl = new Label("Type: " + loan.getType());
                 typeLbl.setWrapText(true);
 
                 VBox loanContentVbox = new VBox(idLbl, dueLbl, amountLbl, statusLbl, typeLbl);
@@ -648,15 +656,9 @@ public class GameWindow {
             List<String> types = new ArrayList<String>();
 
             for (int i = 0; i < ships.size(); i++) {
-                String type = ships.get(i).getType();
-                String shipCl = ships.get(i).getShipClass();
-                int maxCargo = ships.get(i).getMaxCargo();
-                int loadingSpeed = ships.get(i).getLoadingSpeed();
-                int speed = ships.get(i).getSpeed();
-                String manufacturer = ships.get(i).getManufacturer();
-                int plating = ships.get(i).getPlating();
-                int weapons = ships.get(i).getWeapons();
-                List<PurchaseLocation> purchaseLocations = ships.get(i).getPurchaseLocations();
+                Ship ship = ships.get(i);
+                String type = ship.getType();
+                String shipCl = ship.getShipClass();
                 List<String> restrictedGoods = ships.get(i).getRestrictedGoods();
 
                 Label shipCountLbl = new Label("Ship " + (i+1));
@@ -665,17 +667,17 @@ public class GameWindow {
                 typeLbl.setWrapText(true);
                 Label shipClLbl = new Label("Class: " + shipCl);
                 shipClLbl.setWrapText(true);
-                Label maxCargoLbl = new Label("Max cargo: " + maxCargo);
+                Label maxCargoLbl = new Label("Max cargo: " + ship.getMaxCargo());
                 maxCargoLbl.setWrapText(true);
-                Label loadingSpeedLbl = new Label("Loading speed: " + loadingSpeed);
+                Label loadingSpeedLbl = new Label("Loading speed: " + ship.getLoadingSpeed());
                 loadingSpeedLbl.setWrapText(true);
-                Label speedLbl = new Label("Speed: " + speed);
+                Label speedLbl = new Label("Speed: " + ship.getSpeed());
                 speedLbl.setWrapText(true);
-                Label manufacturerLbl = new Label("Manufacturer: " + manufacturer);
+                Label manufacturerLbl = new Label("Manufacturer: " + ship.getManufacturer());
                 manufacturerLbl.setWrapText(true);
-                Label platingLbl = new Label("Plating: " + plating);
+                Label platingLbl = new Label("Plating: " + ship.getPlating());
                 platingLbl.setWrapText(true);
-                Label weaponsLbl = new Label("Weapons: " + weapons);
+                Label weaponsLbl = new Label("Weapons: " + ship.getWeapons());
                 weaponsLbl.setWrapText(true);
 
                 Label purchaseLocationLbl = new Label("Purchase locations: ");
@@ -685,16 +687,14 @@ public class GameWindow {
                         speedLbl, manufacturerLbl, platingLbl, weaponsLbl, purchaseLocationLbl);
                 shipContentVbox.setPadding(new Insets(5, 0, 15, 10));
 
-                for (PurchaseLocation purchaseLocation : purchaseLocations) {
-                    String system = purchaseLocation.getSystem();
+                for (PurchaseLocation purchaseLocation : ship.getPurchaseLocations()) {
                     String location = purchaseLocation.getLocation();
-                    int price = purchaseLocation.getPrice();
 
-                    Label systemLbl = new Label("System: " + system);
+                    Label systemLbl = new Label("System: " + purchaseLocation.getSystem());
                     systemLbl.setWrapText(true);
                     Label locationLbl = new Label("Location: " + location);
                     locationLbl.setWrapText(true);
-                    Label priceLbl = new Label("Price: " + price);
+                    Label priceLbl = new Label("Price: " + purchaseLocation.getPrice());
                     priceLbl.setWrapText(true);
 
                     VBox purLocationVbox = new VBox(systemLbl, locationLbl, priceLbl);
@@ -803,49 +803,30 @@ public class GameWindow {
                     handleError(msg);
                 }
                 else {
-//                    User user = this.model.getCurrentToken().getUser();
-//                    int credits = user.getCredits();
-//                    String content = "Credits: " + credits;
-                    String content = "Credits: ";
+                    User user = this.model.getCurrentToken().getUser();
+                    String content = "Credits: " + user.getCredits();
 
-                    Ship ship = this.model.getShip();
-                    content += "\nShip";
-                    String id = ship.getId();
-                    content += "\n\tID: " + id;
-                    String location = ship.getLocation();
-                    content += "\n\tLocation: " + location;
-                    int x = ship.getX();
-                    content += "\n\tX: " + x;
-                    int y = ship.getY();
-                    content += "\n\tY: " + y;
-                    List<Cargo> cargo = ship.getCargo();
+                    Ship ship = user.getShip();
+                    content += "\nShip:";
+                    content += "\n\tID: " + ship.getId();
+                    content += "\n\tLocation: " + ship.getLocation();
+                    content += "\n\tX: " + ship.getX();
+                    content += "\n\tY: " + ship.getY();
                     content += "\n\tCargo: ";
-                    for (Cargo item : cargo) {
-                        String good = item.getGood();
-                        content += "\n\t\tGood: " + good;
-                        int quantity = item.getQuantity();
-                        content += "\n\t\tQuantity: " + quantity;
-                        int totalVolume = item.getTotalVolume();
-                        content += "\n\t\tTotal volume: " + totalVolume;
+                    for (Cargo item : ship.getCargo()) {
+                        content += "\n\t\tGood: " + item.getGood();
+                        content += "\n\t\tQuantity: " + item.getQuantity();
+                        content += "\n\t\tTotal volume: " + item.getTotalVolume();
                     }
-                    int spaceAvailable = ship.getSpaceAvailable();
-                    content += "\n\tSpace available: " + spaceAvailable;
-                    String type = ship.getType();
-                    content += "\n\tType: " + type;
-                    String shipClass = ship.getShipClass();
-                    content += "\n\tClass: " + shipClass;
-                    int maxCargo = ship.getMaxCargo();
-                    content += "\n\tMax cargo: " + maxCargo;
-                    int loadingSpeed = ship.getLoadingSpeed();
-                    content += "\n\tLoading speed: " + loadingSpeed;
-                    int speed = ship.getSpeed();
-                    content += "\n\tSpeed: " + speed;
-                    String manufacturer = ship.getManufacturer();
-                    content += "\n\tManufacturer: " + manufacturer;
-                    int plating = ship.getPlating();
-                    content += "\n\tPlating: " + plating;
-                    int weapons = ship.getWeapons();
-                    content += "\n\tWeapons: " + weapons;
+                    content += "\n\tSpace available: " + ship.getSpaceAvailable();
+                    content += "\n\tType: " + ship.getType();
+                    content += "\n\tClass: " + ship.getShipClass();
+                    content += "\n\tMax cargo: " + ship.getMaxCargo();
+                    content += "\n\tLoading speed: " + ship.getLoadingSpeed();
+                    content += "\n\tSpeed: " + ship.getSpeed();
+                    content += "\n\tManufacturer: " + ship.getManufacturer();
+                    content += "\n\tPlating: " + ship.getPlating();
+                    content += "\n\tWeapons: " + ship.getWeapons();
 
                     Alert alert = new Alert(AlertType.INFORMATION);
                     alert.setTitle("Purchase ship");
@@ -883,48 +864,37 @@ public class GameWindow {
             List<String> shipIds = new ArrayList<String>();
 
             for (int i = 0; i < ships.size(); i++) {
-                String id = ships.get(i).getId();
-                String location = ships.get(i).getLocation();
-                int x = ships.get(i).getX();
-                int y = ships.get(i).getY();
-                List<Cargo> cargo = ships.get(i).getCargo();
-                int spaceAvailable = ships.get(i).getSpaceAvailable();
-                String type = ships.get(i).getType();
-                String shipClass = ships.get(i).getShipClass();
-                int maxCargo = ships.get(i).getMaxCargo();
-                int loadingSpeed = ships.get(i).getLoadingSpeed();
-                int speed = ships.get(i).getSpeed();
-                String manufacturer = ships.get(i).getManufacturer();
-                int plating = ships.get(i).getPlating();
-                int weapons = ships.get(i).getWeapons();
+                Ship ship = ships.get(i);
+                String id = ship.getId();
 
                 Label shipCountLbl = new Label("Ship " + (i+1));
                 shipCountLbl.setWrapText(true);
                 Label idLbl = new Label("ID: " + id);
                 idLbl.setWrapText(true);
-                Label locationLbl = new Label("Location: " + location);
+                Label locationLbl = new Label("Location: " + ship.getLocation());
                 locationLbl.setWrapText(true);
-                Label xLbl = new Label("X: " + x);
+
+                Label xLbl = new Label("X: " + ship.getX());
                 xLbl.setWrapText(true);
-                Label yLbl = new Label("Y: " + y);
+                Label yLbl = new Label("Y: " + ship.getY());
                 yLbl.setWrapText(true);
-                Label spaceAvailableLbl = new Label("Space available: " + spaceAvailable);
+                Label spaceAvailableLbl = new Label("Space available: " + ship.getSpaceAvailable());
                 spaceAvailableLbl.setWrapText(true);
-                Label typeLbl = new Label("Type: " + type);
+                Label typeLbl = new Label("Type: " + ship.getType());
                 typeLbl.setWrapText(true);
-                Label shipClassLbl = new Label("Class: " + shipClass);
+                Label shipClassLbl = new Label("Class: " + ship.getShipClass());
                 shipClassLbl.setWrapText(true);
-                Label maxCargoLbl = new Label("Max cargo: " + maxCargo);
+                Label maxCargoLbl = new Label("Max cargo: " + ship.getMaxCargo());
                 maxCargoLbl.setWrapText(true);
-                Label loadingSpeedLbl = new Label("Loading speed: " + loadingSpeed);
+                Label loadingSpeedLbl = new Label("Loading speed: " + ship.getLoadingSpeed());
                 loadingSpeedLbl.setWrapText(true);
-                Label speedLbl = new Label("Speed: " + speed);
+                Label speedLbl = new Label("Speed: " + ship.getSpeed());
                 speedLbl.setWrapText(true);
-                Label manufacturerLbl = new Label("Manufacturer: " + manufacturer);
+                Label manufacturerLbl = new Label("Manufacturer: " + ship.getManufacturer());
                 manufacturerLbl.setWrapText(true);
-                Label platingLbl = new Label("Plating: " + plating);
+                Label platingLbl = new Label("Plating: " + ship.getPlating());
                 platingLbl.setWrapText(true);
-                Label weaponsLbl = new Label("Weapons: " + weapons);
+                Label weaponsLbl = new Label("Weapons: " + ship.getWeapons());
                 weaponsLbl.setWrapText(true);
                 Label cargoLbl = new Label ("Cargo: ");
                 cargoLbl.setWrapText(true);
@@ -933,22 +903,24 @@ public class GameWindow {
                         maxCargoLbl, loadingSpeedLbl, speedLbl, manufacturerLbl, platingLbl, weaponsLbl, cargoLbl);
                 shipContentVbox.setPadding(new Insets(5, 0, 15, 10));
 
-                for (Cargo goodCargo : cargo) {
-                    String good = goodCargo.getGood();
-                    int quantity = goodCargo.getQuantity();
-                    int totalVolume = goodCargo.getTotalVolume();
-
-                    Label goodLbl = new Label("Good: " + good);
+                for (Cargo goodCargo : ship.getCargo()) {
+                    Label goodLbl = new Label("Good: " + goodCargo.getGood());
                     goodLbl.setWrapText(true);
-                    Label quantityLbl = new Label("Quantity: " + quantity);
+                    Label quantityLbl = new Label("Quantity: " + goodCargo.getQuantity());
                     quantityLbl.setWrapText(true);
-                    Label totalVolumeLbl = new Label("Total volume: " + totalVolume);
+                    Label totalVolumeLbl = new Label("Total volume: " + goodCargo.getTotalVolume());
                     totalVolumeLbl.setWrapText(true);
 
                     VBox cargoVbox = new VBox(goodLbl, quantityLbl, totalVolumeLbl);
                     cargoVbox.setPadding(new Insets(0, 0, 5, 10));
 
                     shipContentVbox.getChildren().addAll(cargoVbox);
+                }
+
+                if (ship.getFlightPlanId() != null) {
+                    Label flightPlanIdLbl = new Label("Flight plan ID: " + ship.getFlightPlanId());
+                    flightPlanIdLbl.setWrapText(true);
+                    shipContentVbox.getChildren().add(flightPlanIdLbl);
                 }
 
                 this.centerVbox.getChildren().addAll(shipCountLbl, shipContentVbox);
@@ -987,21 +959,12 @@ public class GameWindow {
                 handleError(msg);
             }
             else {
-//                List<String> msg = this.model.purchaseShipFuel(shipIdsMenu.getValue(), quantityTxt.getText());
                 List<String> msg = this.model.purchaseGoods(shipIdsMenu.getValue(), "FUEL", quantityTxt.getText());
                 if (msg.size() > 0) {
                     handleError(msg);
                 }
                 else {
-//                    credits, order, ship
-                    Ship ship = this.model.getShip();
-
-                    Alert alert = new Alert(AlertType.INFORMATION);
-                    alert.setTitle("Purchase ship fuel");
-                    alert.setHeaderText("Success!");
-                    alert.setContentText("Ship fuel purchased.\nShip ID: " + ship.getId());
-
-                    alert.showAndWait();
+                    goodsAlertBox("Purchase ship fuel", "Fuel purchased!");
                 }
             }
         }));
@@ -1079,29 +1042,24 @@ public class GameWindow {
                     List<String> goodSymbols = new ArrayList<String>();
 
                     for (int i = 0; i < goods.size(); i++) {
-                        int pricePerUnit = goods.get(i).getPricePerUnit();
-                        int purchasePricePerUnit = goods.get(i).getPurchasePricePerUnit();
-                        int quantityAvailable = goods.get(i).getQuantityAvailable();
-                        int sellPricePerUnit = goods.get(i).getSellPricePerUnit();
-                        int spread = goods.get(i).getSpread();
-                        String symbol = goods.get(i).getSymbol();
-                        int volumePerUnit = goods.get(i).getVolumePerUnit();
+                        Goods goodsItm = goods.get(i);
+                        String symbol = goodsItm.getSymbol();
 
                         Label goodCountLbl = new Label("Good " + (i+1));
                         goodCountLbl.setWrapText(true);
-                        Label pricePerUnitLbl = new Label("Price per unit: " + pricePerUnit);
+                        Label pricePerUnitLbl = new Label("Price per unit: " + goodsItm.getPricePerUnit());
                         pricePerUnitLbl.setWrapText(true);
-                        Label purchasePricePerUnitLbl = new Label("Purchase price per unit: " + purchasePricePerUnit);
+                        Label purchasePricePerUnitLbl = new Label("Purchase price per unit: " + goodsItm.getPurchasePricePerUnit());
                         purchasePricePerUnitLbl.setWrapText(true);
-                        Label quantityAvailableLbl = new Label("Quantity available: " + quantityAvailable);
+                        Label quantityAvailableLbl = new Label("Quantity available: " + goodsItm.getQuantityAvailable());
                         quantityAvailableLbl.setWrapText(true);
-                        Label sellPricePerUnitLbl = new Label("Sell price per unit: " + sellPricePerUnit);
+                        Label sellPricePerUnitLbl = new Label("Sell price per unit: " + goodsItm.getSellPricePerUnit());
                         sellPricePerUnitLbl.setWrapText(true);
-                        Label spreadLbl = new Label("Spread: " + spread);
+                        Label spreadLbl = new Label("Spread: " + goodsItm.getSpread());
                         spreadLbl.setWrapText(true);
                         Label symbolLbl = new Label("Symbol: " + symbol);
                         symbolLbl.setWrapText(true);
-                        Label volumePerUnitLbl = new Label("Volume per unit: " + volumePerUnit);
+                        Label volumePerUnitLbl = new Label("Volume per unit: " + goodsItm.getVolumePerUnit());
                         volumePerUnitLbl.setWrapText(true);
 
                         VBox goodsContentVbox = new VBox(pricePerUnitLbl, purchasePricePerUnitLbl, quantityAvailableLbl,
@@ -1116,8 +1074,6 @@ public class GameWindow {
                     makePurchaseOrder(shipIds, goodSymbols);
                 }
             }
-
-
         }
     }
 
@@ -1166,15 +1122,7 @@ public class GameWindow {
                     handleError(msg);
                 }
                 else {
-//                    credits, order, ship
-                    Ship ship = this.model.getShip();
-
-                    Alert alert = new Alert(AlertType.INFORMATION);
-                    alert.setTitle("Purchase market place goods");
-                    alert.setHeaderText("Success!");
-                    alert.setContentText("Goods purchased.\nShip ID: " + ship.getId());
-
-                    alert.showAndWait();
+                    goodsAlertBox("Purchase market place goods", "Goods purchased!");
                 }
             }
         }));
@@ -1246,21 +1194,21 @@ public class GameWindow {
                     handleError(msg);
                 }
                 else {
-                    List<Cargo> cargo = this.model.getShip().getCargo();
+                    User user = this.model.getCurrentToken().getUser();
+                    List<Cargo> cargo = user.getShip().getCargo();
                     List<String> goodsSymbols = new ArrayList<String>();
 
                     for (int i = 0; i < cargo.size(); i++) {
-                        String good = cargo.get(i).getGood();
-                        int quantity = cargo.get(i).getQuantity();
-                        int totalVolume = cargo.get(i).getTotalVolume();
+                        Cargo cargoGood = cargo.get(i);
+                        String good = cargoGood.getGood();
 
                         Label goodCountLbl = new Label("Item " + (i+1));
                         goodCountLbl.setWrapText(true);
                         Label goodLbl =  new Label("Good: " + good);
                         goodLbl.setWrapText(true);
-                        Label quantityLbl = new Label("Quantity: " + quantity);
+                        Label quantityLbl = new Label("Quantity: " + cargoGood.getQuantity());
                         quantityLbl.setWrapText(true);
-                        Label totalVolumeLbl = new Label("Total volume: " + totalVolume);
+                        Label totalVolumeLbl = new Label("Total volume: " + cargoGood.getTotalVolume());
                         totalVolumeLbl.setWrapText(true);
 
 
@@ -1272,8 +1220,6 @@ public class GameWindow {
                         goodsSymbols.add(good);
                     }
                     sellGoods(shipId, goodsSymbols);
-
-
                 }
             }
         }
@@ -1308,15 +1254,7 @@ public class GameWindow {
                     handleError(msg);
                 }
                 else {
-//                    credits, order, ship
-                    Ship ship = this.model.getShip();
-
-                    Alert alert = new Alert(AlertType.INFORMATION);
-                    alert.setTitle("Sell goods");
-                    alert.setHeaderText("Success!");
-                    alert.setContentText("Goods sold.\nShip ID: " + ship.getId());
-
-                    alert.showAndWait();
+                    goodsAlertBox("Sell goods", "Goods sold!");
                 }
             }
         }));
@@ -1331,6 +1269,327 @@ public class GameWindow {
         sellMenuVbox.setPadding(new Insets(0, 0, 0, 10));
 
         this.centerVbox.getChildren().addAll(sellMenuVbox);
+    }
+
+    public void goodsAlertBox(String title, String header) {
+        User user = this.model.getCurrentToken().getUser();
+        String content = "Credits: " + user.getCredits();
+
+        Order order = user.getOrder();
+        content += "\nOrder: ";
+        content += "\n\tGood: " + order.getGood();
+        content += "\n\tQuantity: " + order.getQuantity();
+        content += "\n\tPrice per unit: " + order.getPricePerUnit();
+        content += "\n\tTotal: " + order.getTotal();
+
+        Ship ship = user.getShip();
+        content += "\nShip:";
+        content += "\n\tID: " + ship.getId();
+        content += "\n\tLocation: " + ship.getLocation();
+        content += "\n\tX: " + ship.getX();
+        content += "\n\tY: " + ship.getY();
+        content += "\n\tCargo: ";
+        for (Cargo item : ship.getCargo()) {
+            content += "\n\t\tGood: " + item.getGood();
+            content += "\n\t\tQuantity: " + item.getQuantity();
+            content += "\n\t\tTotal volume: " + item.getTotalVolume();
+        }
+        content += "\n\tSpace available: " + ship.getSpaceAvailable();
+        content += "\n\tType: " + ship.getType();
+        content += "\n\tClass: " + ship.getShipClass();
+        content += "\n\tMax cargo: " + ship.getMaxCargo();
+        content += "\n\tLoading speed: " + ship.getLoadingSpeed();
+        content += "\n\tSpeed: " + ship.getSpeed();
+        content += "\n\tManufacturer: " + ship.getManufacturer();
+        content += "\n\tPlating: " + ship.getPlating();
+        content += "\n\tWeapons: " + ship.getWeapons();
+
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+
+        alert.showAndWait();
+    }
+
+    public void findNearbyLocations(String type) {
+        this.centerVbox.getChildren().clear();
+
+        setCenterVboxTitle("Nearby locations");
+
+        List<String> msg = this.model.findNearbyLocations(type);
+        if (msg.size() > 0) {
+            handleError(msg);
+        }
+        else {
+            List<Location> locations = this.model.getLocations();
+            List<String> types = new ArrayList<String>();
+
+            for (int i = 0; i < locations.size(); i++) {
+                Location location = locations.get(i);
+                String locationType = location.getType();
+
+                Label locationCountLbl = new Label("Location " + (i+1));
+                locationCountLbl.setWrapText(true);
+                Label symbolLbl = new Label("Symbol: " + location.getSymbol());
+                symbolLbl.setWrapText(true);
+                Label typeLbl = new Label("Type: " + locationType);
+                typeLbl.setWrapText(true);
+                Label nameLbl = new Label("Name: " + location.getName());
+                nameLbl.setWrapText(true);
+                Label xLbl = new Label("X: " + location.getX());
+                xLbl.setWrapText(true);
+                Label yLbl = new Label("Y: " + location.getY());
+                yLbl.setWrapText(true);
+                Label allowsConstructionLbl = new Label("Allows construction: " + location.getAllowsConstruction());
+                allowsConstructionLbl.setWrapText(true);
+                Label traitsLbl = new Label("Traits: ");
+                traitsLbl.setWrapText(true);
+
+                VBox locationsVbox = new VBox(symbolLbl, typeLbl, nameLbl, xLbl, yLbl, allowsConstructionLbl, traitsLbl);
+                locationsVbox.setPadding(new Insets(5, 0, 15, 10));
+
+                for (String trait : location.getTraits()) {
+                    Label traitLbl = new Label(trait);
+                    traitLbl.setWrapText(true);
+
+                    VBox traitVbox = new VBox(traitLbl);
+                    traitVbox.setPadding(new Insets(0, 0, 5, 10));
+
+                    locationsVbox.getChildren().add(traitVbox);
+                }
+
+                if (location.getMessages() != null) {
+                    Label messagesLbl = new Label("Messages: ");
+                    messagesLbl.setWrapText(true);
+
+                    locationsVbox.getChildren().add(messagesLbl);
+                    for (String message : location.getMessages()) {
+                        Label messageLbl = new Label(message);
+                        messageLbl.setWrapText(true);
+
+                        VBox messagesVbox = new VBox(messageLbl);
+                        messagesVbox.setPadding(new Insets(0, 0, 5, 10));
+
+                        locationsVbox.getChildren().add(messagesVbox);
+                    }
+                }
+
+                this.centerVbox.getChildren().addAll(locationCountLbl, locationsVbox);
+
+                if (!types.contains(locationType)) {
+                    types.add(locationType);
+                }
+            }
+            filterLocations(types);
+        }
+    }
+
+    public void filterLocations(List<String> types) {
+        Label filterLbl = new Label("Filter locations: ");
+        filterLbl.setWrapText(true);
+
+        ComboBox<String> locationsMenu = new ComboBox<String>();
+        locationsMenu.getItems().addAll(types);
+
+        Button filterBtn = new Button("Filter");
+        filterBtn.setOnAction((event) -> {
+            if (locationsMenu.getValue() == null) {
+                List<String> msg = new ArrayList<String>();
+                msg.add("Type was not selected for filter.");
+                handleError(msg);
+            }
+            else {
+                findNearbyLocations(locationsMenu.getValue());
+            }
+        });
+
+        HBox filterHbox = new HBox(locationsMenu, filterBtn);
+        filterHbox.setPadding(new Insets(0, 0, 20, 10));
+
+        this.centerVbox.getChildren().addAll(filterLbl, filterHbox);
+    }
+
+    public void createFlightPlan() {
+        this.centerVbox.getChildren().clear();
+
+        setCenterVboxTitle("Create a flight plan");
+
+        List<String> msg = this.model.getUserShips();
+        if (msg.size() > 0) {
+            handleError(msg);
+        }
+        else {
+            List<Ship> ships = this.model.getCurrentToken().getUser().getShips();
+            List<String> shipIds = new ArrayList<String>();
+            for (Ship ship : ships) {
+                shipIds.add(ship.getId());
+            }
+
+            Label shipIdLbl = new Label("Select ship: ");
+            shipIdLbl.setWrapText(true);
+
+            ComboBox<String> shipIdMenu = new ComboBox<String>();
+            shipIdMenu.getItems().addAll(shipIds);
+
+            HBox shipIdsHbox = new HBox(shipIdLbl, shipIdMenu);
+
+            msg = this.model.findNearbyLocations("");
+            if (msg.size() > 0) {
+                handleError(msg);
+            }
+            else {
+                List<String> locations = new ArrayList<String>();
+                for (Location location : this.model.getLocations()) {
+                    String symbol = location.getSymbol();
+                    if (!locations.contains(symbol)) {
+                        locations.add(symbol);
+                    }
+                }
+
+                Label destinationLbl = new Label("Enter destination symbol: ");
+                destinationLbl.setWrapText(true);
+
+                ComboBox<String> destinationMenu = new ComboBox<String>();
+                destinationMenu.getItems().addAll(locations);
+
+                HBox destinationsHbox = new HBox(destinationLbl, destinationMenu);
+
+                Button submitBtn = new Button("Submit");
+                submitBtn.setOnAction((event) -> {
+                    if (shipIdMenu.getValue() == null || destinationMenu.getValue() == null) {
+                        List<String> errorMsg = new ArrayList<String>();
+                        if (shipIdMenu.getValue() == null) {
+                            errorMsg.add("Ship was not selected for the flight plan.");
+                        }
+                        if (destinationMenu.getValue() == null) {
+                            errorMsg.add("Destination was not selected for the flight plan");
+                        }
+                        handleError(errorMsg);
+                    }
+                    else {
+                        List<String> errorMsg = this.model.createFlightPlan(shipIdMenu.getValue(), destinationMenu.getValue());
+                        if (errorMsg.size() > 0) {
+                            handleError(errorMsg);
+                        }
+                        else {
+                            FlightPlan flightPlan = this.model.getFlightPlan();
+                            String content = "Flight plan";
+                            content += "\n\tID: " + flightPlan.getId();
+                            content += "\n\tShip ID: " + flightPlan.getShipId();
+                            content += "\n\tCreated at: " + flightPlan.getCreatedAt();
+                            content += "\n\tArrives at: " + flightPlan.getArrivesAt();
+                            content += "\n\tDestination: " + flightPlan.getDestination();
+                            content += "\n\tDeparture: " + flightPlan.getDeparture();
+                            content += "\n\tDistance: " + flightPlan.getDistance();
+                            content += "\n\tFuel consumed: " + flightPlan.getFuelConsumed();
+                            content += "\n\tFuel remaining: " + flightPlan.getFuelRemaining();
+                            content += "\n\tTerminated at: " + flightPlan.getTerminatedAt();
+                            content += "\n\tTime remaining in seconds: " + flightPlan.getTimeRemainingInSeconds();
+
+                            Alert alert = new Alert(AlertType.INFORMATION);
+                            alert.setTitle("Flight plan");
+                            alert.setHeaderText("Created flight plan!");
+                            alert.setContentText(content);
+
+                            alert.showAndWait();
+                        }
+                    }
+                });
+
+                Pane menuSpacer = new Pane();
+                menuSpacer.setPrefHeight(5);
+
+                Pane btnSpacer = new Pane();
+                btnSpacer.setPrefHeight(10);
+
+                VBox purchaseMenuVbox = new VBox(shipIdsHbox, menuSpacer, destinationsHbox, btnSpacer, submitBtn);
+                purchaseMenuVbox.setPadding(new Insets(0, 0, 0, 10));
+
+                this.centerVbox.getChildren().addAll(purchaseMenuVbox);
+            }
+
+        }
+    }
+
+    public void viewFlightPlan() {
+        this.centerVbox.getChildren().clear();
+
+        setCenterVboxTitle("View flight plan");
+
+        List<String> msg = this.model.getUserShips();
+        if (msg.size() > 0) {
+            handleError(msg);
+        }
+        else {
+            List<Ship> ships = this.model.getCurrentToken().getUser().getShips();
+            List<String> flightPlanIds = new ArrayList<String>();
+            for (Ship ship : ships) {
+                if (ship.getFlightPlanId() != null) {
+                    flightPlanIds.add(ship.getFlightPlanId());
+                }
+            }
+
+            Label flightPlanLbl = new Label("Select flight plan");
+            flightPlanLbl.setWrapText(true);
+
+            ComboBox<String> flightPlanIdMenu = new ComboBox<String>();
+            flightPlanIdMenu.getItems().addAll(flightPlanIds);
+
+            Button viewBtn = new Button("View");
+
+            HBox viewFlightHbox = new HBox(flightPlanIdMenu, viewBtn);
+            VBox flightPlanVbox = new VBox();
+
+            Pane spacer = new Pane();
+            spacer.setPrefHeight(20);
+
+            this.centerVbox.getChildren().addAll(flightPlanLbl, viewFlightHbox, spacer, flightPlanVbox);
+
+            viewBtn.setOnAction((event -> {
+                if (flightPlanIdMenu.getValue() == null) {
+                    List<String> errorMsg = new ArrayList<String>();
+                    errorMsg.add("Flight plan was not selected to view");
+                    handleError(errorMsg);
+                }
+                else {
+                    List<String> errorMsg = this.model.viewFlightPlan(flightPlanIdMenu.getValue());
+                    if (errorMsg.size() > 0) {
+                        handleError(errorMsg);
+                    }
+                    else {
+                        flightPlanVbox.getChildren().clear();
+                        FlightPlan flightPlan = this.model.getFlightPlan();
+
+                        Label idLbl = new Label("ID: " + flightPlan.getId());
+                        idLbl.setWrapText(true);
+                        Label shipIdLbl = new Label("Ship ID: " + flightPlan.getShipId());
+                        shipIdLbl.setWrapText(true);
+                        Label createdAtLbl = new Label("Created at: " + flightPlan.getCreatedAt());
+                        createdAtLbl.setWrapText(true);
+                        Label arrivesAtLbl = new Label("Arrives at: " + flightPlan.getArrivesAt());
+                        arrivesAtLbl.setWrapText(true);
+                        Label destinationLbl = new Label("Destination: " + flightPlan.getDestination());
+                        destinationLbl.setWrapText(true);
+                        Label departureLbl = new Label("Departure: " + flightPlan.getDeparture());
+                        departureLbl.setWrapText(true);
+                        Label distanceLbl = new Label("Distance: " + flightPlan.getDistance());
+                        distanceLbl.setWrapText(true);
+                        Label fuelConsumedLbl = new Label("Fuel consumed: " + flightPlan.getFuelConsumed());
+                        fuelConsumedLbl.setWrapText(true);
+                        Label fuelRemainingLbl = new Label("Fuel remaining: " + flightPlan.getFuelRemaining());
+                        fuelRemainingLbl.setWrapText(true);
+                        Label terminatedAtLbl = new Label("Terminated at: " + flightPlan.getTerminatedAt());
+                        terminatedAtLbl.setWrapText(true);
+                        Label timeRemainingInSecondsLbl = new Label("Time remaining in seconds: " + flightPlan.getTimeRemainingInSeconds());
+                        timeRemainingInSecondsLbl.setWrapText(true);
+
+                        flightPlanVbox.getChildren().addAll(idLbl, shipIdLbl, createdAtLbl, arrivesAtLbl, destinationLbl,
+                                departureLbl, distanceLbl, fuelConsumedLbl, fuelRemainingLbl, terminatedAtLbl, timeRemainingInSecondsLbl);
+                    }
+                }
+            }));
+        }
     }
 
 }

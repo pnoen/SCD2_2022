@@ -19,9 +19,10 @@ public class OnlineGameEngine implements GameEngine{
     private Token currentToken;
     private List<Loan> availableLoans;
     private List<Ship> availableShips;
-    private Ship ship;
     private List<Goods> goods;
-    private Order order;
+    private List<Location> locations;
+    private FlightPlan flightPlan;
+    private Status serverStatus;
 
     public OnlineGameEngine() {
         this.status = "Online";
@@ -59,7 +60,7 @@ public class OnlineGameEngine implements GameEngine{
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 Token token = gson.fromJson(response.body(), Token.class);
-                System.out.println(token);
+//                System.out.println(token);
                 msg.add(token.getToken());
             }
             else if (response.statusCode() >= 400 && response.statusCode() < 500) {
@@ -102,7 +103,6 @@ public class OnlineGameEngine implements GameEngine{
                 Token token = gson.fromJson(response.body(), Token.class);
                 token.setToken(authToken);
                 this.currentToken = token;
-                System.out.println(token);
             }
             else if (response.statusCode() >= 400 && response.statusCode() < 600) {
                 msg = handleErrorReq(response.body());
@@ -151,9 +151,9 @@ public class OnlineGameEngine implements GameEngine{
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 Map<String, Object> map = gson.fromJson(response.body(), Map.class);
-                System.out.println("item" + map.get("loans"));
-
-                Loan[] loans  = gson.fromJson(String.valueOf(map.get("loans")), Loan[].class);
+//                System.out.println("item" + map.get("loans"));
+                String json = gson.toJson(map.get("loans"));
+                Loan[] loans = gson.fromJson(json, Loan[].class);
                 this.availableLoans = Arrays.asList(loans);
                 for (Loan loan : this.availableLoans) {
                     System.out.println(loan);
@@ -202,7 +202,7 @@ public class OnlineGameEngine implements GameEngine{
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 User user = gson.fromJson(response.body(), User.class);
                 this.currentToken.setUser(user);
-                System.out.println(user.getLoan());
+//                System.out.println(user.getLoan());
             }
             else if (response.statusCode() >= 400 && response.statusCode() < 600) {
                 msg = handleErrorReq(response.body());
@@ -243,15 +243,11 @@ public class OnlineGameEngine implements GameEngine{
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 User user = gson.fromJson(response.body(), User.class);
-//                System.out.println("item" + map.get("loans"));
-
-//                User user = gson.fromJson(String.valueOf(map.get("loans")), User.class);
                 this.currentToken.setUser(user);
-                List<Loan> loans = this.currentToken.getUser().getLoans();
-                for (Loan loan : loans) {
-                    System.out.println(loan);
-                }
-
+//                List<Loan> loans = this.currentToken.getUser().getLoans();
+//                for (Loan loan : loans) {
+//                    System.out.println(loan);
+//                }
             }
             else if (response.statusCode() >= 400 && response.statusCode() < 600) {
                 msg = handleErrorReq(response.body());
@@ -356,8 +352,8 @@ public class OnlineGameEngine implements GameEngine{
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 Map<String, Object> map = gson.fromJson(response.body(), Map.class);
 //                System.out.println(map.get("shipListings"));
-
-                Ship[] ships  = gson.fromJson(String.valueOf(map.get("shipListings")), Ship[].class);
+                String json = gson.toJson(map.get("shipListings"));
+                Ship[] ships  = gson.fromJson(json, Ship[].class);
                 this.availableShips = Arrays.asList(ships);
 //                for (Ship ship : this.availableShips) {
 //                    System.out.println(ship);
@@ -404,14 +400,9 @@ public class OnlineGameEngine implements GameEngine{
             Gson gson = new Gson();
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
-
-                User user = gson.fromJson(String.valueOf(map.get("user")), User.class);
-                System.out.println(user.getCredits());
+                User user = gson.fromJson(response.body(), User.class);
+//                System.out.println(user.getCredits());
                 this.currentToken.setUser(user);
-
-                Ship ship = gson.fromJson(String.valueOf(map.get("ship")), Ship.class);
-                this.ship = ship;
             }
             else if (response.statusCode() >= 400 && response.statusCode() < 600) {
                 msg = handleErrorReq(response.body());
@@ -429,10 +420,6 @@ public class OnlineGameEngine implements GameEngine{
             msg.add(ignored.getMessage());
         }
         return msg;
-    }
-
-    public Ship getShip() {
-        return ship;
     }
 
     public List<String> getUserShips() {
@@ -457,10 +444,6 @@ public class OnlineGameEngine implements GameEngine{
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 User user = gson.fromJson(response.body(), User.class);
                 this.currentToken.setUser(user);
-//                List<Ship> ships = this.currentToken.getUser().getShips();
-//                for (Ship ship : ships) {
-//                    System.out.println(ship);
-//                }
             }
             else if (response.statusCode() >= 400 && response.statusCode() < 600) {
                 msg = handleErrorReq(response.body());
@@ -501,7 +484,8 @@ public class OnlineGameEngine implements GameEngine{
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 Map<String, Object> map = gson.fromJson(response.body(), Map.class);
-                Goods[] goods  = gson.fromJson(String.valueOf(map.get("marketplace")), Goods[].class);
+                String json = gson.toJson(map.get("marketplace"));
+                Goods[] goods = gson.fromJson(json, Goods[].class);
                 this.goods = Arrays.asList(goods);
             }
             else if (response.statusCode() >= 400 && response.statusCode() < 600) {
@@ -545,16 +529,8 @@ public class OnlineGameEngine implements GameEngine{
             Gson gson = new Gson();
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
-
-                User user = gson.fromJson(String.valueOf(map.get("user")), User.class);
+                User user = gson.fromJson(response.body(), User.class);
                 this.currentToken.setUser(user);
-
-                Order order = gson.fromJson(String.valueOf(map.get("order")), Order.class);
-                this.order = order;
-
-                Ship ship = gson.fromJson(String.valueOf(map.get("ship")), Ship.class);
-                this.ship = ship;
             }
             else if (response.statusCode() >= 400 && response.statusCode() < 600) {
                 msg = handleErrorReq(response.body());
@@ -572,10 +548,6 @@ public class OnlineGameEngine implements GameEngine{
             msg.add(ignored.getMessage());
         }
         return msg;
-    }
-
-    public Order getOrder() {
-        return this.order;
     }
 
     public List<String> sellGoods(String shipId, String goods, String quantity) {
@@ -597,16 +569,8 @@ public class OnlineGameEngine implements GameEngine{
             Gson gson = new Gson();
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
-
-                User user = gson.fromJson(String.valueOf(map.get("user")), User.class);
+                User user = gson.fromJson(response.body(), User.class);
                 this.currentToken.setUser(user);
-
-                Order order = gson.fromJson(String.valueOf(map.get("order")), Order.class);
-                this.order = order;
-
-                Ship ship = gson.fromJson(String.valueOf(map.get("ship")), Ship.class);
-                this.ship = ship;
             }
             else if (response.statusCode() >= 400 && response.statusCode() < 600) {
                 msg = handleErrorReq(response.body());
@@ -646,9 +610,8 @@ public class OnlineGameEngine implements GameEngine{
             Gson gson = new Gson();
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
-                Ship ship  = gson.fromJson(String.valueOf(map.get("ship")), Ship.class);
-                this.ship = ship;
+                User user = gson.fromJson(response.body(), User.class);
+                this.currentToken.setUser(user);
             }
             else if (response.statusCode() >= 400 && response.statusCode() < 600) {
                 msg = handleErrorReq(response.body());
@@ -666,5 +629,183 @@ public class OnlineGameEngine implements GameEngine{
             msg.add(ignored.getMessage());
         }
         return msg;
+    }
+
+    public List<String> findNearbyLocations(String type) {
+        List<String> msg = new ArrayList<String>();
+        String authToken = this.currentToken.getToken();
+
+        try {
+            String uri = "https://api.spacetraders.io/systems/OE/locations?token=" + authToken;
+            if (type.length() != 0) {
+                uri += "&type=" + type;
+            }
+            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
+                    .GET()
+                    .build();
+
+            HttpClient client = HttpClient.newBuilder().build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("Response status code was: " + response.statusCode());
+//            System.out.println("Response headers were: " + response.headers());
+            System.out.println("Response body was:\n" + response.body());
+            Gson gson = new Gson();
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
+                String json = gson.toJson(map.get("locations"));
+                Location[] locations = gson.fromJson(json, Location[].class);
+                this.locations = Arrays.asList(locations);
+            }
+            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
+                msg = handleErrorReq(response.body());
+            }
+
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Something went wrong with our request!");
+//            System.out.println(e.getMessage());
+            msg.add("Something went wrong with our request!");
+            msg.add(e.getMessage());
+        } catch (URISyntaxException ignored) {
+            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
+            // hard-coded and so needs a way to be checked for correctness at runtime.
+            msg.add("Something went wrong.");
+            msg.add(ignored.getMessage());
+        }
+        return msg;
+    }
+
+    public List<Location> getLocations() {
+        return this.locations;
+    }
+
+    public List<String> createFlightPlan(String shipId, String destination) {
+        List<String> msg = new ArrayList<String>();
+        String authToken = this.currentToken.getToken();
+        try {
+            String uri = "https://api.spacetraders.io/my/flight-plans?token=" + authToken + "&shipId=" +
+                    shipId + "&destination=" + destination;
+            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .build();
+
+            HttpClient client = HttpClient.newBuilder().build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("Response status code was: " + response.statusCode());
+            System.out.println("Response body was:\n" + response.body());
+            Gson gson = new Gson();
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
+
+                String json = gson.toJson(map.get("flightPlan"));
+                FlightPlan flightPlan = gson.fromJson(json, FlightPlan.class);
+                this.flightPlan = flightPlan;
+            }
+            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
+                msg = handleErrorReq(response.body());
+            }
+
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Something went wrong with our request!");
+            msg.add("Something went wrong with our request!");
+            msg.add(e.getMessage());
+        } catch (URISyntaxException ignored) {
+            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
+            // hard-coded and so needs a way to be checked for correctness at runtime.
+            msg.add("Something went wrong.");
+            msg.add(ignored.getMessage());
+        }
+        return msg;
+    }
+
+    public FlightPlan getFlightPlan() {
+        return this.flightPlan;
+    }
+
+    public List<String> viewFlightPlan(String flightId) {
+        List<String> msg = new ArrayList<String>();
+        String authToken = this.currentToken.getToken();
+        try {
+            String uri = "https://api.spacetraders.io/my/flight-plans/" + flightId + "?token=" + authToken;
+            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
+                    .GET()
+                    .build();
+
+            HttpClient client = HttpClient.newBuilder().build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("Response status code was: " + response.statusCode());
+            System.out.println("Response body was:\n" + response.body());
+            Gson gson = new Gson();
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
+
+                String json = gson.toJson(map.get("flightPlan"));
+                FlightPlan flightPlan = gson.fromJson(json, FlightPlan.class);
+                this.flightPlan = flightPlan;
+            }
+            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
+                msg = handleErrorReq(response.body());
+            }
+
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Something went wrong with our request!");
+            msg.add("Something went wrong with our request!");
+            msg.add(e.getMessage());
+        } catch (URISyntaxException ignored) {
+            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
+            // hard-coded and so needs a way to be checked for correctness at runtime.
+            msg.add("Something went wrong.");
+            msg.add(ignored.getMessage());
+        }
+        return msg;
+    }
+
+    public List<String> checkServerStatus() {
+        List<String> msg = new ArrayList<String>();
+        try {
+            String uri = "https://api.spacetraders.io/game/status";
+            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
+                    .GET()
+                    .build();
+
+            HttpClient client = HttpClient.newBuilder().build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("Response status code was: " + response.statusCode());
+            System.out.println("Response body was:\n" + response.body());
+            Gson gson = new Gson();
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                Status status = gson.fromJson(response.body(), Status.class);
+                this.serverStatus = status;
+            }
+            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
+                msg = handleErrorReq(response.body());
+            }
+
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Something went wrong with our request!");
+            msg.add("Something went wrong with our request!");
+            msg.add(e.getMessage());
+        } catch (URISyntaxException ignored) {
+            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
+            // hard-coded and so needs a way to be checked for correctness at runtime.
+            msg.add("Something went wrong.");
+            msg.add(ignored.getMessage());
+        }
+        return msg;
+    }
+
+    public Status getServerStatus() {
+        return this.serverStatus;
     }
 }

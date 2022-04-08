@@ -89,6 +89,10 @@ public class Ship {
         return location;
     }
 
+    public String getFlightPlanId() {
+        return flightPlanId;
+    }
+
     @Override
     public String toString() {
         return this.shipClass + " " + type;
