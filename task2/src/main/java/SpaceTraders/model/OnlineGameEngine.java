@@ -61,7 +61,7 @@ public class OnlineGameEngine implements GameEngine{
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 Token token = gson.fromJson(response.body(), Token.class);
 //                System.out.println(token);
-                msg.add(token.getToken());
+                this.currentToken = token;
             }
             else if (response.statusCode() >= 400 && response.statusCode() < 500) {
                 msg = handleErrorReq(response.body());
@@ -155,9 +155,9 @@ public class OnlineGameEngine implements GameEngine{
                 String json = gson.toJson(map.get("loans"));
                 Loan[] loans = gson.fromJson(json, Loan[].class);
                 this.availableLoans = Arrays.asList(loans);
-                for (Loan loan : this.availableLoans) {
-                    System.out.println(loan);
-                }
+//                for (Loan loan : this.availableLoans) {
+//                    System.out.println(loan);
+//                }
 
             }
             else if (response.statusCode() >= 400 && response.statusCode() < 600) {

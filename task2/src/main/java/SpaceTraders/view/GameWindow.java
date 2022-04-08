@@ -158,19 +158,26 @@ public class GameWindow {
             String username = usernameInput.getText();
             List<String> msg = this.model.register(username);
 
-
             ButtonType copy = new ButtonType("Copy token");
 
-
-            if (msg.size() > 1) {
+            if (msg.size() > 0) {
                 handleError(msg);
             }
             else {
+                Token token = this.model.getCurrentToken();
+                User user = token.getUser();
+                String content = "Token: " + token.getToken();
+                content += "\nUser: ";
+                content += "\n\tUsername: " + user.getUsername();
+                content += "\n\tCredits: " + user.getCredits();
+                content += "\n\tShips: ";
+                content += "\n\tLoans: ";
+
                 Alert alert = new Alert(AlertType.INFORMATION);
                 alert.getButtonTypes().add(copy);
                 alert.setTitle("Registration");
                 alert.setHeaderText("Success!");
-                alert.setContentText("Token - " + msg.get(0));
+                alert.setContentText(content);
 
                 Optional<ButtonType> result = alert.showAndWait();
 
@@ -178,7 +185,7 @@ public class GameWindow {
 //                System.out.println("copy");
                     Clipboard clipboard = Clipboard.getSystemClipboard();
                     ClipboardContent clipboardContent = new ClipboardContent();
-                    clipboardContent.putString(msg.get(0));
+                    clipboardContent.putString(this.model.getCurrentToken().getToken());
                     clipboard.setContent(clipboardContent);
                 }
             }
@@ -619,23 +626,25 @@ public class GameWindow {
             for (int i = 0; i < loans.size(); i++) {
                 Loan loan = loans.get(i);
 
-                Label loanLbl = new Label("Loan " + (i+1));
-                loanLbl.setWrapText(true);
-                Label idLbl = new Label("ID: " + loan.getId());
-                idLbl.setWrapText(true);
-                Label dueLbl = new Label("Due: " + loan.getDue());
-                dueLbl.setWrapText(true);
-                Label amountLbl = new Label("Repayment amount: " + loan.getAmount());
-                amountLbl.setWrapText(true);
-                Label statusLbl = new Label("Status: " + loan.getStatus());
-                statusLbl.setWrapText(true);
-                Label typeLbl = new Label("Type: " + loan.getType());
-                typeLbl.setWrapText(true);
+                if (loan.getStatus().equals("CURRENT")) {
+                    Label loanLbl = new Label("Loan ");
+                    loanLbl.setWrapText(true);
+                    Label idLbl = new Label("ID: " + loan.getId());
+                    idLbl.setWrapText(true);
+                    Label dueLbl = new Label("Due: " + loan.getDue());
+                    dueLbl.setWrapText(true);
+                    Label amountLbl = new Label("Repayment amount: " + loan.getAmount());
+                    amountLbl.setWrapText(true);
+                    Label statusLbl = new Label("Status: " + loan.getStatus());
+                    statusLbl.setWrapText(true);
+                    Label typeLbl = new Label("Type: " + loan.getType());
+                    typeLbl.setWrapText(true);
 
-                VBox loanContentVbox = new VBox(idLbl, dueLbl, amountLbl, statusLbl, typeLbl);
-                loanContentVbox.setPadding(new Insets(5, 0, 15, 10));
+                    VBox loanContentVbox = new VBox(idLbl, dueLbl, amountLbl, statusLbl, typeLbl);
+                    loanContentVbox.setPadding(new Insets(5, 0, 15, 10));
 
-                this.centerVbox.getChildren().addAll(loanLbl, loanContentVbox);
+                    this.centerVbox.getChildren().addAll(loanLbl, loanContentVbox);
+                }
             }
         }
     }
