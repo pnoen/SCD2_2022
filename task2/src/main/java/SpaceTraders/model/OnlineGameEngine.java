@@ -2,12 +2,6 @@ package SpaceTraders.model;
 
 import com.google.gson.Gson;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,12 +17,14 @@ public class OnlineGameEngine implements GameEngine{
     private List<Location> locations;
     private FlightPlan flightPlan;
     private Status serverStatus;
+    private Request request;
 
-    public OnlineGameEngine() {
+    public OnlineGameEngine(Request request) {
         this.status = "Online";
         this.statusIconColour = "#01c629";
         this.availableLoans = new ArrayList<Loan>();
         this.availableShips = new ArrayList<Ship>();
+        this.request = request;
     }
 
     public String getStatus() {
@@ -40,84 +36,46 @@ public class OnlineGameEngine implements GameEngine{
     }
 
     public List<String> register(String username) {
-        // add username filtering
+        String uri = "https://api.spacetraders.io/users/" + username + "/claim";
+        List<String> msg = request.postRequest(uri);
 
-        List<String> msg = new ArrayList<String>();
-        try {
-            String uri = "https://api.spacetraders.io/users/" + username + "/claim";
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .POST(HttpRequest.BodyPublishers.noBody())
-                    .build();
-
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
 //            System.out.println("Response headers were: " + response.headers());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                Token token = gson.fromJson(response.body(), Token.class);
-//                System.out.println(token);
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                Token token = gson.fromJson(msg.get(2), Token.class);
                 this.currentToken = token;
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 500) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-//            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
-
         return msg;
     }
 
     public List<String> getAccountDetails(String authToken) {
-        List<String> msg = new ArrayList<String>();
-        try {
-            String uri = "https://api.spacetraders.io/my/account?token=" + authToken;
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .GET()
-                    .build();
+        String uri = "https://api.spacetraders.io/my/account?token=" + authToken;
+        List<String> msg = request.getRequest(uri);
 
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
 //            System.out.println("Response headers were: " + response.headers());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                Token token = gson.fromJson(response.body(), Token.class);
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                Token token = gson.fromJson(msg.get(2), Token.class);
                 token.setToken(authToken);
                 this.currentToken = token;
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-//            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
@@ -131,49 +89,26 @@ public class OnlineGameEngine implements GameEngine{
     }
 
     public List<String> getAvailableLoans() {
-        List<String> msg = new ArrayList<String>();
         String authToken = this.currentToken.getToken();
+        String uri = "https://api.spacetraders.io/types/loans?token=" + authToken;
+        List<String> msg = request.getRequest(uri);
 
-        try {
-            String uri = "https://api.spacetraders.io/types/loans?token=" + authToken;
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .GET()
-                    .build();
-
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
 //            System.out.println("Response headers were: " + response.headers());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
-//                System.out.println("item" + map.get("loans"));
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                Map<String, Object> map = gson.fromJson(msg.get(2), Map.class);
                 String json = gson.toJson(map.get("loans"));
                 Loan[] loans = gson.fromJson(json, Loan[].class);
                 this.availableLoans = Arrays.asList(loans);
-//                for (Loan loan : this.availableLoans) {
-//                    System.out.println(loan);
-//                }
-
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-//            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
@@ -183,86 +118,47 @@ public class OnlineGameEngine implements GameEngine{
     }
 
     public List<String> takeLoan(String loanType) {
-        List<String> msg = new ArrayList<String>();
         String authToken = this.currentToken.getToken();
-        try {
-            String uri = "https://api.spacetraders.io/my/loans?token=" + authToken + "&type=" + loanType;
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .POST(HttpRequest.BodyPublishers.noBody())
-                    .build();
+        String uri = "https://api.spacetraders.io/my/loans?token=" + authToken + "&type=" + loanType;
+        List<String> msg = request.postRequest(uri);
 
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                User user = gson.fromJson(response.body(), User.class);
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
+//            System.out.println("Response headers were: " + response.headers());
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                User user = gson.fromJson(msg.get(2), User.class);
                 this.currentToken.setUser(user);
-//                System.out.println(user.getLoan());
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-//            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
 
     public List<String> activeLoans() {
-        List<String> msg = new ArrayList<String>();
         String authToken = this.currentToken.getToken();
+        String uri = "https://api.spacetraders.io/my/loans?token=" + authToken;
+        List<String> msg = request.getRequest(uri);
 
-        try {
-            String uri = "https://api.spacetraders.io/my/loans?token=" + authToken;
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .GET()
-                    .build();
-
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
 //            System.out.println("Response headers were: " + response.headers());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                User user = gson.fromJson(response.body(), User.class);
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                User user = gson.fromJson(msg.get(2), User.class);
                 this.currentToken.setUser(user);
-//                List<Loan> loans = this.currentToken.getUser().getLoans();
-//                for (Loan loan : loans) {
-//                    System.out.println(loan);
-//                }
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-//            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
@@ -328,52 +224,29 @@ public class OnlineGameEngine implements GameEngine{
     }
 
     public List<String> availableShips(String shipClass) {
-        List<String> msg = new ArrayList<String>();
         String authToken = this.currentToken.getToken();
+        String uri = "https://api.spacetraders.io/systems/OE/ship-listings?token=" + authToken;
+        if (shipClass.length() != 0) {
+            uri += "&class=" + shipClass;
+        }
+        List<String> msg = request.getRequest(uri);
 
-        try {
-            String uri = "https://api.spacetraders.io/systems/OE/ship-listings?token=" + authToken;
-            if (shipClass.length() != 0) {
-                uri += "&class=" + shipClass;
-            }
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .GET()
-                    .build();
-
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
 //            System.out.println("Response headers were: " + response.headers());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
-//                System.out.println(map.get("shipListings"));
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                Map<String, Object> map = gson.fromJson(msg.get(2), Map.class);
                 String json = gson.toJson(map.get("shipListings"));
                 Ship[] ships  = gson.fromJson(json, Ship[].class);
                 this.availableShips = Arrays.asList(ships);
-//                for (Ship ship : this.availableShips) {
-//                    System.out.println(ship);
-//                }
-
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-//            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
@@ -383,125 +256,72 @@ public class OnlineGameEngine implements GameEngine{
     }
 
     public List<String> purchaseShip(String location, String type) {
-        List<String> msg = new ArrayList<String>();
         String authToken = this.currentToken.getToken();
-        try {
-            String uri = "https://api.spacetraders.io/my/ships?token=" + authToken + "&location=" + location + "&type=" + type;
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .POST(HttpRequest.BodyPublishers.noBody())
-                    .build();
+        String uri = "https://api.spacetraders.io/my/ships?token=" + authToken + "&location=" + location + "&type=" + type;
+        List<String> msg = request.postRequest(uri);
 
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                User user = gson.fromJson(response.body(), User.class);
-//                System.out.println(user.getCredits());
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
+//            System.out.println("Response headers were: " + response.headers());
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                User user = gson.fromJson(msg.get(2), User.class);
                 this.currentToken.setUser(user);
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-//            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
 
     public List<String> getUserShips() {
-        List<String> msg = new ArrayList<String>();
         String authToken = this.currentToken.getToken();
+        String uri = "https://api.spacetraders.io/my/ships?token=" + authToken;
+        List<String> msg = request.getRequest(uri);
 
-        try {
-            String uri = "https://api.spacetraders.io/my/ships?token=" + authToken;
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .GET()
-                    .build();
-
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
 //            System.out.println("Response headers were: " + response.headers());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                User user = gson.fromJson(response.body(), User.class);
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                User user = gson.fromJson(msg.get(2), User.class);
                 this.currentToken.setUser(user);
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-//            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
 
     public List<String> viewMarketPlace(String location) {
-        List<String> msg = new ArrayList<String>();
         String authToken = this.currentToken.getToken();
+        String uri = "https://api.spacetraders.io/locations/" + location + "/marketplace?token=" + authToken;
+        List<String> msg = request.getRequest(uri);
 
-        try {
-            String uri = "https://api.spacetraders.io/locations/" + location + "/marketplace?token=" + authToken;
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .GET()
-                    .build();
-
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
 //            System.out.println("Response headers were: " + response.headers());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                Map<String, Object> map = gson.fromJson(msg.get(2), Map.class);
                 String json = gson.toJson(map.get("marketplace"));
                 Goods[] goods = gson.fromJson(json, Goods[].class);
                 this.goods = Arrays.asList(goods);
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-//            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
@@ -511,168 +331,100 @@ public class OnlineGameEngine implements GameEngine{
     }
 
     public List<String> purchaseGoods(String shipId, String goods, String quantity) {
-        List<String> msg = new ArrayList<String>();
         String authToken = this.currentToken.getToken();
-        try {
-            String uri = "https://api.spacetraders.io/my/purchase-orders?token=" + authToken + "&shipId=" +
-                    shipId + "&good=" + goods + "&quantity=" + quantity;
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .POST(HttpRequest.BodyPublishers.noBody())
-                    .build();
+        String uri = "https://api.spacetraders.io/my/purchase-orders?token=" + authToken + "&shipId=" +
+                shipId + "&good=" + goods + "&quantity=" + quantity;
+        List<String> msg = request.postRequest(uri);
 
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                User user = gson.fromJson(response.body(), User.class);
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
+//            System.out.println("Response headers were: " + response.headers());
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                User user = gson.fromJson(msg.get(2), User.class);
                 this.currentToken.setUser(user);
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-//            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
 
     public List<String> sellGoods(String shipId, String goods, String quantity) {
-        List<String> msg = new ArrayList<String>();
         String authToken = this.currentToken.getToken();
-        try {
-            String uri = "https://api.spacetraders.io/my/sell-orders?token=" + authToken + "&shipId=" +
-                    shipId + "&good=" + goods + "&quantity=" + quantity;
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .POST(HttpRequest.BodyPublishers.noBody())
-                    .build();
+        String uri = "https://api.spacetraders.io/my/sell-orders?token=" + authToken + "&shipId=" +
+                shipId + "&good=" + goods + "&quantity=" + quantity;
+        List<String> msg = request.postRequest(uri);
 
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                User user = gson.fromJson(response.body(), User.class);
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
+//            System.out.println("Response headers were: " + response.headers());
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                User user = gson.fromJson(msg.get(2), User.class);
                 this.currentToken.setUser(user);
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-//            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
 
     public List<String> getShipInfo(String shipId) {
-        List<String> msg = new ArrayList<String>();
         String authToken = this.currentToken.getToken();
+        String uri = "https://api.spacetraders.io/my/ships/" + shipId + "?token=" + authToken;
+        List<String> msg = request.getRequest(uri);
 
-        try {
-            String uri = "https://api.spacetraders.io/my/ships/" + shipId + "?token=" + authToken;
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .GET()
-                    .build();
-
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
 //            System.out.println("Response headers were: " + response.headers());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                User user = gson.fromJson(response.body(), User.class);
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                User user = gson.fromJson(msg.get(2), User.class);
                 this.currentToken.setUser(user);
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-//            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
 
     public List<String> findNearbyLocations(String type) {
-        List<String> msg = new ArrayList<String>();
         String authToken = this.currentToken.getToken();
+        String uri = "https://api.spacetraders.io/systems/OE/locations?token=" + authToken;
+        if (type.length() != 0) {
+            uri += "&type=" + type;
+        }
+        List<String> msg = request.getRequest(uri);
 
-        try {
-            String uri = "https://api.spacetraders.io/systems/OE/locations?token=" + authToken;
-            if (type.length() != 0) {
-                uri += "&type=" + type;
-            }
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .GET()
-                    .build();
-
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
 //            System.out.println("Response headers were: " + response.headers());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                Map<String, Object> map = gson.fromJson(msg.get(2), Map.class);
                 String json = gson.toJson(map.get("locations"));
                 Location[] locations = gson.fromJson(json, Location[].class);
                 this.locations = Arrays.asList(locations);
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-//            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
@@ -682,43 +434,27 @@ public class OnlineGameEngine implements GameEngine{
     }
 
     public List<String> createFlightPlan(String shipId, String destination) {
-        List<String> msg = new ArrayList<String>();
         String authToken = this.currentToken.getToken();
-        try {
-            String uri = "https://api.spacetraders.io/my/flight-plans?token=" + authToken + "&shipId=" +
-                    shipId + "&destination=" + destination;
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .POST(HttpRequest.BodyPublishers.noBody())
-                    .build();
+        String uri = "https://api.spacetraders.io/my/flight-plans?token=" + authToken + "&shipId=" +
+                shipId + "&destination=" + destination;
+        List<String> msg = request.postRequest(uri);
 
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
-
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
+//            System.out.println("Response headers were: " + response.headers());
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                Map<String, Object> map = gson.fromJson(msg.get(2), Map.class);
                 String json = gson.toJson(map.get("flightPlan"));
                 FlightPlan flightPlan = gson.fromJson(json, FlightPlan.class);
                 this.flightPlan = flightPlan;
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
@@ -728,79 +464,48 @@ public class OnlineGameEngine implements GameEngine{
     }
 
     public List<String> viewFlightPlan(String flightId) {
-        List<String> msg = new ArrayList<String>();
         String authToken = this.currentToken.getToken();
-        try {
-            String uri = "https://api.spacetraders.io/my/flight-plans/" + flightId + "?token=" + authToken;
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .GET()
-                    .build();
+        String uri = "https://api.spacetraders.io/my/flight-plans/" + flightId + "?token=" + authToken;
+        List<String> msg = request.getRequest(uri);
 
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                Map<String, Object> map = gson.fromJson(response.body(), Map.class);
-
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
+//            System.out.println("Response headers were: " + response.headers());
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                Map<String, Object> map = gson.fromJson(msg.get(2), Map.class);
                 String json = gson.toJson(map.get("flightPlan"));
                 FlightPlan flightPlan = gson.fromJson(json, FlightPlan.class);
                 this.flightPlan = flightPlan;
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }
 
     public List<String> checkServerStatus() {
-        List<String> msg = new ArrayList<String>();
-        try {
-            String uri = "https://api.spacetraders.io/game/status";
-            HttpRequest request = HttpRequest.newBuilder(new URI(uri))
-                    .GET()
-                    .build();
+        String uri = "https://api.spacetraders.io/game/status";
+        List<String> msg = request.getRequest(uri);
 
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Response status code was: " + response.statusCode());
-            System.out.println("Response body was:\n" + response.body());
-            Gson gson = new Gson();
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                Status status = gson.fromJson(response.body(), Status.class);
+        if (msg.size() == 3) {
+            int statusCode = Integer.parseInt(msg.get(0));
+            System.out.println("Response status code was: " + statusCode);
+//            System.out.println("Response headers were: " + response.headers());
+            System.out.println("Response body was:\n" + msg.get(2));
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                Status status = gson.fromJson(msg.get(2), Status.class);
                 this.serverStatus = status;
+                msg.clear();
             }
-            else if (response.statusCode() >= 400 && response.statusCode() < 600) {
-                msg = handleErrorReq(response.body());
+            else if (statusCode >= 400 && statusCode < 500) {
+                msg = handleErrorReq(msg.get(2));
             }
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Something went wrong with our request!");
-            msg.add("Something went wrong with our request!");
-            msg.add(e.getMessage());
-        } catch (URISyntaxException ignored) {
-            // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
-            // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
-            msg.add(ignored.getMessage());
         }
         return msg;
     }

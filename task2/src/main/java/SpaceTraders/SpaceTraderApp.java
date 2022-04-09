@@ -1,9 +1,6 @@
 package SpaceTraders;
 
-import SpaceTraders.model.DummyAPI;
-import SpaceTraders.model.GameEngine;
-import SpaceTraders.model.OfflineGameEngine;
-import SpaceTraders.model.OnlineGameEngine;
+import SpaceTraders.model.*;
 import SpaceTraders.view.GameWindow;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -41,7 +38,7 @@ public class SpaceTraderApp extends Application {
                 return new OfflineGameEngine(new DummyAPI());
             }
             else if (args.get(0).equals("online")) {
-                return new OnlineGameEngine();
+                return new OnlineGameEngine(new Request());
             }
         }
         return null;
