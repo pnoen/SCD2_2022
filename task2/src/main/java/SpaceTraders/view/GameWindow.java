@@ -880,8 +880,7 @@ public class GameWindow {
                 shipCountLbl.setWrapText(true);
                 Label idLbl = new Label("ID: " + id);
                 idLbl.setWrapText(true);
-                Label locationLbl = new Label("Location: " + ship.getLocation());
-                locationLbl.setWrapText(true);
+
 
                 Label xLbl = new Label("X: " + ship.getX());
                 xLbl.setWrapText(true);
@@ -930,6 +929,11 @@ public class GameWindow {
                     Label flightPlanIdLbl = new Label("Flight plan ID: " + ship.getFlightPlanId());
                     flightPlanIdLbl.setWrapText(true);
                     shipContentVbox.getChildren().add(flightPlanIdLbl);
+                }
+                else {
+                    Label locationLbl = new Label("Location: " + ship.getLocation());
+                    locationLbl.setWrapText(true);
+                    shipContentVbox.getChildren().add(locationLbl);
                 }
 
                 this.centerVbox.getChildren().addAll(shipCountLbl, shipContentVbox);
@@ -1010,12 +1014,14 @@ public class GameWindow {
             List<String> shipIds = new ArrayList<String>();
             for (Ship ship : ships) {
                 String shipLocation = ship.getLocation();
-                if (!shipLocations.contains(shipLocation)) {
-                    shipLocations.add(shipLocation);
-                }
+                if (shipLocation != null) {
+                    if (!shipLocations.contains(shipLocation)) {
+                        shipLocations.add(shipLocation);
+                    }
 
-                if (shipLocation.equals(location)) {
-                    shipIds.add(ship.getId());
+                    if (shipLocation.equals(location)) {
+                        shipIds.add(ship.getId());
+                    }
                 }
             }
 

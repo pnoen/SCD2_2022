@@ -138,7 +138,7 @@ public class OfflineGameEngine implements GameEngine {
     public List<String> viewMarketPlace(String location) {
         Gson gson = new Gson();
 
-        String rawJson = this.dummyAPI.getViewMarketPlaceJson();
+        String rawJson = this.dummyAPI.getViewMarketPlaceJson(location);
         Map<String, Object> map = gson.fromJson(rawJson, Map.class);
         String json = gson.toJson(map.get("marketplace"));
         Goods[] goods = gson.fromJson(json, Goods[].class);
@@ -174,7 +174,7 @@ public class OfflineGameEngine implements GameEngine {
     public List<String> getShipInfo(String shipId) {
         Gson gson = new Gson();
 
-        String rawJson = this.dummyAPI.getShipInfoJson();
+        String rawJson = this.dummyAPI.getShipInfoJson(shipId);
         User user = gson.fromJson(rawJson, User.class);
         this.currentToken.setUser(user);
 
@@ -184,7 +184,7 @@ public class OfflineGameEngine implements GameEngine {
     public List<String> findNearbyLocations(String type) {
         Gson gson = new Gson();
 
-        String rawJson = this.dummyAPI.getFindNearbyLocationsJson();
+        String rawJson = this.dummyAPI.getFindNearbyLocationsJson(type);
         Map<String, Object> map = gson.fromJson(rawJson, Map.class);
         String json = gson.toJson(map.get("locations"));
         Location[] locations = gson.fromJson(json, Location[].class);
