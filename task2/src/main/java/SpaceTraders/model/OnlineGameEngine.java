@@ -173,7 +173,7 @@ public class OnlineGameEngine implements GameEngine{
         msg.add("Error code: " + codeClean[0]);
 
         msg.add(String.valueOf(errorMap.get("error").get("message")));
-        System.out.println(errorMap.get("error"));
+//        System.out.println(errorMap.get("error"));
         if (errorMap.get("error").get("data") != null) {
             String data = gson.toJson(errorMap.get("error").get("data"));
             Map<String, List<String>> map = gson.fromJson(data, Map.class);
