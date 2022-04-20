@@ -21,10 +21,12 @@ public class Request {
 
     public List<String> getRequest(String uri) {
         List<String> msg = new ArrayList<String>();
+//        System.out.println(INPUT_API_APP_ID + " " + INPUT_APP_KEY);
         try {
             HttpRequest request = HttpRequest.newBuilder(new URI(uri))
                     .GET()
-                    .header("api_id", INPUT_API_APP_ID)
+                    .header("Accept", "application/json")
+                    .header("app_id", INPUT_API_APP_ID)
                     .header("app_key", INPUT_APP_KEY)
                     .build();
 
@@ -32,7 +34,7 @@ public class Request {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             msg.add(String.valueOf(response.statusCode()));
-            msg.add(String.valueOf(response.headers()));
+//            msg.add(String.valueOf(response.headers()));
             msg.add(response.body());
 
         } catch (IOException | InterruptedException e) {

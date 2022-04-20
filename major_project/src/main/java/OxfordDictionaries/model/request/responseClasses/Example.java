@@ -9,7 +9,7 @@ public class Example {
     private List<CategorizedText> notes; // optional
     private List<Region> regions; // optional
     private List<Register> registers; // optional
-    private List<String> senselds; // optional
+    private List<String> senseIds; // optional
     private String text;
 
     public List<String> getDefinitions() {
@@ -32,8 +32,8 @@ public class Example {
         return registers;
     }
 
-    public List<String> getSenselds() {
-        return senselds;
+    public List<String> getSenseIds() {
+        return senseIds;
     }
 
     public String getText() {

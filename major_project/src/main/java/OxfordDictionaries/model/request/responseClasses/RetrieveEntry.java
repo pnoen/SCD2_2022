@@ -7,7 +7,6 @@ public class RetrieveEntry {
     private Metadata metadata; // optional
     private List<HeadwordEntry> results; // optional
     private String word;
-    private String error;
 
     public String getId() {
         return id;
@@ -23,9 +22,5 @@ public class RetrieveEntry {
 
     public String getWord() {
         return word;
-    }
-
-    public String getError() {
-        return error;
     }
 }

@@ -6,12 +6,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class EntryInputVbox {
-
+    private VBox vbox;
     private ComboBox<String> langsMenu;
     private TextField wordTxt;
     private ComboBox<String> fieldMenu;
@@ -22,9 +23,9 @@ public class EntryInputVbox {
     private ComboBox<String> matchMenu;
 
     public VBox create() {
-        Label titleLbl = new Label("Search a word");
+        Label titleLbl = new Label("Search for an entry");
         titleLbl.setWrapText(true);
-        titleLbl.setFont(new Font(25));
+        titleLbl.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
 
         HBox langHbox = createLangHbox();
         HBox wordHbox = createWordHbox();
@@ -35,7 +36,7 @@ public class EntryInputVbox {
         HBox registersHbox = createRegistersHbox();
         HBox matchHbox = createMatchHbox();
 
-        VBox vbox = new VBox(5);
+        this.vbox = new VBox(5);
         vbox.getChildren().addAll(titleLbl, langHbox, wordHbox, fieldHbox,
                 gramFeatHbox, lexiCateHbox, domainsHbox, registersHbox, matchHbox);
 
@@ -50,6 +51,7 @@ public class EntryInputVbox {
         langs.add("en-us");
         this.langsMenu = new ComboBox<>();
         langsMenu.getItems().addAll(langs);
+        langsMenu.getSelectionModel().selectFirst();
         HBox langHbox = new HBox(langLbl, langsMenu);
         return langHbox;
     }
@@ -67,7 +69,7 @@ public class EntryInputVbox {
         fieldLbl.setWrapText(true);
         List<String> fields = new ArrayList<>();
         fields.add("");
-        fields.add("definition");
+        fields.add("definitions");
         fields.add("domains");
         fields.add("etymologies");
         fields.add("examples");
@@ -77,6 +79,7 @@ public class EntryInputVbox {
         fields.add("variantForms");
         this.fieldMenu = new ComboBox<>();
         fieldMenu.getItems().addAll(fields);
+        fieldMenu.getSelectionModel().selectFirst();
         HBox fieldHbox = new HBox(fieldLbl, fieldMenu);
         return fieldHbox;
     }
@@ -122,7 +125,43 @@ public class EntryInputVbox {
         matches.add("true");
         this.matchMenu = new ComboBox<>();
         matchMenu.getItems().addAll(matches);
+        matchMenu.getSelectionModel().selectFirst();
         HBox matchHbox = new HBox(matchLbl, matchMenu);
         return matchHbox;
+    }
+
+    public String getLang() {
+        return langsMenu.getValue();
+    }
+
+    public String getWord() {
+        if (wordTxt.getText().trim().equals("")) {
+            return null;
+        }
+        return wordTxt.getText();
+    }
+
+    public String getField() {
+        return fieldMenu.getValue();
+    }
+
+    public String getGramFeat() {
+        return gramFeatTxt.getText();
+    }
+
+    public String getLexiCate() {
+        return lexiCateTxt.getText();
+    }
+
+    public String getDomains() {
+        return domainsTxt.getText();
+    }
+
+    public String getRegisters() {
+        return registersTxt.getText();
+    }
+
+    public String getMatch() {
+        return matchMenu.getValue();
     }
 }

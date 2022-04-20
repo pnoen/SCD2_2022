@@ -53,20 +53,24 @@ public class OnlineInputEngine implements InputEngine {
 
         List<String> response = request.getRequest(uri);
 
-        if (response.size() == 3) {
+        if (response.size() == 2) {
             int statusCode = Integer.parseInt(response.get(0));
-            System.out.println("Response body was:\n" + response.get(2));
+//            System.out.println("Response body was:\n" + response.get(1));
 
             if (statusCode >= 200 && statusCode < 300) {
                 Gson gson = new Gson();
-                this.retrieveEntry = gson.fromJson(response.get(2), RetrieveEntry.class);
+                this.retrieveEntry = gson.fromJson(response.get(1), RetrieveEntry.class);
                 response.clear();
             }
             else if (statusCode >= 400 && statusCode < 500) {
-                response = handleErrorReq(response.get(0), response.get(2));
+                response = handleErrorReq(response.get(0), response.get(1));
             }
         }
         return response;
+    }
+
+    public RetrieveEntry getRetrieveEntry() {
+        return retrieveEntry;
     }
 
     public List<String> handleErrorReq(String code, String body) {

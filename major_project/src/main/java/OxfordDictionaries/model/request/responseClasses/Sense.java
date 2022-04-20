@@ -3,9 +3,9 @@ package OxfordDictionaries.model.request.responseClasses;
 import java.util.List;
 
 public class Sense {
-    private SynonymsAntonyms antonyms; // optional
-    private List<Inline_model_2> contstructions; // optional
-    private List<String> crossReferenceMarks; // optional
+    private List<SynonymsAntonyms> antonyms; // optional
+    private List<Inline_model_2> constructions; // optional
+    private List<String> crossReferenceMarkers; // optional
     private List<CrossReference> crossReferences; // optional
     private List<String> definitions; // optional
     private List<DomainClass> domainClasses; // optional
@@ -21,20 +21,20 @@ public class Sense {
     private List<SemanticClass> semanticClasses; // optional
     private List<String> shortDefinitions; // optional
     private List<Sense> subsenses; // optional
-    private SynonymsAntonyms synonyms; // optional
+    private List<SynonymsAntonyms> synonyms; // optional
     private List<ThesaurusLink> thesaurusLinks; // optional
     private List<VariantForm> variantForms; // optional
 
-    public SynonymsAntonyms getAntonyms() {
+    public List<SynonymsAntonyms> getAntonyms() {
         return antonyms;
     }
 
-    public List<Inline_model_2> getContstructions() {
-        return contstructions;
+    public List<Inline_model_2> getConstructions() {
+        return constructions;
     }
 
-    public List<String> getCrossReferenceMarks() {
-        return crossReferenceMarks;
+    public List<String> getCrossReferenceMarkers() {
+        return crossReferenceMarkers;
     }
 
     public List<CrossReference> getCrossReferences() {
@@ -97,7 +97,7 @@ public class Sense {
         return subsenses;
     }
 
-    public SynonymsAntonyms getSynonyms() {
+    public List<SynonymsAntonyms> getSynonyms() {
         return synonyms;
     }
 

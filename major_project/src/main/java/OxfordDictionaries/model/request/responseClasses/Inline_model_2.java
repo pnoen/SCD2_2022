@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Inline_model_2 {
     private List<Domain> domains; // optional
-    private List<String> examples; // optional
+    private List<ExampleText> examples; // optional
     private List<CategorizedText> notes; // optional
     private List<Region> regions; // optional
     private List<Register> registers; // optional
@@ -14,7 +14,7 @@ public class Inline_model_2 {
         return domains;
     }
 
-    public List<String> getExamples() {
+    public List<ExampleText> getExamples() {
         return examples;
     }
 
