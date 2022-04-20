@@ -186,7 +186,7 @@ public class GameWindow {
 
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()){
-            System.out.println(result.get());
+//            System.out.println(result.get());
             String error;
 
             try {

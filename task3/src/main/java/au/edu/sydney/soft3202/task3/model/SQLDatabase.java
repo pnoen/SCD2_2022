@@ -41,7 +41,7 @@ public class SQLDatabase {
             statement.execute(createUsersTableSQL);
             statement.execute(createSaveDataTableSQL);
 
-            System.out.println("Created tables");
+//            System.out.println("Created tables");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             error = e.getMessage();
