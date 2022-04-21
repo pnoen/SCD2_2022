@@ -116,6 +116,10 @@ public class GameWindow {
             List<String> error = inputEngine.entrySearch(entryInputVbox.getLang(), entryInputVbox.getWord(), entryInputVbox.getField(),
                     entryInputVbox.getGramFeat(), entryInputVbox.getLexiCate(), entryInputVbox.getDomains(), entryInputVbox.getRegisters(),
                     entryInputVbox.getMatch());
+            if (error == null) {
+                System.out.println("No entry");
+                return;
+            }
             if (error.size() > 0) {
                 handleError(error);
                 return;

@@ -2,8 +2,12 @@ package OxfordDictionaries.view;
 
 import OxfordDictionaries.model.request.responseClasses.*;
 import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
@@ -168,9 +172,22 @@ public class ContentDisplayVbox {
         vbox.setPadding(listPadding);
 
         if (pronunciation.getAudioFile() != null) {
-            Label audLbl = new Label("Audio File: " + pronunciation.getAudioFile());
+            Label audLbl = new Label("Audio: ");
             audLbl.setWrapText(true);
-            vbox.getChildren().add(audLbl);
+
+            Media proMedia = new Media(pronunciation.getAudioFile());
+            MediaPlayer proPlayer = new MediaPlayer(proMedia);
+            proPlayer.setOnEndOfMedia(() -> {
+                proPlayer.stop();
+            });
+
+            Button proBtn = new Button("Play");
+            proBtn.setOnAction((event) -> {
+                proPlayer.play();
+            });
+
+            HBox proHbox = new HBox(audLbl, proBtn);
+            vbox.getChildren().addAll(proHbox);
         }
 
         if (pronunciation.getDialects() != null) {

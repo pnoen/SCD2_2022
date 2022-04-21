@@ -64,6 +64,10 @@ public class OnlineInputEngine implements InputEngine {
             }
             else if (statusCode >= 400 && statusCode < 500) {
                 response = handleErrorReq(response.get(0), response.get(1));
+                if (response.get(0).equals("404") &&
+                        response.get(1).equals("No entry found matching supplied source_lang, word and provided filters")) {
+                    response = null;
+                }
             }
         }
         return response;
