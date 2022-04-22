@@ -15,4 +15,8 @@ public class OfflineInputEngine implements InputEngine {
     public RetrieveEntry getRetrieveEntry() {
         return retrieveEntry;
     }
+
+    public List<String> lemmaSearch(String lang, String word, String gramFeat, String lexiCate) {
+        return null;
+    }
 }

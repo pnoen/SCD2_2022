@@ -1,5 +1,6 @@
 package OxfordDictionaries.view;
 
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -21,6 +22,7 @@ public class EntryInputVbox {
     private TextField domainsTxt;
     private TextField registersTxt;
     private ComboBox<String> matchMenu;
+    private Button searchBtn;
 
     public VBox create() {
         Label titleLbl = new Label("Search for an entry");
@@ -36,9 +38,11 @@ public class EntryInputVbox {
         HBox registersHbox = createRegistersHbox();
         HBox matchHbox = createMatchHbox();
 
+        this.searchBtn = new Button("Search");
+
         this.vbox = new VBox(5);
-        vbox.getChildren().addAll(titleLbl, langHbox, wordHbox, fieldHbox,
-                gramFeatHbox, lexiCateHbox, domainsHbox, registersHbox, matchHbox);
+        vbox.getChildren().addAll(titleLbl, langHbox, wordHbox, fieldHbox, gramFeatHbox,
+                lexiCateHbox, domainsHbox, registersHbox, matchHbox, searchBtn);
 
         return vbox;
     }
@@ -109,7 +113,7 @@ public class EntryInputVbox {
     }
 
     public HBox createRegistersHbox() {
-        Label registersLbl = new Label("Word: ");
+        Label registersLbl = new Label("Registers: ");
         registersLbl.setWrapText(true);
         this.registersTxt = new TextField();
         HBox registersHbox = new HBox(registersLbl, registersTxt);
@@ -163,5 +167,9 @@ public class EntryInputVbox {
 
     public String getMatch() {
         return matchMenu.getValue();
+    }
+
+    public Button getSearchBtn() {
+        return searchBtn;
     }
 }

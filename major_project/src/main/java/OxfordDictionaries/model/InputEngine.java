@@ -10,4 +10,6 @@ public interface InputEngine {
                              String domains, String registers, String match);
 
     RetrieveEntry getRetrieveEntry();
+
+    List<String> lemmaSearch(String lang, String word, String gramFeat, String lexiCate);
 }

@@ -17,6 +17,7 @@ public class LexicalEntry {
     private String root; // optional
     private String text;
     private List<VariantForm> variantForms; // optional
+    private List<Inflection> inflectionOf;
 
     public List<RelatedEntry> getCompounds() {
         return compounds;
@@ -72,5 +73,9 @@ public class LexicalEntry {
 
     public List<VariantForm> getVariantForms() {
         return variantForms;
+    }
+
+    public List<Inflection> getInflectionOf() {
+        return inflectionOf;
     }
 }

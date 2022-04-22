@@ -64,8 +64,7 @@ public class OnlineInputEngine implements InputEngine {
             }
             else if (statusCode >= 400 && statusCode < 500) {
                 response = handleErrorReq(response.get(0), response.get(1));
-                if (response.get(0).equals("404") &&
-                        response.get(1).equals("No entry found matching supplied source_lang, word and provided filters")) {
+                if (response.get(0).equals("404")) {
                     response = null;
                 }
             }
@@ -76,6 +75,56 @@ public class OnlineInputEngine implements InputEngine {
     public RetrieveEntry getRetrieveEntry() {
         return retrieveEntry;
     }
+
+    public List<String> lemmaSearch(String lang, String word, String gramFeat, String lexiCate) {
+        String uri = "https://od-api.oxforddictionaries.com/api/v2/lemmas/" + lang + "/" + word;
+
+
+        List<String> parameters = new ArrayList<>();
+        parameters.add("grammaticalFeatures=");
+        parameters.add("lexicalCategory=");
+
+        List<String> filters = new ArrayList<>();
+        filters.add(gramFeat);
+        filters.add(lexiCate);
+
+        List<String> valid = new ArrayList<>();
+        for (int i = 0; i < filters.size(); i++) {
+            String filter = filters.get(i);
+            String trim = filter.trim();
+            if (!trim.equals("")) {
+                valid.add(parameters.get(i) + filter);
+            }
+        }
+
+        if (valid.size() >= 1) {
+            String validStr = String.join("&", valid);
+            uri += "?" + validStr;
+        }
+
+        System.out.println(uri);
+
+        List<String> response = request.getRequest(uri);
+
+        if (response.size() == 2) {
+            int statusCode = Integer.parseInt(response.get(0));
+            System.out.println("Response body was:\n" + response.get(1));
+
+            if (statusCode >= 200 && statusCode < 300) {
+                Gson gson = new Gson();
+                this.retrieveEntry = gson.fromJson(response.get(1), RetrieveEntry.class);
+                response.clear();
+            }
+            else if (statusCode >= 400 && statusCode < 500) {
+                response = handleErrorReq(response.get(0), response.get(1));
+                if (response.get(0).equals("404")) {
+                    response = null;
+                }
+            }
+        }
+        return response;
+    }
+
 
     public List<String> handleErrorReq(String code, String body) {
         Gson gson = new Gson();
