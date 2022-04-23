@@ -12,6 +12,7 @@ public class OnlineInputEngine implements InputEngine {
     private Request request;
     private RetrieveEntry retrieveEntry;
     private List<List<String>> history;
+    private int currentPageInd;
 
     public OnlineInputEngine(Request request) {
         this.request = request;
@@ -19,7 +20,7 @@ public class OnlineInputEngine implements InputEngine {
     }
 
     public List<String> entrySearch(String lang, String word, String field, String gramFeat, String lexiCate,
-                            String domains, String registers, String match, boolean newSearch) {
+                            String domains, String registers, String match, boolean newSearch, boolean historyEntry) {
         String uri = "https://od-api.oxforddictionaries.com/api/v2/entries/" + lang + "/" + word;
 
         List<String> parameters = new ArrayList<>();
@@ -52,8 +53,10 @@ public class OnlineInputEngine implements InputEngine {
             uri += "?" + validStr;
         }
 
+        uri = uriEscape(uri);
 
         List<String> response = request.getRequest(uri);
+//        System.out.println(response);
 
         if (response.size() == 2) {
             int statusCode = Integer.parseInt(response.get(0));
@@ -64,21 +67,26 @@ public class OnlineInputEngine implements InputEngine {
                 this.retrieveEntry = gson.fromJson(response.get(1), RetrieveEntry.class);
                 response.clear();
 
-                List<String> search = new ArrayList<>();
-                search.add(lang);
-                search.add(word);
-                search.add(field);
-                search.add(gramFeat);
-                search.add(lexiCate);
-                search.add(domains);
-                search.add(registers);
-                search.add(match);
-                String newEntry = "Searched";
-                if (!newSearch) {
-                    newEntry = "Synonym/Antonym of " + history.get(history.size()-1).get(1);
+                if (!historyEntry) {
+                    List<String> search = new ArrayList<>();
+                    search.add(lang);
+                    search.add(word);
+                    search.add(field);
+                    search.add(gramFeat);
+                    search.add(lexiCate);
+                    search.add(domains);
+                    search.add(registers);
+                    search.add(match);
+                    String newEntry = "Searched";
+                    if (!newSearch) {
+                        newEntry = "Synonym/Antonym of " + history.get(currentPageInd).get(1);
+                        List<String> currentEntry = history.remove(currentPageInd);
+                        history.add(currentEntry);
+                    }
+                    search.add(newEntry);
+                    history.add(search);
+                    currentPageInd = history.size() - 1;
                 }
-                search.add(newEntry);
-                history.add(search);
             }
             else if (statusCode >= 400 && statusCode < 500) {
                 response = handleErrorReq(response.get(0), response.get(1));
@@ -119,10 +127,11 @@ public class OnlineInputEngine implements InputEngine {
             uri += "?" + validStr;
         }
 
+        uri = uriEscape(uri);
 //        System.out.println(uri);
 
         List<String> response = request.getRequest(uri);
-
+//        System.out.println(response);
         if (response.size() == 2) {
             int statusCode = Integer.parseInt(response.get(0));
 //            System.out.println("Response body was:\n" + response.get(1));
@@ -154,6 +163,17 @@ public class OnlineInputEngine implements InputEngine {
 
     public List<List<String>> getHistory() {
         return history;
+    }
+
+    public void setCurrentPageInd(int ind) {
+        this.currentPageInd = ind;
+    }
+
+    public String uriEscape(String uri) {
+        String uriClean = uri.replace("%", "25");
+        uriClean = uriClean.replace(" ", "%20");
+        uriClean = uriClean.replace("$", "%25");
+        return uriClean;
     }
 
 }

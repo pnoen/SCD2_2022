@@ -124,17 +124,18 @@ public class GameWindow {
             }
 
             displayEntry(entryInputVbox.getLang(), entryInputVbox.getWord(), entryInputVbox.getField(), entryInputVbox.getGramFeat(),
-                    entryInputVbox.getLexiCate(), entryInputVbox.getDomains(), entryInputVbox.getRegisters(), entryInputVbox.getMatch(), true);
+                    entryInputVbox.getLexiCate(), entryInputVbox.getDomains(), entryInputVbox.getRegisters(), entryInputVbox.getMatch(),
+                    true, false);
         });
 
     }
 
     public void displayEntry(String lang, String word, String field, String gramFeat, String lexiCate,
-                             String domain, String register, String match, boolean newSearch) {
-        List<String> error = inputEngine.entrySearch(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch);
+                             String domain, String register, String match, boolean newSearch, boolean historySearch) {
+        List<String> error = inputEngine.entrySearch(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch);
         if (error == null) {
-            System.out.println("No entry");
-            lemma(entryInputVbox.getWord(), entryInputVbox.getGramFeat(), entryInputVbox.getLexiCate());
+//            System.out.println("No entry");
+            lemma(word, gramFeat, lexiCate, newSearch);
             return;
         }
         if (error.size() > 0) {
@@ -152,7 +153,7 @@ public class GameWindow {
             int ind = i;
             synAntHboxes.get(ind).setOnMouseClicked((event) -> {
                 String text = entryDisplayVbox.getSynAntText(ind);
-                displayEntry(lang, text, "", "", "", "", "", "", false);
+                displayEntry(lang, text, "", "", "", "", "", "", false, false);
             });
         }
     }
@@ -166,12 +167,11 @@ public class GameWindow {
         alert.showAndWait();
     }
 
-    public void lemma(String word, String gramFeat, String lexiCate) {
+    public void lemma(String word, String gramFeat, String lexiCate, boolean newSearch) {
         List<String> error = inputEngine.lemmaSearch("en", word, gramFeat, lexiCate);
         if (error == null) {
             List<String> errorMsg = Arrays.asList("No lemma was found for the entry.");
             handleError(errorMsg);
-            entry();
             return;
         }
         if (error.size() > 0) {
@@ -184,14 +184,16 @@ public class GameWindow {
 
         if (lemmaDisplayVbox.getLemmaSize() == 1) {
             List<String> lemma = lemmaDisplayVbox.getLemma(0);
-            displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true", true);
+            displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true",
+                    newSearch, false);
             return;
         }
 
         lemmaDisplayVbox.getSelectBtn().setOnAction((event) -> {
             int id = lemmaDisplayVbox.getLemmaId();
             List<String> lemma = lemmaDisplayVbox.getLemma(id - 1);
-            displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true", true);
+            displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true",
+                    newSearch, false);
         });
     }
 
@@ -210,7 +212,8 @@ public class GameWindow {
             }
             List<String> entry = history.get(ind);
             displayEntry(entry.get(0), entry.get(1), entry.get(2), entry.get(3), entry.get(4), entry.get(5),
-                    entry.get(6), entry.get(7), true);
+                    entry.get(6), entry.get(7), true, true);
+            inputEngine.setCurrentPageInd(ind);
         });
     }
 }

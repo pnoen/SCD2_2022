@@ -7,9 +7,10 @@ import java.util.List;
 public class OfflineInputEngine implements InputEngine {
     private RetrieveEntry retrieveEntry;
     private List<List<String>> history;
+    private int currentPageInd;
 
     public List<String> entrySearch(String lang, String word, String field, String gramFeat, String lexiCate,
-                                    String domains, String registers, String match, boolean newSearch) {
+                                    String domains, String registers, String match, boolean newSearch, boolean historyEntry) {
         return null;
     }
 
@@ -23,5 +24,9 @@ public class OfflineInputEngine implements InputEngine {
 
     public List<List<String>> getHistory() {
         return history;
+    }
+
+    public void setCurrentPageInd(int ind) {
+        this.currentPageInd = ind;
     }
 }

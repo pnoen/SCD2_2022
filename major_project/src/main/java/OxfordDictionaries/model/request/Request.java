@@ -40,12 +40,12 @@ public class Request {
         } catch (IOException | InterruptedException e) {
             System.out.println("Something went wrong with our request!");
 //            System.out.println(e.getMessage());
-            msg.add("Something went wrong with our request!");
+//            msg.add("Something went wrong with our request!");
             msg.add(e.getMessage());
         } catch (URISyntaxException ignored) {
             // This would mean our URI is incorrect - this is here because often the URI you use will not be (fully)
             // hard-coded and so needs a way to be checked for correctness at runtime.
-            msg.add("Something went wrong.");
+//            msg.add("Something went wrong.");
             msg.add(ignored.getMessage());
         }
         return msg;

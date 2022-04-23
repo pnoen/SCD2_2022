@@ -35,8 +35,8 @@ public class LemmaDisplayVbox {
         this.lemmas = createData(retrieveEntry);
 
         TableView<List<String>> table = new TableView<>();
-        table.setFixedCellSize(20);
-        table.setPrefHeight(20*lemmas.size() + 27);
+        table.setFixedCellSize(25);
+        table.setPrefHeight(25*lemmas.size() + 27);
 
         TableColumn<List<String>, String> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().get(0)));
