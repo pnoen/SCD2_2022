@@ -11,6 +11,7 @@ import OxfordDictionaries.model.InputEngine;
 import OxfordDictionaries.model.OutputEngine;
 import javafx.scene.Scene;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,6 +29,8 @@ public class GameWindow {
     private EntryInputVbox entryInputVbox;
     private EntryDisplayVbox entryDisplayVbox;
     private LemmaDisplayVbox lemmaDisplayVbox;
+    private HistoryDisplayVbox historyDisplayVbox;
+    private Button reportBtn;
 
     public GameWindow(int width, int height, InputEngine inputEngine, OutputEngine outputEngine) {
         this.width = width;
@@ -60,6 +63,7 @@ public class GameWindow {
         this.entryInputVbox = new EntryInputVbox();
         this.entryDisplayVbox = new EntryDisplayVbox();
         this.lemmaDisplayVbox = new LemmaDisplayVbox();
+        this.historyDisplayVbox = new HistoryDisplayVbox();
         entry();
     }
 
@@ -94,19 +98,21 @@ public class GameWindow {
         Button historyBtn = new Button("History");
         historyBtn.setPrefWidth(btnWidth);
         historyBtn.setOnAction((event -> {
-
+            history();
         }));
 
-        Button reportBtn = new Button("Create Report");
+        this.reportBtn = new Button("Create Report");
         reportBtn.setPrefWidth(btnWidth);
         reportBtn.setOnAction((event -> {
 
         }));
+        reportBtn.setDisable(true);
 
         this.leftVbox.getChildren().addAll(entryBtn, historyBtn, reportBtn);
     }
 
     public void entry() {
+        this.reportBtn.setDisable(true);
         VBox entryVbox = entryInputVbox.create();
         this.contentScrollPane.setContent(entryVbox);
 
@@ -118,13 +124,14 @@ public class GameWindow {
             }
 
             displayEntry(entryInputVbox.getLang(), entryInputVbox.getWord(), entryInputVbox.getField(), entryInputVbox.getGramFeat(),
-                    entryInputVbox.getLexiCate(), entryInputVbox.getDomains(), entryInputVbox.getRegisters(), entryInputVbox.getMatch());
+                    entryInputVbox.getLexiCate(), entryInputVbox.getDomains(), entryInputVbox.getRegisters(), entryInputVbox.getMatch(), true);
         });
 
     }
 
-    public void displayEntry(String lang, String word, String field, String gramFeat, String lexiCate, String domain, String register, String match) {
-        List<String> error = inputEngine.entrySearch(lang, word, field, gramFeat, lexiCate, domain, register, match);
+    public void displayEntry(String lang, String word, String field, String gramFeat, String lexiCate,
+                             String domain, String register, String match, boolean newSearch) {
+        List<String> error = inputEngine.entrySearch(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch);
         if (error == null) {
             System.out.println("No entry");
             lemma(entryInputVbox.getWord(), entryInputVbox.getGramFeat(), entryInputVbox.getLexiCate());
@@ -134,17 +141,18 @@ public class GameWindow {
             handleError(error);
             return;
         }
+        reportBtn.setDisable(false);
         RetrieveEntry retrieveEntry = inputEngine.getRetrieveEntry();
         VBox contentVbox = entryDisplayVbox.create(retrieveEntry);
         contentScrollPane.setVvalue(0);
         contentScrollPane.setContent(contentVbox);
 
-        List<VBox> synAntVboxes = entryDisplayVbox.getSynAntVboxes();
-        for (int i = 0; i < synAntVboxes.size(); i++) {
+        List<HBox> synAntHboxes = entryDisplayVbox.getSynAntHboxes();
+        for (int i = 0; i < synAntHboxes.size(); i++) {
             int ind = i;
-            synAntVboxes.get(ind).setOnMouseClicked((event) -> {
+            synAntHboxes.get(ind).setOnMouseClicked((event) -> {
                 String text = entryDisplayVbox.getSynAntText(ind);
-                displayEntry(lang, text, "", "", "", "", "", "");
+                displayEntry(lang, text, "", "", "", "", "", "", false);
             });
         }
     }
@@ -176,14 +184,33 @@ public class GameWindow {
 
         if (lemmaDisplayVbox.getLemmaSize() == 1) {
             List<String> lemma = lemmaDisplayVbox.getLemma(0);
-            displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true");
+            displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true", true);
             return;
         }
 
         lemmaDisplayVbox.getSelectBtn().setOnAction((event) -> {
             int id = lemmaDisplayVbox.getLemmaId();
             List<String> lemma = lemmaDisplayVbox.getLemma(id - 1);
-            displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true");
+            displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true", true);
+        });
+    }
+
+    public void history() {
+        reportBtn.setDisable(true);
+        List<List<String>> history = inputEngine.getHistory();
+        VBox historyVbox = historyDisplayVbox.create(history);
+        this.contentScrollPane.setContent(historyVbox);
+        historyDisplayVbox.getGoBtn().setOnAction((event) -> {
+            int ind = historyDisplayVbox.getSelectedBtnVal();
+            if (ind == -1) {
+                List<String> error = new ArrayList<>();
+                error.add("No radio button was selected");
+                handleError(error);
+                return;
+            }
+            List<String> entry = history.get(ind);
+            displayEntry(entry.get(0), entry.get(1), entry.get(2), entry.get(3), entry.get(4), entry.get(5),
+                    entry.get(6), entry.get(7), true);
         });
     }
 }

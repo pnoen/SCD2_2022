@@ -4,6 +4,8 @@ import OxfordDictionaries.model.request.responseClasses.*;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
@@ -19,169 +21,191 @@ public class EntryDisplayVbox {
     private Insets padding;
     private Insets listPadding;
     private List<String> synAntTexts;
-    private List<VBox> synAntVboxes;
+    private List<HBox> synAntHboxes;
+    private CustomItemBuilder customItemBuilder;
 
     public EntryDisplayVbox() {
         this.padding = new Insets(0, 0, 0, 20);
         this.listPadding = new Insets(0, 0, 10, 15);
         this.synAntTexts = new ArrayList<>();
-        this.synAntVboxes = new ArrayList<>();
+        this.synAntHboxes = new ArrayList<>();
+        this.customItemBuilder = new CustomItemBuilder();
     }
 
     public VBox create(RetrieveEntry retrieveEntry) {
         synAntTexts.clear();
-        synAntVboxes.clear();
+        synAntHboxes.clear();
 
         this.vbox = new VBox(5);
 
         Label titleLbl = new Label(retrieveEntry.getWord());
         titleLbl.setWrapText(true);
         titleLbl.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
-        vbox.getChildren().add(titleLbl);
 
-        handleStringLbl(retrieveEntry.getId(), vbox, "ID: ");
+        TreeItem<CustomItem> root = new TreeItem<>();
+
+        TreeView<CustomItem> entryTree = new TreeView<>(root);
+        entryTree.setShowRoot(false);
+        entryTree.setStyle("-fx-base: #d0d0d0;-fx-focus-color: #d0d0d0;-fx-faint-focus-color: #d0d0d0;");
+
+        vbox.getChildren().addAll(titleLbl, entryTree);
+
+        handleStringLbl(retrieveEntry.getId(), root, "ID: ", false);
 
         if (retrieveEntry.getMetadata() != null) {
+            customItemBuilder.newItem();
             Label metaLbl = new Label("Metadata: ");
             metaLbl.setWrapText(true);
-            VBox metaVbox = createMetadata(retrieveEntry.getMetadata());
-            vbox.getChildren().addAll(metaLbl, metaVbox);
+            customItemBuilder.setLabel(metaLbl);
+            TreeItem<CustomItem> metaItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            root.getChildren().add(metaItem);
+
+            createMetadata(retrieveEntry.getMetadata(), metaItem);
         }
 
         if (retrieveEntry.getResults() != null) {
+            customItemBuilder.newItem();
             Label resultsLbl = new Label("Results: ");
             resultsLbl.setWrapText(true);
-            vbox.getChildren().add(resultsLbl);
+            customItemBuilder.setLabel(resultsLbl);
+            TreeItem<CustomItem> resultsItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            root.getChildren().add(resultsItem);
 
             for (HeadwordEntry result : retrieveEntry.getResults()) {
-                VBox resultVbox = createHeadwordEntry(result);
-                vbox.getChildren().add(resultVbox);
+                createHeadwordEntry(result, resultsItem);
             }
         }
 
-        handleStringLbl(retrieveEntry.getWord(), vbox, "Word: ");
+        handleStringLbl(retrieveEntry.getWord(), root, "Word: ", false);
         return vbox;
     }
 
-    public VBox createMetadata(Metadata metadata) {
-        VBox vbox = new VBox();
-        vbox.setPadding(padding);
-
+    public void createMetadata(Metadata metadata, TreeItem<CustomItem> parent) {
         if (metadata.getOperation() != null) {
-            handleStringLbl(metadata.getOperation(), vbox, "Operation: ");
+            handleStringLbl(metadata.getOperation(), parent, "Operation: ", false);
         }
 
         if (metadata.getProvider() != null) {
-            handleStringLbl(metadata.getProvider(), vbox, "Provider: ");
+            handleStringLbl(metadata.getProvider(), parent, "Provider: ", false);
         }
 
         if (metadata.getSchema() != null) {
-            handleStringLbl(metadata.getSchema(), vbox, "Schema: ");
+            handleStringLbl(metadata.getSchema(), parent, "Schema: ", false);
         }
-
-        return vbox;
     }
 
-    public VBox createHeadwordEntry(HeadwordEntry headwordEntry) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
-        handleStringLbl(headwordEntry.getId(), vbox, "ID: ");
-        handleStringLbl(headwordEntry.getLanguage(), vbox, "Language: ");
+    public void createHeadwordEntry(HeadwordEntry headwordEntry, TreeItem<CustomItem> parent) {
+        handleStringLbl(headwordEntry.getId(), parent, "ID: ", false);
+        handleStringLbl(headwordEntry.getLanguage(), parent, "Language: ", false);
 
         if (headwordEntry.getLexicalEntries() != null) {
+            customItemBuilder.newItem();
             Label lexLbl = new Label("Lexical Entries: ");
             lexLbl.setWrapText(true);
-            vbox.getChildren().add(lexLbl);
+            customItemBuilder.setLabel(lexLbl);
+            TreeItem<CustomItem> lexItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            parent.getChildren().add(lexItem);
 
+            int count = 1;
             for (LexicalEntry lex : headwordEntry.getLexicalEntries()) {
-                VBox lexVbox = createLexicalEntry(lex);
-                vbox.getChildren().add(lexVbox);
+                customItemBuilder.newItem();
+                Label lexChildLbl = new Label(String.valueOf(count));
+                lexChildLbl.setWrapText(true);
+                customItemBuilder.setLabel(lexChildLbl);
+                TreeItem<CustomItem> lexChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+                lexItem.getChildren().add(lexChildItem);
+
+                createLexicalEntry(lex, lexChildItem);
+                count += 1;
             }
         }
 
         if (headwordEntry.getPronunciations() != null) {
-            handlePronunciations(headwordEntry.getPronunciations(), vbox);
+            handlePronunciations(headwordEntry.getPronunciations(), parent);
         }
 
         if (headwordEntry.getType() != null) {
-            handleStringLbl(headwordEntry.getType(), vbox, "Type: ");
+            handleStringLbl(headwordEntry.getType(), parent, "Type: ", false);
         }
 
-        handleStringLbl(headwordEntry.getWord(), vbox, "Word: ");
-        return vbox;
+        handleStringLbl(headwordEntry.getWord(), parent, "Word: ", false);
     }
 
-    public VBox createLexicalEntry(LexicalEntry lexicalEntry) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
+    public void createLexicalEntry(LexicalEntry lexicalEntry, TreeItem<CustomItem> parent) {
         if (lexicalEntry.getCompounds() != null) {
-            handleRelatedEntries(lexicalEntry.getCompounds(), vbox, "Compounds: ");
+            handleRelatedEntries(lexicalEntry.getCompounds(), parent, "Compounds: ");
         }
 
         if (lexicalEntry.getDerivativeOf() != null) {
-            handleRelatedEntries(lexicalEntry.getDerivativeOf(), vbox, "Derivative Of: ");
+            handleRelatedEntries(lexicalEntry.getDerivativeOf(), parent, "Derivative Of: ");
         }
 
         if (lexicalEntry.getDerivatives() != null) {
-            handleRelatedEntries(lexicalEntry.getDerivatives(), vbox, "Derivatives: ");
+            handleRelatedEntries(lexicalEntry.getDerivatives(), parent, "Derivatives: ");
         }
 
         if (lexicalEntry.getEntries() != null) {
+            customItemBuilder.newItem();
             Label entrLbl = new Label("Entries: ");
             entrLbl.setWrapText(true);
-            vbox.getChildren().add(entrLbl);
+            customItemBuilder.setLabel(entrLbl);
+            TreeItem<CustomItem> entrItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            parent.getChildren().add(entrItem);
 
+            int count = 1;
             for (Entry entry : lexicalEntry.getEntries()) {
-                VBox entryVbox = createEntry(entry);
-                vbox.getChildren().add(entryVbox);
+                customItemBuilder.newItem();
+                Label entrChildLbl = new Label(String.valueOf(count));
+                entrChildLbl.setWrapText(true);
+                customItemBuilder.setLabel(entrChildLbl);
+                TreeItem<CustomItem> entrChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+                entrItem.getChildren().add(entrChildItem);
+
+                createEntry(entry, entrChildItem);
+                count += 1;
             }
         }
 
         if (lexicalEntry.getGrammaticalFeatures() != null) {
-            handleGrammaticalFeatures(lexicalEntry.getGrammaticalFeatures(), vbox);
+            handleGrammaticalFeatures(lexicalEntry.getGrammaticalFeatures(), parent);
         }
 
-        handleStringLbl(lexicalEntry.getLanguage(), vbox, "Language: ");
-        handleLexicalCategory(lexicalEntry.getLexicalCategory(), vbox);
+        handleStringLbl(lexicalEntry.getLanguage(), parent, "Language: ", false);
+        handleLexicalCategory(lexicalEntry.getLexicalCategory(), parent);
 
         if (lexicalEntry.getNotes() != null) {
-            handleNotes(lexicalEntry.getNotes(), vbox);
+            handleNotes(lexicalEntry.getNotes(), parent);
         }
 
         if (lexicalEntry.getPhrasalVerbs() != null) {
-            handleRelatedEntries(lexicalEntry.getPhrasalVerbs(), vbox, "Phrasal Verbs: ");
+            handleRelatedEntries(lexicalEntry.getPhrasalVerbs(), parent, "Phrasal Verbs: ");
         }
 
         if (lexicalEntry.getPhrases() != null) {
-            handleRelatedEntries(lexicalEntry.getPhrases(), vbox, "Phrases: ");
+            handleRelatedEntries(lexicalEntry.getPhrases(), parent, "Phrases: ");
         }
 
         if (lexicalEntry.getPronunciations() != null) {
-            handlePronunciations(lexicalEntry.getPronunciations(), vbox);
+            handlePronunciations(lexicalEntry.getPronunciations(), parent);
         }
 
         if (lexicalEntry.getRoot() != null) {
-            handleStringLbl(lexicalEntry.getRoot(), vbox, "Root: ");
+            handleStringLbl(lexicalEntry.getRoot(), parent, "Root: ", false);
         }
 
-        handleStringLbl(lexicalEntry.getText(), vbox, "Text: ");
+        handleStringLbl(lexicalEntry.getText(), parent, "Text: ", false);
 
         if (lexicalEntry.getVariantForms() != null) {
-            handleVariantForms(lexicalEntry.getVariantForms(), vbox);
+            handleVariantForms(lexicalEntry.getVariantForms(), parent);
         }
-
-        return vbox;
     }
 
-    public VBox createPronunciation(Pronunciation pronunciation) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
+    public void createPronunciation(Pronunciation pronunciation, TreeItem<CustomItem> parent) {
         if (pronunciation.getAudioFile() != null) {
+            customItemBuilder.newItem();
             Label audLbl = new Label("Audio: ");
             audLbl.setWrapText(true);
+            customItemBuilder.setLabel(audLbl);
 
             Media proMedia = new Media(pronunciation.getAudioFile());
             MediaPlayer proPlayer = new MediaPlayer(proMedia);
@@ -193,669 +217,801 @@ public class EntryDisplayVbox {
             proBtn.setOnAction((event) -> {
                 proPlayer.play();
             });
-
-            HBox proHbox = new HBox(audLbl, proBtn);
-            vbox.getChildren().addAll(proHbox);
+            customItemBuilder.setBtn(proBtn);
+            TreeItem<CustomItem> audItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            parent.getChildren().add(audItem);
         }
 
         if (pronunciation.getDialects() != null) {
-            handleStrings(pronunciation.getDialects(), vbox, "Dialects: ");
+            handleStrings(pronunciation.getDialects(), parent, "Dialects: ");
         }
 
         if (pronunciation.getPhoneticNotation() != null) {
-            handleStringLbl(pronunciation.getPhoneticNotation(), vbox, "Phonetic Notation: ");
+            handleStringLbl(pronunciation.getPhoneticNotation(), parent, "Phonetic Notation: ", false);
         }
 
         if (pronunciation.getPhoneticSpelling() != null) {
-            handleStringLbl(pronunciation.getPhoneticSpelling(), vbox, "Phonetic Spelling: ");
+            handleStringLbl(pronunciation.getPhoneticSpelling(), parent, "Phonetic Spelling: ", false);
         }
 
         if (pronunciation.getRegions() != null) {
-            handleRegions(pronunciation.getRegions(), vbox);
+            handleRegions(pronunciation.getRegions(), parent);
         }
 
         if (pronunciation.getRegisters() != null) {
-            handleRegisters(pronunciation.getRegisters(), vbox);
+            handleRegisters(pronunciation.getRegisters(), parent);
         }
-
-        return vbox;
     }
 
-    public VBox createRelatedEntry(RelatedEntry relatedEntry) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
+    public void createRelatedEntry(RelatedEntry relatedEntry, TreeItem<CustomItem> parent) {
         if (relatedEntry.getDomains() != null) {
-            handleDomains(relatedEntry.getDomains(), vbox);
+            handleDomains(relatedEntry.getDomains(), parent);
         }
 
-        handleStringLbl(relatedEntry.getId(), vbox, "ID: ");
+        handleStringLbl(relatedEntry.getId(), parent, "ID: ", false);
 
         if (relatedEntry.getLanguage() != null) {
-            handleStringLbl(relatedEntry.getLanguage(), vbox, "Language: ");
+            handleStringLbl(relatedEntry.getLanguage(), parent, "Language: ", false);
         }
 
         if (relatedEntry.getRegions() != null) {
-            handleRegions(relatedEntry.getRegions(), vbox);
+            handleRegions(relatedEntry.getRegions(), parent);
         }
 
         if (relatedEntry.getRegisters() != null) {
-            handleRegisters(relatedEntry.getRegisters(), vbox);
+            handleRegisters(relatedEntry.getRegisters(), parent);
         }
 
-        handleStringLbl(relatedEntry.getText(), vbox, "Text: ");
+        handleStringLbl(relatedEntry.getText(), parent, "Text: ", false);
 
-        return vbox;
     }
 
-    public VBox createEntry(Entry entry) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
+    public void createEntry(Entry entry, TreeItem<CustomItem> parent) {
         if (entry.getCrossReferenceMarkers() != null) {
-            handleStrings(entry.getCrossReferenceMarkers(), vbox, "Cross Reference Markers: ");
+            handleStrings(entry.getCrossReferenceMarkers(), parent, "Cross Reference Markers: ");
         }
 
         if (entry.getCrossReferences() != null) {
-            handleCrossReferences(entry.getCrossReferences(), vbox);
+            handleCrossReferences(entry.getCrossReferences(), parent);
         }
 
         if (entry.getEtymologies() != null) {
-            handleStrings(entry.getEtymologies(), vbox, "Etymologies: ");
+            handleStrings(entry.getEtymologies(), parent, "Etymologies: ");
         }
 
         if (entry.getGrammaticalFeatures() != null) {
-            handleGrammaticalFeatures(entry.getGrammaticalFeatures(), vbox);
+            handleGrammaticalFeatures(entry.getGrammaticalFeatures(), parent);
         }
 
         if (entry.getHomographNumber() != null) {
-            handleStringLbl(entry.getHomographNumber(), vbox, "Homograph Number: ");
+            handleStringLbl(entry.getHomographNumber(), parent, "Homograph Number: ", false);
         }
 
         if (entry.getInflections() != null) {
-            handleInflections(entry.getInflections(), vbox);
+            handleInflections(entry.getInflections(), parent);
         }
 
         if (entry.getNotes() != null) {
-            handleNotes(entry.getNotes(), vbox);
+            handleNotes(entry.getNotes(), parent);
         }
 
         if (entry.getPronunciations() != null) {
-            handlePronunciations(entry.getPronunciations(), vbox);
+            handlePronunciations(entry.getPronunciations(), parent);
         }
 
         if (entry.getSenses() != null) {
-            handleSenses(entry.getSenses(), vbox, "Senses: ");
+            handleSenses(entry.getSenses(), parent, "Senses: ");
         }
 
         if (entry.getVariantForms() != null) {
-            handleVariantForms(entry.getVariantForms(), vbox);
+            handleVariantForms(entry.getVariantForms(), parent);
         }
-
-        return vbox;
     }
 
-    public VBox createGrammaticalFeature(GrammaticalFeature grammaticalFeature) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
-        handleStringLbl(grammaticalFeature.getId(), vbox, "ID: ");
-        handleStringLbl(grammaticalFeature.getText(), vbox, "Text: ");
-        handleStringLbl(grammaticalFeature.getType(), vbox, "Type: ");
-        return vbox;
+    public void createGrammaticalFeature(GrammaticalFeature grammaticalFeature, TreeItem<CustomItem> parent) {
+        handleStringLbl(grammaticalFeature.getId(), parent, "ID: ", false);
+        handleStringLbl(grammaticalFeature.getText(), parent, "Text: ", false);
+        handleStringLbl(grammaticalFeature.getType(), parent, "Type: ", false);
     }
 
-    public VBox createLexicalCategory(LexicalCategory lexicalCategory) {
-        VBox vbox = new VBox();
-        vbox.setPadding(padding);
-
-        handleStringLbl(lexicalCategory.getId(), vbox, "ID: ");
-        handleStringLbl(lexicalCategory.getText(), vbox, "Text: ");
-
-        return vbox;
+    public void createLexicalCategory(LexicalCategory lexicalCategory, TreeItem<CustomItem> parent) {
+        handleStringLbl(lexicalCategory.getId(), parent, "ID: ", false);
+        handleStringLbl(lexicalCategory.getText(), parent, "Text: ", false);
     }
 
-    public VBox createCategorizedText(CategorizedText categorizedText) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
+    public void createCategorizedText(CategorizedText categorizedText, TreeItem<CustomItem> parent) {
         if (categorizedText.getId() != null) {
-            handleStringLbl(categorizedText.getId(), vbox, "ID: ");
+            handleStringLbl(categorizedText.getId(), parent, "ID: ", false);
         }
 
-        handleStringLbl(categorizedText.getText(), vbox, "Text: ");
-        handleStringLbl(categorizedText.getType(), vbox, "Type: ");
-        return vbox;
+        handleStringLbl(categorizedText.getText(), parent, "Text: ", false);
+        handleStringLbl(categorizedText.getType(), parent, "Type: ", false);
     }
 
-    public VBox createVariantForm(VariantForm variantForm) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
+    public void createVariantForm(VariantForm variantForm, TreeItem<CustomItem> parent) {
         if (variantForm.getDomains() != null) {
-            handleDomains(variantForm.getDomains(), vbox);
+            handleDomains(variantForm.getDomains(), parent);
         }
 
         if (variantForm.getNotes() != null) {
-            handleNotes(variantForm.getNotes(), vbox);
+            handleNotes(variantForm.getNotes(), parent);
         }
 
         if (variantForm.getPronunciations() != null) {
-            handlePronunciations(variantForm.getPronunciations(), vbox);
+            handlePronunciations(variantForm.getPronunciations(), parent);
         }
 
         if (variantForm.getRegions() != null) {
-            handleRegions(variantForm.getRegions(), vbox);
+            handleRegions(variantForm.getRegions(), parent);
         }
 
         if (variantForm.getRegisters() != null) {
-            handleRegisters(variantForm.getRegisters(), vbox);
+            handleRegisters(variantForm.getRegisters(), parent);
         }
 
-        handleStringLbl(variantForm.getText(), vbox, "Text: ");
-
-        return vbox;
+        handleStringLbl(variantForm.getText(), parent, "Text: ", false);
     }
 
-    public VBox createString(String str) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
+    public void createString(String str, TreeItem<CustomItem> parent) {
+        customItemBuilder.newItem();
         Label strLbl = new Label(str);
         strLbl.setWrapText(true);
-
-        vbox.getChildren().add(strLbl);
-        return vbox;
+        customItemBuilder.setLabel(strLbl);
+        TreeItem<CustomItem> strItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(strItem);
     }
 
-    public VBox createRegion(Region region) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
-        handleStringLbl(region.getId(), vbox, "ID: ");
-        handleStringLbl(region.getText(), vbox, "Text: ");
-        return vbox;
+    public void createRegion(Region region, TreeItem<CustomItem> parent) {
+        handleStringLbl(region.getId(), parent, "ID: ", false);
+        handleStringLbl(region.getText(), parent, "Text: ", false);
     }
 
-    public VBox createRegister(Register register) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
-        handleStringLbl(register.getId(), vbox, "ID: ");
-        handleStringLbl(register.getText(), vbox, "Text: ");
-        return vbox;
+    public void createRegister(Register register, TreeItem<CustomItem> parent) {
+        handleStringLbl(register.getId(), parent, "ID: ", false);
+        handleStringLbl(register.getText(), parent, "Text: ", false);
     }
 
-    public VBox createDomain(Domain domain) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
-        handleStringLbl(domain.getId(), vbox, "ID: ");
-        handleStringLbl(domain.getText(), vbox, "Text: ");
-        return vbox;
+    public void createDomain(Domain domain, TreeItem<CustomItem> parent) {
+        handleStringLbl(domain.getId(), parent, "ID: ", false);
+        handleStringLbl(domain.getText(), parent, "Text: ", false);
     }
 
-    public VBox createCrossReference(CrossReference crossReference) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
-        handleStringLbl(crossReference.getId(), vbox, "ID: ");
-        handleStringLbl(crossReference.getText(), vbox, "Text: ");
-        handleStringLbl(crossReference.getType(), vbox, "Type: ");
-        return vbox;
+    public void createCrossReference(CrossReference crossReference, TreeItem<CustomItem> parent) {
+        handleStringLbl(crossReference.getId(), parent, "ID: ", false);
+        handleStringLbl(crossReference.getText(), parent, "Text: ", false);
+        handleStringLbl(crossReference.getType(), parent, "Type: ", false);
     }
 
-    public VBox createInflectedForm(InflectedForm inflectedForm) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
+    public void createInflectedForm(InflectedForm inflectedForm, TreeItem<CustomItem> parent) {
         if (inflectedForm.getDomains() != null) {
-            handleDomains(inflectedForm.getDomains(), vbox);
+            handleDomains(inflectedForm.getDomains(), parent);
         }
 
         if (inflectedForm.getGrammaticalFeatures() != null) {
-            handleGrammaticalFeatures(inflectedForm.getGrammaticalFeatures(), vbox);
+            handleGrammaticalFeatures(inflectedForm.getGrammaticalFeatures(), parent);
         }
 
-        handleStringLbl(inflectedForm.getInflectedForm(), vbox, "Inflected Form: ");
+        handleStringLbl(inflectedForm.getInflectedForm(), parent, "Inflected Form: ", false);
 
         if (inflectedForm.getLexicalCategory() != null) {
-            handleLexicalCategory(inflectedForm.getLexicalCategory(), vbox);
+            handleLexicalCategory(inflectedForm.getLexicalCategory(), parent);
         }
 
         if (inflectedForm.getPronunciations() != null) {
-            handlePronunciations(inflectedForm.getPronunciations(), vbox);
+            handlePronunciations(inflectedForm.getPronunciations(), parent);
         }
 
         if (inflectedForm.getRegions() != null) {
-            handleRegions(inflectedForm.getRegions(), vbox);
+            handleRegions(inflectedForm.getRegions(), parent);
         }
 
         if (inflectedForm.getRegisters() != null) {
-            handleRegisters(inflectedForm.getRegisters(), vbox);
+            handleRegisters(inflectedForm.getRegisters(), parent);
         }
-
-        return vbox;
     }
 
-    public VBox createSense(Sense sense) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
+    public void createSense(Sense sense, TreeItem<CustomItem> parent) {
         if (sense.getAntonyms() != null) {
-            handleSynonymsAntonyms(sense.getAntonyms(), vbox, "Antonyms: ");
+            handleSynonymsAntonyms(sense.getAntonyms(), parent, "Antonyms: ");
         }
 
         if (sense.getConstructions() != null) {
+            customItemBuilder.newItem();
             Label conLbl = new Label("Constructions: ");
             conLbl.setWrapText(true);
-            vbox.getChildren().add(conLbl);
+            customItemBuilder.setLabel(conLbl);
+            TreeItem<CustomItem> conItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            parent.getChildren().add(conItem);
 
+            int count = 1;
             for (Inline_model_2 con : sense.getConstructions()) {
-                VBox conVbox = createConstruction(con);
-                vbox.getChildren().add(conVbox);
+                customItemBuilder.newItem();
+                Label conChildLbl = new Label(String.valueOf(count));
+                conChildLbl.setWrapText(true);
+                customItemBuilder.setLabel(conChildLbl);
+                TreeItem<CustomItem> conChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+                conItem.getChildren().add(conChildItem);
+
+                createConstruction(con, conChildItem);
+                count += 1;
             }
         }
 
         if (sense.getCrossReferenceMarkers() != null) {
-            handleStrings(sense.getCrossReferenceMarkers(), vbox, "Cross Reference Markers: ");
+            handleStrings(sense.getCrossReferenceMarkers(), parent, "Cross Reference Markers: ");
         }
 
         if (sense.getCrossReferences() != null) {
-            handleCrossReferences(sense.getCrossReferences(), vbox);
+            handleCrossReferences(sense.getCrossReferences(), parent);
         }
 
         if (sense.getDefinitions() != null) {
-            handleStrings(sense.getDefinitions(), vbox, "Definitions: ");
+            handleStrings(sense.getDefinitions(), parent, "Definitions: ");
         }
 
         if (sense.getDomainClasses() != null) {
+            customItemBuilder.newItem();
             Label domLbl = new Label("Domain Classes: ");
             domLbl.setWrapText(true);
-            vbox.getChildren().add(domLbl);
+            customItemBuilder.setLabel(domLbl);
+            TreeItem<CustomItem> domItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            parent.getChildren().add(domItem);
 
+            int count = 1;
             for (DomainClass dom : sense.getDomainClasses()) {
-                VBox domVbox = createDomainClass(dom);
-                vbox.getChildren().add(domVbox);
+                customItemBuilder.newItem();
+                Label domChildLbl = new Label(String.valueOf(count));
+                domChildLbl.setWrapText(true);
+                customItemBuilder.setLabel(domChildLbl);
+                TreeItem<CustomItem> domChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+                domItem.getChildren().add(domChildItem);
+
+                createDomainClass(dom, domChildItem);
+                count += 1;
             }
         }
 
         if (sense.getDomains() != null) {
-            handleDomains(sense.getDomains(), vbox);
+            handleDomains(sense.getDomains(), parent);
         }
 
         if (sense.getEtymologies() != null) {
-            handleStrings(sense.getEtymologies(), vbox, "Etymologies: ");
+            handleStrings(sense.getEtymologies(), parent, "Etymologies: ");
         }
 
         if (sense.getExamples() != null) {
+            customItemBuilder.newItem();
             Label examLbl = new Label("Examples: ");
             examLbl.setWrapText(true);
-            vbox.getChildren().add(examLbl);
+            customItemBuilder.setLabel(examLbl);
+            TreeItem<CustomItem> examItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            parent.getChildren().add(examItem);
 
+            int count = 1;
             for (Example exam : sense.getExamples()) {
-                VBox examVbox = createExample(exam);
-                vbox.getChildren().add(examVbox);
+                customItemBuilder.newItem();
+                Label examChildLbl = new Label(String.valueOf(count));
+                examChildLbl.setWrapText(true);
+                customItemBuilder.setLabel(examChildLbl);
+                TreeItem<CustomItem> examChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+                examItem.getChildren().add(examChildItem);
+
+                createExample(exam, examChildItem);
+                count += 1;
             }
         }
 
         if (sense.getId() != null) {
-            handleStringLbl(sense.getId(), vbox, "ID: ");
+            handleStringLbl(sense.getId(), parent, "ID: ", false);
         }
 
         if (sense.getInflections() != null) {
-            handleInflections(sense.getInflections(), vbox);
+            handleInflections(sense.getInflections(), parent);
         }
 
         if (sense.getNotes() != null) {
-            handleNotes(sense.getNotes(), vbox);
+            handleNotes(sense.getNotes(), parent);
         }
 
         if (sense.getPronunciations() != null) {
-            handlePronunciations(sense.getPronunciations(), vbox);
+            handlePronunciations(sense.getPronunciations(), parent);
         }
 
         if (sense.getRegions() != null) {
-            handleRegions(sense.getRegions(), vbox);
+            handleRegions(sense.getRegions(), parent);
         }
 
         if (sense.getRegisters() != null) {
-            handleRegisters(sense.getRegisters(), vbox);
+            handleRegisters(sense.getRegisters(), parent);
         }
 
         if (sense.getSemanticClasses() != null) {
+            customItemBuilder.newItem();
             Label semLbl = new Label("Semantic Classes: ");
             semLbl.setWrapText(true);
-            vbox.getChildren().add(semLbl);
+            customItemBuilder.setLabel(semLbl);
+            TreeItem<CustomItem> semItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            parent.getChildren().add(semItem);
 
+            int count = 1;
             for (SemanticClass sem : sense.getSemanticClasses()) {
-                VBox semVbox = createSemanticClass(sem);
-                vbox.getChildren().add(semVbox);
+                customItemBuilder.newItem();
+                Label semChildLbl = new Label(String.valueOf(count));
+                semChildLbl.setWrapText(true);
+                customItemBuilder.setLabel(semChildLbl);
+                TreeItem<CustomItem> semChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+                semItem.getChildren().add(semChildItem);
+
+                createSemanticClass(sem, semChildItem);
+                count += 1;
             }
         }
 
         if (sense.getShortDefinitions() != null) {
-            handleStrings(sense.getShortDefinitions(), vbox, "Short Definitions: ");
+            handleStrings(sense.getShortDefinitions(), parent, "Short Definitions: ");
         }
 
         if (sense.getSubsenses() != null) {
-            handleSenses(sense.getSubsenses(), vbox, "Sub-senses: ");
+            handleSenses(sense.getSubsenses(), parent, "Sub-senses: ");
         }
 
         if (sense.getSynonyms() != null) {
-            handleSynonymsAntonyms(sense.getSynonyms(), vbox, "Synonyms: ");
+            handleSynonymsAntonyms(sense.getSynonyms(), parent, "Synonyms: ");
         }
 
         if (sense.getThesaurusLinks() != null) {
+            customItemBuilder.newItem();
             Label theLbl = new Label("Thesaurus Links: ");
             theLbl.setWrapText(true);
-            vbox.getChildren().add(theLbl);
+            customItemBuilder.setLabel(theLbl);
+            TreeItem<CustomItem> theItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            parent.getChildren().add(theItem);
 
+            int count = 1;
             for (ThesaurusLink the : sense.getThesaurusLinks()) {
-                VBox theVbox = createThesaurusLink(the);
-                vbox.getChildren().add(theVbox);
+                customItemBuilder.newItem();
+                Label theChildLbl = new Label(String.valueOf(count));
+                theChildLbl.setWrapText(true);
+                customItemBuilder.setLabel(theChildLbl);
+                TreeItem<CustomItem> theChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+                theItem.getChildren().add(theChildItem);
+
+                createThesaurusLink(the, theChildItem);
+                count += 1;
             }
         }
 
         if (sense.getVariantForms() != null) {
-            handleVariantForms(sense.getVariantForms(), vbox);
+            handleVariantForms(sense.getVariantForms(), parent);
         }
-
-        return vbox;
     }
 
-    public VBox createSynonymAntonym(SynonymsAntonyms synonymAntonym) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
+    public void createSynonymAntonym(SynonymsAntonyms synonymAntonym, TreeItem<CustomItem> parent) {
         if (synonymAntonym.getDomains() != null) {
-            handleDomains(synonymAntonym.getDomains(), vbox);
+            handleDomains(synonymAntonym.getDomains(), parent);
         }
 
         if (synonymAntonym.getId() != null) {
-            handleStringLbl(synonymAntonym.getId(), vbox, "ID: ");
+            handleStringLbl(synonymAntonym.getId(), parent, "ID: ", false);
         }
 
         if (synonymAntonym.getLanguage() != null) {
-            handleStringLbl(synonymAntonym.getLanguage(), vbox, "Language: ");
+            handleStringLbl(synonymAntonym.getLanguage(), parent, "Language: ", false);
         }
 
         if (synonymAntonym.getRegions() != null) {
-            handleRegions(synonymAntonym.getRegions(), vbox);
+            handleRegions(synonymAntonym.getRegions(), parent);
         }
 
         if (synonymAntonym.getRegisters() != null) {
-            handleRegisters(synonymAntonym.getRegisters(), vbox);
+            handleRegisters(synonymAntonym.getRegisters(), parent);
         }
 
-        handleStringLbl(synonymAntonym.getText(), vbox, "Text: ");
-        return vbox;
+        handleStringLbl(synonymAntonym.getText(), parent, "Text: ", true);
     }
 
-    public VBox createConstruction(Inline_model_2 construction) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
+    public void createConstruction(Inline_model_2 construction, TreeItem<CustomItem> parent) {
         if (construction.getDomains() != null) {
-            handleDomains(construction.getDomains(), vbox);
+            handleDomains(construction.getDomains(), parent);
         }
 
         if (construction.getExamples() != null) {
-//            handleStrings(construction.getExamples(), vbox, "Examples: ");
+            customItemBuilder.newItem();
             Label examLbl = new Label("Examples: ");
             examLbl.setWrapText(true);
-            vbox.getChildren().add(examLbl);
+            customItemBuilder.setLabel(examLbl);
+            TreeItem<CustomItem> examItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            parent.getChildren().add(examItem);
 
+            int count = 1;
             for (ExampleText exam : construction.getExamples()) {
-                VBox examVbox = createExampleText(exam);
-                vbox.getChildren().add(examVbox);
+                customItemBuilder.newItem();
+                Label examChildLbl = new Label(String.valueOf(count));
+                examChildLbl.setWrapText(true);
+                customItemBuilder.setLabel(examChildLbl);
+                TreeItem<CustomItem> examChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+                examItem.getChildren().add(examChildItem);
+
+                createExampleText(exam, examChildItem);
+                count += 1;
             }
         }
 
         if (construction.getNotes() != null) {
-            handleNotes(construction.getNotes(), vbox);
+            handleNotes(construction.getNotes(), parent);
         }
 
         if (construction.getRegions() != null) {
-            handleRegions(construction.getRegions(), vbox);
+            handleRegions(construction.getRegions(), parent);
         }
 
         if (construction.getRegisters() != null) {
-            handleRegisters(construction.getRegisters(), vbox);
+            handleRegisters(construction.getRegisters(), parent);
         }
 
-        handleStringLbl(construction.getText(), vbox, "Text: ");
-        return vbox;
+        handleStringLbl(construction.getText(), parent, "Text: ", false);
     }
 
-    public VBox createDomainClass(DomainClass domainClass) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
-        handleStringLbl(domainClass.getId(), vbox, "ID: ");
-        handleStringLbl(domainClass.getText(), vbox, "Text: ");
-        return vbox;
+    public void createDomainClass(DomainClass domainClass, TreeItem<CustomItem> parent) {
+        handleStringLbl(domainClass.getId(), parent, "ID: ", false);
+        handleStringLbl(domainClass.getText(), parent, "Text: ", false);
     }
 
-    public VBox createExample(Example example) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
+    public void createExample(Example example, TreeItem<CustomItem> parent) {
         if (example.getDefinitions() != null) {
-            handleStrings(example.getDefinitions(), vbox, "Definitions: ");
+            handleStrings(example.getDefinitions(), parent, "Definitions: ");
         }
 
         if (example.getDomains() != null) {
-            handleDomains(example.getDomains(), vbox);
+            handleDomains(example.getDomains(), parent);
         }
 
         if (example.getNotes() != null) {
-            handleNotes(example.getNotes(), vbox);
+            handleNotes(example.getNotes(), parent);
         }
 
         if (example.getRegions() != null) {
-            handleRegions(example.getRegions(), vbox);
+            handleRegions(example.getRegions(), parent);
         }
 
         if (example.getRegisters() != null) {
-            handleRegisters(example.getRegisters(), vbox);
+            handleRegisters(example.getRegisters(), parent);
         }
 
         if (example.getSenseIds() != null) {
-            handleStrings(example.getSenseIds(), vbox, "Sense IDs: ");
+            handleStrings(example.getSenseIds(), parent, "Sense IDs: ");
         }
 
-        handleStringLbl(example.getText(), vbox, "Text: ");
-        return vbox;
+        handleStringLbl(example.getText(), parent, "Text: ", false);
     }
 
-    public VBox createSemanticClass(SemanticClass semanticClass) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
-        handleStringLbl(semanticClass.getId(), vbox, "ID: ");
-        handleStringLbl(semanticClass.getText(), vbox, "Text: ");
-        return vbox;
+    public void createSemanticClass(SemanticClass semanticClass, TreeItem<CustomItem> parent) {
+        handleStringLbl(semanticClass.getId(), parent, "ID: ", false);
+        handleStringLbl(semanticClass.getText(), parent, "Text: ", false);
     }
 
-    public VBox createThesaurusLink(ThesaurusLink thesaurusLink) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
-        handleStringLbl(thesaurusLink.getEntry_id(), vbox, "Entry ID: ");
-        handleStringLbl(thesaurusLink.getSense_id(), vbox, "Sense ID: ");
-        return vbox;
+    public void createThesaurusLink(ThesaurusLink thesaurusLink, TreeItem<CustomItem> parent) {
+        handleStringLbl(thesaurusLink.getEntry_id(), parent, "Entry ID: ", false);
+        handleStringLbl(thesaurusLink.getSense_id(), parent, "Sense ID: ", false);
     }
 
-    public VBox createExampleText(ExampleText exampleText) {
-        VBox vbox = new VBox();
-        vbox.setPadding(listPadding);
-
-        handleStringLbl(exampleText.getText(), vbox, "Text: ");
-        return vbox;
+    public void createExampleText(ExampleText exampleText, TreeItem<CustomItem> parent) {
+        handleStringLbl(exampleText.getText(), parent, "Text: ", false);
     }
 
-    public void handlePronunciations(List<Pronunciation> pronunciations, VBox vbox) {
+    public void handlePronunciations(List<Pronunciation> pronunciations, TreeItem<CustomItem> parent) {
+        customItemBuilder.newItem();
         Label proLbl = new Label("Pronunciations: ");
         proLbl.setWrapText(true);
-        vbox.getChildren().add(proLbl);
+        customItemBuilder.setLabel(proLbl);
+        TreeItem<CustomItem> proItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(proItem);
 
+        int count = 1;
         for (Pronunciation pro : pronunciations) {
-            VBox proVbox = createPronunciation(pro);
-            vbox.getChildren().add(proVbox);
+            customItemBuilder.newItem();
+            Label proChildLbl = new Label(String.valueOf(count));
+            proChildLbl.setWrapText(true);
+            customItemBuilder.setLabel(proChildLbl);
+            TreeItem<CustomItem> proChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            proItem.getChildren().add(proChildItem);
+
+            createPronunciation(pro, proChildItem);
+            count += 1;
         }
     }
 
-    public void handleGrammaticalFeatures(List<GrammaticalFeature> grammaticalFeatures, VBox vbox) {
+    public void handleGrammaticalFeatures(List<GrammaticalFeature> grammaticalFeatures, TreeItem<CustomItem> parent) {
+        customItemBuilder.newItem();
         Label gramLbl = new Label("Grammatical Features: ");
         gramLbl.setWrapText(true);
-        vbox.getChildren().add(gramLbl);
+        customItemBuilder.setLabel(gramLbl);
+        TreeItem<CustomItem> gramItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(gramItem);
 
+        int count = 1;
         for (GrammaticalFeature gram :  grammaticalFeatures) {
-            VBox gramVbox = createGrammaticalFeature(gram);
-            vbox.getChildren().add(gramVbox);
+            customItemBuilder.newItem();
+            Label gramChildLbl = new Label(String.valueOf(count));
+            gramChildLbl.setWrapText(true);
+            customItemBuilder.setLabel(gramChildLbl);
+            TreeItem<CustomItem> gramChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            gramItem.getChildren().add(gramChildItem);
+
+            createGrammaticalFeature(gram, gramChildItem);
+            count += 1;
         }
     }
 
-    public void handleRelatedEntries(List<RelatedEntry> relatedEntries, VBox vbox, String label) {
+    public void handleRelatedEntries(List<RelatedEntry> relatedEntries, TreeItem<CustomItem> parent, String label) {
+        customItemBuilder.newItem();
         Label relaLbl = new Label(label);
         relaLbl.setWrapText(true);
-        vbox.getChildren().add(relaLbl);
+        customItemBuilder.setLabel(relaLbl);
+        TreeItem<CustomItem> relaItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(relaItem);
 
+        int count = 1;
         for (RelatedEntry entry : relatedEntries) {
-            VBox entryVbox = createRelatedEntry(entry);
-            vbox.getChildren().add(entryVbox);
+            customItemBuilder.newItem();
+            Label relaChildLbl = new Label(String.valueOf(count));
+            relaChildLbl.setWrapText(true);
+            customItemBuilder.setLabel(relaChildLbl);
+            TreeItem<CustomItem> relaChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            relaItem.getChildren().add(relaChildItem);
+
+            createRelatedEntry(entry, relaChildItem);
+            count += 1;
         }
     }
 
-    public void handleNotes(List<CategorizedText> notes, VBox vbox) {
+    public void handleNotes(List<CategorizedText> notes, TreeItem<CustomItem> parent) {
+        customItemBuilder.newItem();
         Label notesLbl = new Label("Notes: ");
         notesLbl.setWrapText(true);
-        vbox.getChildren().add(notesLbl);
+        customItemBuilder.setLabel(notesLbl);
+        TreeItem<CustomItem> notesItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(notesItem);
 
+        int count = 1;
         for (CategorizedText note : notes) {
-            VBox noteVbox = createCategorizedText(note);
-            vbox.getChildren().add(noteVbox);
+            customItemBuilder.newItem();
+            Label notesChildLbl = new Label(String.valueOf(count));
+            notesChildLbl.setWrapText(true);
+            customItemBuilder.setLabel(notesChildLbl);
+            TreeItem<CustomItem> notesChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            notesItem.getChildren().add(notesChildItem);
+
+            createCategorizedText(note, notesChildItem);
+            count += 1;
         }
     }
 
-    public void handleVariantForms(List<VariantForm> variantForms, VBox vbox) {
+    public void handleVariantForms(List<VariantForm> variantForms, TreeItem<CustomItem> parent) {
+        customItemBuilder.newItem();
         Label varLbl = new Label("Variant Forms: ");
         varLbl.setWrapText(true);
-        vbox.getChildren().add(varLbl);
+        customItemBuilder.setLabel(varLbl);
+        TreeItem<CustomItem> varItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(varItem);
 
+        int count = 1;
         for (VariantForm var : variantForms) {
-            VBox varVbox = createVariantForm(var);
-            vbox.getChildren().add(varVbox);
+            customItemBuilder.newItem();
+            Label varChildLbl = new Label(String.valueOf(count));
+            varChildLbl.setWrapText(true);
+            customItemBuilder.setLabel(varChildLbl);
+            TreeItem<CustomItem> varChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            varItem.getChildren().add(varChildItem);
+
+            createVariantForm(var, varChildItem);
+            count += 1;
         }
     }
 
-    public void handleStrings(List<String> strings, VBox vbox, String label) {
+    public void handleStrings(List<String> strings, TreeItem<CustomItem> parent, String label) {
+        customItemBuilder.newItem();
         Label strLbl = new Label(label);
         strLbl.setWrapText(true);
-        vbox.getChildren().add(strLbl);
+        customItemBuilder.setLabel(strLbl);
+        TreeItem<CustomItem> strItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(strItem);
 
+        int count = 1;
         for (String str : strings) {
-            VBox strVbox = createString(str);
-            vbox.getChildren().add(strVbox);
+            customItemBuilder.newItem();
+            Label strChildLbl = new Label(String.valueOf(count));
+            strChildLbl.setWrapText(true);
+            customItemBuilder.setLabel(strChildLbl);
+            TreeItem<CustomItem> strChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            strItem.getChildren().add(strChildItem);
+
+            createString(str, strChildItem);
+            count += 1;
         }
     }
 
-    public void handleRegions(List<Region> regions, VBox vbox) {
+    public void handleRegions(List<Region> regions, TreeItem<CustomItem> parent) {
+        customItemBuilder.newItem();
         Label regLbl = new Label("Regions: ");
         regLbl.setWrapText(true);
-        vbox.getChildren().add(regLbl);
+        customItemBuilder.setLabel(regLbl);
+        TreeItem<CustomItem> regItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(regItem);
 
+        int count = 1;
         for (Region reg : regions) {
-            VBox regVbox = createRegion(reg);
-            vbox.getChildren().add(regVbox);
+            customItemBuilder.newItem();
+            Label regChildLbl = new Label(String.valueOf(count));
+            regChildLbl.setWrapText(true);
+            customItemBuilder.setLabel(regChildLbl);
+            TreeItem<CustomItem> regChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            regItem.getChildren().add(regChildItem);
+
+            createRegion(reg, regChildItem);
+            count += 1;
         }
     }
 
-    public void handleRegisters(List<Register> registers, VBox vbox) {
+    public void handleRegisters(List<Register> registers, TreeItem<CustomItem> parent) {
+        customItemBuilder.newItem();
         Label regLbl = new Label("Registers: ");
         regLbl.setWrapText(true);
-        vbox.getChildren().add(regLbl);
+        customItemBuilder.setLabel(regLbl);
+        TreeItem<CustomItem> regItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(regItem);
 
+        int count = 1;
         for (Register reg : registers) {
-            VBox regVbox = createRegister(reg);
-            vbox.getChildren().add(regVbox);
+            customItemBuilder.newItem();
+            Label regChildLbl = new Label(String.valueOf(count));
+            regChildLbl.setWrapText(true);
+            customItemBuilder.setLabel(regChildLbl);
+            TreeItem<CustomItem> regChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            regItem.getChildren().add(regChildItem);
+
+            createRegister(reg, regChildItem);
+            count += 1;
         }
     }
 
-    public void handleDomains(List<Domain> domains, VBox vbox) {
+    public void handleDomains(List<Domain> domains, TreeItem<CustomItem> parent) {
+        customItemBuilder.newItem();
         Label domLbl = new Label("Domains: ");
         domLbl.setWrapText(true);
-        vbox.getChildren().add(domLbl);
+        customItemBuilder.setLabel(domLbl);
+        TreeItem<CustomItem> domItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(domItem);
 
+        int count = 1;
         for (Domain dom : domains) {
-            VBox domVbox = createDomain(dom);
-            vbox.getChildren().add(domVbox);
+            customItemBuilder.newItem();
+            Label domChildLbl = new Label(String.valueOf(count));
+            domChildLbl.setWrapText(true);
+            customItemBuilder.setLabel(domChildLbl);
+            TreeItem<CustomItem> domChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            domItem.getChildren().add(domChildItem);
+
+            createDomain(dom, domChildItem);
+            count += 1;
         }
     }
 
-    public void handleCrossReferences(List<CrossReference> crossReferences, VBox vbox) {
+    public void handleCrossReferences(List<CrossReference> crossReferences, TreeItem<CustomItem> parent) {
+        customItemBuilder.newItem();
         Label crossLbl = new Label("Cross Reference: ");
         crossLbl.setWrapText(true);
-        vbox.getChildren().add(crossLbl);
+        customItemBuilder.setLabel(crossLbl);
+        TreeItem<CustomItem> crossItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(crossItem);
 
+        int count = 1;
         for (CrossReference cross : crossReferences) {
-            VBox crossVbox = createCrossReference(cross);
-            vbox.getChildren().add(crossVbox);
+            customItemBuilder.newItem();
+            Label crossChildLabel = new Label(String.valueOf(count));
+            crossChildLabel.setWrapText(true);
+            customItemBuilder.setLabel(crossChildLabel);
+            TreeItem<CustomItem> crossChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            crossItem.getChildren().add(crossChildItem);
+
+            createCrossReference(cross, crossChildItem);
+            count += 1;
         }
     }
 
-    public void handleInflections(List<InflectedForm> inflectedForms, VBox vbox) {
+    public void handleInflections(List<InflectedForm> inflectedForms, TreeItem<CustomItem> parent) {
+        customItemBuilder.newItem();
         Label infLbl = new Label("Inflections: ");
         infLbl.setWrapText(true);
-        vbox.getChildren().add(infLbl);
+        customItemBuilder.setLabel(infLbl);
+        TreeItem<CustomItem> infItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(infItem);
 
+        int count = 1;
         for (InflectedForm inf : inflectedForms) {
-            VBox infVbox = createInflectedForm(inf);
-            vbox.getChildren().add(infVbox);
+            customItemBuilder.newItem();
+            Label infChildLbl = new Label(String.valueOf(count));
+            infChildLbl.setWrapText(true);
+            customItemBuilder.setLabel(infChildLbl);
+            TreeItem<CustomItem> infChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            infItem.getChildren().add(infChildItem);
+
+            createInflectedForm(inf, infChildItem);
+            count += 1;
         }
     }
 
-    public void handleSenses(List<Sense> senses, VBox vbox, String label) {
+    public void handleSenses(List<Sense> senses, TreeItem<CustomItem> parent, String label) {
+        customItemBuilder.newItem();
         Label senLbl = new Label(label);
         senLbl.setWrapText(true);
-        vbox.getChildren().add(senLbl);
+        customItemBuilder.setLabel(senLbl);
+        TreeItem<CustomItem> senItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(senItem);
 
+        int count = 1;
         for (Sense sen : senses) {
-            VBox senVbox = createSense(sen);
-            vbox.getChildren().add(senVbox);
+            customItemBuilder.newItem();
+            Label senChildLbl = new Label(String.valueOf(count));
+            senChildLbl.setWrapText(true);
+            customItemBuilder.setLabel(senChildLbl);
+            TreeItem<CustomItem> senChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            senItem.getChildren().add(senChildItem);
+
+            createSense(sen, senChildItem);
+            count += 1;
         }
     }
 
-    public void handleStringLbl(String string, VBox vbox, String label) {
+    public void handleStringLbl(String string, TreeItem<CustomItem> parent, String label, boolean synAnt) {
+        if (synAnt) {
+            synAntHboxes.add(parent.getValue());
+            synAntTexts.add(string);
+        }
+
+        customItemBuilder.newItem();
         Label strLbl = new Label(label + string);
         strLbl.setWrapText(true);
-        vbox.getChildren().add(strLbl);
+        customItemBuilder.setLabel(strLbl);
+        TreeItem<CustomItem> strTree = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(strTree);
     }
 
-    public void handleLexicalCategory(LexicalCategory lexicalCategory, VBox vbox) {
+    public void handleLexicalCategory(LexicalCategory lexicalCategory, TreeItem<CustomItem> parent) {
+        customItemBuilder.newItem();
         Label lexiCateLbl = new Label("Lexical Category");
         lexiCateLbl.setWrapText(true);
-        VBox lexiCateVbox = createLexicalCategory(lexicalCategory);
-        vbox.getChildren().addAll(lexiCateLbl, lexiCateVbox);
+        customItemBuilder.setLabel(lexiCateLbl);
+        TreeItem<CustomItem> lexiCateItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(lexiCateItem);
+
+        createLexicalCategory(lexicalCategory, lexiCateItem);
     }
 
-    public void handleSynonymsAntonyms(List<SynonymsAntonyms> synonymsAntonyms, VBox vbox, String label) {
+    public void handleSynonymsAntonyms(List<SynonymsAntonyms> synonymsAntonyms, TreeItem<CustomItem> parent, String label) {
+        customItemBuilder.newItem();
         Label synAntLbl = new Label(label);
         synAntLbl.setWrapText(true);
-        vbox.getChildren().add(synAntLbl);
+        customItemBuilder.setLabel(synAntLbl);
+        TreeItem<CustomItem> synAntItem = new TreeItem<>(customItemBuilder.getCustomItem());
+        parent.getChildren().add(synAntItem);
 
+        int count = 1;
         for (SynonymsAntonyms synAnt : synonymsAntonyms) {
-            VBox synAntVBox = createSynonymAntonym(synAnt);
-            vbox.getChildren().add(synAntVBox);
+            customItemBuilder.newItem();
+            Label synAntChildLbl = new Label(String.valueOf(count));
+            synAntChildLbl.setWrapText(true);
+            customItemBuilder.setLabel(synAntChildLbl);
+            TreeItem<CustomItem> synAntChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+            synAntItem.getChildren().add(synAntChildItem);
 
-            synAntVboxes.add(synAntVBox);
-            synAntTexts.add(synAnt.getText());
+            createSynonymAntonym(synAnt, synAntChildItem);
+            count += 1;
         }
     }
 
-    public List<VBox> getSynAntVboxes() {
-        return synAntVboxes;
+    public List<HBox> getSynAntHboxes() {
+        return synAntHboxes;
     }
 
     public String getSynAntText(int ind) {

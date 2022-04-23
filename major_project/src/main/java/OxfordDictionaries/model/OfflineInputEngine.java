@@ -6,9 +6,10 @@ import java.util.List;
 
 public class OfflineInputEngine implements InputEngine {
     private RetrieveEntry retrieveEntry;
+    private List<List<String>> history;
 
     public List<String> entrySearch(String lang, String word, String field, String gramFeat, String lexiCate,
-                                    String domains, String registers, String match) {
+                                    String domains, String registers, String match, boolean newSearch) {
         return null;
     }
 
@@ -18,5 +19,9 @@ public class OfflineInputEngine implements InputEngine {
 
     public List<String> lemmaSearch(String lang, String word, String gramFeat, String lexiCate) {
         return null;
+    }
+
+    public List<List<String>> getHistory() {
+        return history;
     }
 }
