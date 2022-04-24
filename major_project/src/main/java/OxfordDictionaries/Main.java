@@ -79,7 +79,6 @@ public class Main extends Application {
         this.INPUT_API_APP_ID = apiId;
         this.INPUT_APP_KEY = appKey;
         this.PASTEBIN_API_KEY = pastebinKey;
-        System.out.println(pastebinKey);
     }
 
     public static void main(String[] args) {

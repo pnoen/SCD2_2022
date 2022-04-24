@@ -39,7 +39,7 @@ public class OnlineOutputEngine implements OutputEngine {
         String postBody = pastebinPost.toString();
         List<String> response = request.postRequest(uri, postBody);
 
-        System.out.println(response);
+//        System.out.println(response);
         if (response.size() == 2) {
             int statusCode = Integer.parseInt(response.get(0));
 //            System.out.println("Response body was:\n" + response.get(1));
