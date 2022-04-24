@@ -1,11 +1,10 @@
 package OxfordDictionaries.view;
 
 import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import OxfordDictionaries.model.InputEngine;
 import OxfordDictionaries.model.OutputEngine;
@@ -31,6 +30,7 @@ public class GameWindow {
     private LemmaDisplayVbox lemmaDisplayVbox;
     private HistoryDisplayVbox historyDisplayVbox;
     private Button reportBtn;
+    private ReportDialog reportDialog;
 
     public GameWindow(int width, int height, InputEngine inputEngine, OutputEngine outputEngine) {
         this.width = width;
@@ -64,6 +64,7 @@ public class GameWindow {
         this.entryDisplayVbox = new EntryDisplayVbox();
         this.lemmaDisplayVbox = new LemmaDisplayVbox();
         this.historyDisplayVbox = new HistoryDisplayVbox();
+        this.reportDialog = new ReportDialog();
         entry();
     }
 
@@ -104,7 +105,7 @@ public class GameWindow {
         this.reportBtn = new Button("Create Report");
         reportBtn.setPrefWidth(btnWidth);
         reportBtn.setOnAction((event -> {
-
+            sendReport();
         }));
         reportBtn.setDisable(true);
 
@@ -215,5 +216,22 @@ public class GameWindow {
                     entry.get(6), entry.get(7), true, true);
             inputEngine.setCurrentPageInd(ind);
         });
+    }
+
+    public void sendReport() {
+        Dialog<String> dialog = reportDialog.create();
+        reportDialog.getSendBtn().addEventFilter(ActionEvent.ACTION, event -> {
+            List<String> error = outputEngine.sendReport(inputEngine.getRetrieveEntry(), reportDialog.getPrivateVal(), reportDialog.getNameVal(),
+                    reportDialog.getUserKeyVal(), reportDialog.getExpireVal(), reportDialog.getFolderVal());
+            if (error.size() > 0) {
+                handleError(error);
+                return;
+            }
+            TextInputDialog linkDialog = new TextInputDialog(outputEngine.getPastebinLink());
+            linkDialog.setTitle("Send Report");
+            linkDialog.setHeaderText("Link to paste:");
+            linkDialog.showAndWait();
+        });
+        dialog.showAndWait();
     }
 }

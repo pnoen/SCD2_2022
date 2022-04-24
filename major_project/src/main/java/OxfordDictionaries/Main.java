@@ -11,6 +11,7 @@ import java.util.List;
 public class Main extends Application {
     private String INPUT_API_APP_ID;
     private String INPUT_APP_KEY;
+    private String PASTEBIN_API_KEY;
 
     @Override
     public void start(Stage primaryStage) {
@@ -61,7 +62,7 @@ public class Main extends Application {
             return new OfflineOutputEngine();
         }
         else if (engine.equals("online")) {
-            return new OnlineOutputEngine();
+            return new OnlineOutputEngine(PASTEBIN_API_KEY, new Request(INPUT_API_APP_ID, INPUT_APP_KEY));
         }
         return null;
     }
@@ -69,13 +70,16 @@ public class Main extends Application {
     public void setEnvVar() {
         String apiId = System.getenv("INPUT_API_APP_ID");
         String appKey = System.getenv("INPUT_API_KEY");
-        if (apiId == null || appKey == null) {
+        String pastebinKey = System.getenv("PASTEBIN_API_KEY");
+        if (apiId == null || appKey == null || pastebinKey == null) {
             System.out.println("Environment variables not set");
             System.exit(-1);
         }
 
         this.INPUT_API_APP_ID = apiId;
         this.INPUT_APP_KEY = appKey;
+        this.PASTEBIN_API_KEY = pastebinKey;
+        System.out.println(pastebinKey);
     }
 
     public static void main(String[] args) {
