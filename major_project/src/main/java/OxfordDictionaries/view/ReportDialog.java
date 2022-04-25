@@ -136,4 +136,5 @@ public class ReportDialog {
     public Node getSendBtn() {
         return sendBtn;
     }
+
 }

@@ -1,6 +1,7 @@
 package OxfordDictionaries;
 
 import OxfordDictionaries.model.*;
+import OxfordDictionaries.model.request.DummyAPI;
 import OxfordDictionaries.model.request.Request;
 import OxfordDictionaries.view.GameWindow;
 import javafx.application.Application;
@@ -49,7 +50,7 @@ public class Main extends Application {
 
     public InputEngine getInputEngine(String engine) {
         if (engine.equals("offline")) {
-            return new OfflineInputEngine();
+            return new OfflineInputEngine(new DummyAPI());
         }
         else if (engine.equals("online")) {
             return new OnlineInputEngine(new Request(INPUT_API_APP_ID, INPUT_APP_KEY));
@@ -59,7 +60,7 @@ public class Main extends Application {
 
     public OutputEngine getOutputEngine(String engine) {
         if (engine.equals("offline")) {
-            return new OfflineOutputEngine();
+            return new OfflineOutputEngine(new DummyAPI());
         }
         else if (engine.equals("online")) {
             return new OnlineOutputEngine(PASTEBIN_API_KEY, new Request(INPUT_API_APP_ID, INPUT_APP_KEY));
