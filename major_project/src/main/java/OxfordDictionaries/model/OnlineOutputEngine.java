@@ -6,9 +6,7 @@ import OxfordDictionaries.model.request.Request;
 import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class OnlineOutputEngine implements OutputEngine {
     private String PASTEBIN_API_KEY;
@@ -16,10 +14,10 @@ public class OnlineOutputEngine implements OutputEngine {
     private PastebinPostBuilder pastebinPostBuilder;
     private String pastebinLink;
 
-    public OnlineOutputEngine(String PASTEBIN_API_KEY, Request request) {
+    public OnlineOutputEngine(String PASTEBIN_API_KEY, Request request, PastebinPostBuilder pastebinPostBuilder) {
         this.PASTEBIN_API_KEY = PASTEBIN_API_KEY;
         this.request = request;
-        this.pastebinPostBuilder = new PastebinPostBuilder();
+        this.pastebinPostBuilder = pastebinPostBuilder;
     }
 
     public List<String> sendReport(RetrieveEntry retrieveEntry, int apiPastePrivate, String apiPasteName, String apiUserKey,
@@ -28,13 +26,7 @@ public class OnlineOutputEngine implements OutputEngine {
         Gson gson = new Gson();
         String entry = gson.toJson(retrieveEntry);
 
-        pastebinPostBuilder.newItem(PASTEBIN_API_KEY, "paste", entry, apiPastePrivate);
-        pastebinPostBuilder.setPasteFormat("json");
-        pastebinPostBuilder.setPasteName(apiPasteName);
-        pastebinPostBuilder.setUserKey(apiUserKey);
-        pastebinPostBuilder.setPasteExpireDate(apiPasteExpireDate);
-        pastebinPostBuilder.setFolderKey(apiFolderKey);
-        PastebinPost pastebinPost = pastebinPostBuilder.getPastebinPost();
+        PastebinPost pastebinPost = createPastebinPost(entry, apiPastePrivate, apiPasteName, apiUserKey, apiPasteExpireDate, apiFolderKey);
 
         String postBody = pastebinPost.toString();
         List<String> response = request.postRequest(uri, postBody);
@@ -54,5 +46,15 @@ public class OnlineOutputEngine implements OutputEngine {
 
     public String getPastebinLink() {
         return pastebinLink;
+    }
+
+    public PastebinPost createPastebinPost(String entry, int apiPastePrivate, String apiPasteName, String apiUserKey, String apiPasteExpireDate, String apiFolderKey) {
+        pastebinPostBuilder.newItem(PASTEBIN_API_KEY, "paste", entry, apiPastePrivate);
+        pastebinPostBuilder.setPasteFormat("json");
+        pastebinPostBuilder.setPasteName(apiPasteName);
+        pastebinPostBuilder.setUserKey(apiUserKey);
+        pastebinPostBuilder.setPasteExpireDate(apiPasteExpireDate);
+        pastebinPostBuilder.setFolderKey(apiFolderKey);
+        return pastebinPostBuilder.getPastebinPost();
     }
 }

@@ -92,6 +92,7 @@ public class LemmaDisplayVbox {
                             for (GrammaticalFeature gramFeat : entry.getGrammaticalFeatures()) {
                                 List<String> lemmaCopy = new ArrayList<>(lemma);
                                 lemmaCopy.add(gramFeat.getId());
+                                lemmas.add(lemmaCopy);
                             }
                             continue;
                         }
@@ -101,7 +102,6 @@ public class LemmaDisplayVbox {
                 }
             }
         }
-
         return lemmas;
     }
 

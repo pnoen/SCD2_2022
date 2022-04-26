@@ -126,14 +126,15 @@ public class GameWindow {
 
             displayEntry(entryInputVbox.getLang(), entryInputVbox.getWord(), entryInputVbox.getField(), entryInputVbox.getGramFeat(),
                     entryInputVbox.getLexiCate(), entryInputVbox.getDomains(), entryInputVbox.getRegisters(), entryInputVbox.getMatch(),
-                    true, false);
+                    true, false, false);
         });
 
     }
 
     public void displayEntry(String lang, String word, String field, String gramFeat, String lexiCate,
-                             String domain, String register, String match, boolean newSearch, boolean historySearch) {
-        List<String> error = inputEngine.entrySearch(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch);
+                             String domain, String register, String match, boolean newSearch, boolean historySearch, boolean lemma) {
+        List<String> error = inputEngine.entrySearch(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma);
+        System.out.println(error);
         if (error == null) {
 //            System.out.println("No entry");
             lemma(word, gramFeat, lexiCate, newSearch);
@@ -141,6 +142,9 @@ public class GameWindow {
         }
         if (error.size() > 0) {
             handleError(error);
+            if (lemma) {
+                entry();
+            }
             return;
         }
         reportBtn.setDisable(false);
@@ -154,7 +158,7 @@ public class GameWindow {
             int ind = i;
             synAntHboxes.get(ind).setOnMouseClicked((event) -> {
                 String text = entryDisplayVbox.getSynAntText(ind);
-                displayEntry(lang, text, "", "", "", "", "", "", false, false);
+                displayEntry(lang, text, "", "", "", "", "", "", false, false, false);
             });
         }
     }
@@ -183,19 +187,19 @@ public class GameWindow {
         VBox lemmaVbox = lemmaDisplayVbox.create(retrieveEntry);
         this.contentScrollPane.setContent(lemmaVbox);
 
-        if (lemmaDisplayVbox.getLemmaSize() == 1) {
-            List<String> lemma = lemmaDisplayVbox.getLemma(0);
-            displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true",
-                    newSearch, false);
-            return;
-        }
-
         lemmaDisplayVbox.getSelectBtn().setOnAction((event) -> {
             int id = lemmaDisplayVbox.getLemmaId();
             List<String> lemma = lemmaDisplayVbox.getLemma(id - 1);
             displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true",
-                    newSearch, false);
+                    newSearch, false, true);
         });
+
+        if (lemmaDisplayVbox.getLemmaSize() == 1) {
+            List<String> lemma = lemmaDisplayVbox.getLemma(0);
+            displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true",
+                    newSearch, false, true);
+            return;
+        }
     }
 
     public void history() {
@@ -213,7 +217,7 @@ public class GameWindow {
             }
             List<String> entry = history.get(ind);
             displayEntry(entry.get(0), entry.get(1), entry.get(2), entry.get(3), entry.get(4), entry.get(5),
-                    entry.get(6), entry.get(7), true, true);
+                    entry.get(6), entry.get(7), true, true, false);
             inputEngine.setCurrentPageInd(ind);
         });
     }

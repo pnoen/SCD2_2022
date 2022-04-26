@@ -7,7 +7,7 @@ import java.util.List;
 public interface InputEngine {
 
     List<String> entrySearch(String lang, String word, String field, String gramFeat, String lexiCate,
-                             String domains, String registers, String match, boolean newSearch, boolean historyEntry);
+                             String domains, String registers, String match, boolean newSearch, boolean historyEntry, boolean lemma);
 
     RetrieveEntry getRetrieveEntry();
 
