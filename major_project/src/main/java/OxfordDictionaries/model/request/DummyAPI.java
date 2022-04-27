@@ -1,4 +1,4 @@
-package OxfordDictionaries.model.request;
+package oxfordDictionaries.model.request;
 
 public class DummyAPI {
 

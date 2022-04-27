@@ -1,4 +1,4 @@
-package OxfordDictionaries.view;
+package oxfordDictionaries.view;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -38,11 +38,14 @@ public class EntryInputVbox {
         HBox registersHbox = createRegistersHbox();
         HBox matchHbox = createMatchHbox();
 
+        Label delimiterLbl = new Label("The filters are comma-delimited.");
+        delimiterLbl.setWrapText(true);
+
         this.searchBtn = new Button("Search");
 
         this.vbox = new VBox(5);
         vbox.getChildren().addAll(titleLbl, langHbox, wordHbox, fieldHbox, gramFeatHbox,
-                lexiCateHbox, domainsHbox, registersHbox, matchHbox, searchBtn);
+                lexiCateHbox, domainsHbox, registersHbox, matchHbox, delimiterLbl, searchBtn);
 
         return vbox;
     }
@@ -69,7 +72,7 @@ public class EntryInputVbox {
     }
 
     public HBox createFieldHBox() {
-        Label fieldLbl = new Label("Field: ");
+        Label fieldLbl = new Label("Field: (Opt.) ");
         fieldLbl.setWrapText(true);
         List<String> fields = new ArrayList<>();
         fields.add("");
@@ -89,7 +92,7 @@ public class EntryInputVbox {
     }
 
     public HBox createGramFeatHbox() {
-        Label gramFeatLbl = new Label("Grammatical Feature: ");
+        Label gramFeatLbl = new Label("Grammatical Feature: (Opt.) ");
         gramFeatLbl.setWrapText(true);
         this.gramFeatTxt = new TextField();
         HBox gramFeatHbox = new HBox(gramFeatLbl, gramFeatTxt);
@@ -97,7 +100,7 @@ public class EntryInputVbox {
     }
 
     public HBox createLexiCateHbox() {
-        Label lexiCateLbl = new Label("Lexical Category: ");
+        Label lexiCateLbl = new Label("Lexical Category: (Opt.) ");
         lexiCateLbl.setWrapText(true);
         this.lexiCateTxt = new TextField();
         HBox lexiCateHbox = new HBox(lexiCateLbl, lexiCateTxt);
@@ -105,7 +108,7 @@ public class EntryInputVbox {
     }
 
     public HBox createDomainsHbox() {
-        Label domainsLbl = new Label("Domains: ");
+        Label domainsLbl = new Label("Domains: (Opt.) ");
         domainsLbl.setWrapText(true);
         this.domainsTxt = new TextField();
         HBox domainsHbox = new HBox(domainsLbl, domainsTxt);
@@ -113,7 +116,7 @@ public class EntryInputVbox {
     }
 
     public HBox createRegistersHbox() {
-        Label registersLbl = new Label("Registers: ");
+        Label registersLbl = new Label("Registers: (Opt.) ");
         registersLbl.setWrapText(true);
         this.registersTxt = new TextField();
         HBox registersHbox = new HBox(registersLbl, registersTxt);
@@ -121,7 +124,7 @@ public class EntryInputVbox {
     }
 
     public HBox createMatchHbox() {
-        Label matchLbl = new Label("Strict Match: ");
+        Label matchLbl = new Label("Strict Match: (Opt.) ");
         matchLbl.setWrapText(true);
         List<String> matches = new ArrayList<>();
         matches.add("");

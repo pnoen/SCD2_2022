@@ -1,4 +1,4 @@
-package OxfordDictionaries.model.request.responseClasses;
+package oxfordDictionaries.model.request.responseClasses;
 
 public class Metadata {
     private String operation;

@@ -1,7 +1,7 @@
-package OxfordDictionaries.model;
+package oxfordDictionaries.model;
 
-import OxfordDictionaries.model.request.DummyAPI;
-import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
+import oxfordDictionaries.model.request.DummyAPI;
+import oxfordDictionaries.model.request.responseClasses.RetrieveEntry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class TestOfflineInputEngine {
+public class OfflineInputEngineTest {
     private OfflineInputEngine offlineInputEngine;
     private DummyAPI dummyAPIMock;
 

@@ -1,16 +1,14 @@
-package OxfordDictionaries.view;
+package oxfordDictionaries.view;
 
-import OxfordDictionaries.model.request.responseClasses.*;
+import oxfordDictionaries.model.request.responseClasses.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class LemmaDisplayVbox {

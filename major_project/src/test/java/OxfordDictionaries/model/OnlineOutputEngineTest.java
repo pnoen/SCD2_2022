@@ -1,9 +1,9 @@
-package OxfordDictionaries.model;
+package oxfordDictionaries.model;
 
-import OxfordDictionaries.model.request.PastebinPost;
-import OxfordDictionaries.model.request.PastebinPostBuilder;
-import OxfordDictionaries.model.request.Request;
-import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
+import oxfordDictionaries.model.request.PastebinPost;
+import oxfordDictionaries.model.request.PastebinPostBuilder;
+import oxfordDictionaries.model.request.Request;
+import oxfordDictionaries.model.request.responseClasses.RetrieveEntry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +14,7 @@ import static org.mockito.Mockito.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-public class TestOnlineOutputEngine {
+public class OnlineOutputEngineTest {
     private OnlineOutputEngine onlineOutputEngine;
     private Request requestMock;
     private PastebinPostBuilder pastebinPostBuilderMock;

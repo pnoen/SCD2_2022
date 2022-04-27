@@ -1,7 +1,7 @@
-package OxfordDictionaries.model;
+package oxfordDictionaries.model;
 
-import OxfordDictionaries.model.request.DummyAPI;
-import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
+import oxfordDictionaries.model.request.DummyAPI;
+import oxfordDictionaries.model.request.responseClasses.RetrieveEntry;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;

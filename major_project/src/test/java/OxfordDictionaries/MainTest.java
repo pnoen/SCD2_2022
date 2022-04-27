@@ -1,6 +1,6 @@
-package OxfordDictionaries;
+package oxfordDictionaries;
 
-import OxfordDictionaries.model.*;
+import oxfordDictionaries.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -8,7 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.instanceOf;
 
-public class TestMain {
+public class MainTest {
     private Main main;
 
     @BeforeEach

@@ -1,4 +1,4 @@
-package OxfordDictionaries.model.request;
+package oxfordDictionaries.model.request;
 
 public class PastebinPost {
     private String api_dev_key;

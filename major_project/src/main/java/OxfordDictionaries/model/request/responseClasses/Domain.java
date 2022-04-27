@@ -1,4 +1,4 @@
-package OxfordDictionaries.model.request.responseClasses;
+package oxfordDictionaries.model.request.responseClasses;
 
 // Inline model 9
 public class Domain {

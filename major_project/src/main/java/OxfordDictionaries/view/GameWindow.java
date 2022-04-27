@@ -1,13 +1,13 @@
-package OxfordDictionaries.view;
+package oxfordDictionaries.view;
 
-import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
+import oxfordDictionaries.model.request.responseClasses.RetrieveEntry;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import OxfordDictionaries.model.InputEngine;
-import OxfordDictionaries.model.OutputEngine;
+import oxfordDictionaries.model.InputEngine;
+import oxfordDictionaries.model.OutputEngine;
 import javafx.scene.Scene;
 
 import java.util.ArrayList;
@@ -134,7 +134,7 @@ public class GameWindow {
     public void displayEntry(String lang, String word, String field, String gramFeat, String lexiCate,
                              String domain, String register, String match, boolean newSearch, boolean historySearch, boolean lemma) {
         List<String> error = inputEngine.entrySearch(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma);
-        System.out.println(error);
+//        System.out.println(error);
         if (error == null) {
 //            System.out.println("No entry");
             lemma(word, gramFeat, lexiCate, newSearch);

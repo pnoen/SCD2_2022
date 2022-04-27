@@ -1,8 +1,7 @@
-package OxfordDictionaries.model.request;
+package oxfordDictionaries.model.request;
 
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;

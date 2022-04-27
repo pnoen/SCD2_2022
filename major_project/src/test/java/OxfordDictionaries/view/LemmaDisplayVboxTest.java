@@ -1,6 +1,6 @@
-package OxfordDictionaries.view;
+package oxfordDictionaries.view;
 
-import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
+import oxfordDictionaries.model.request.responseClasses.RetrieveEntry;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +10,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-public class TestLemmaDisplayVbox {
+public class LemmaDisplayVboxTest {
     private LemmaDisplayVbox lemmaDisplayVbox;
 
     @BeforeEach

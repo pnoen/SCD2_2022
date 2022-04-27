@@ -1,4 +1,4 @@
-package OxfordDictionaries.view;
+package oxfordDictionaries.view;
 
 import javafx.scene.Node;
 import javafx.scene.control.*;

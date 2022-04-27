@@ -1,7 +1,8 @@
-package OxfordDictionaries.model;
+package oxfordDictionaries.model;
 
-import OxfordDictionaries.model.request.Request;
-import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
+import oxfordDictionaries.model.request.Request;
+import oxfordDictionaries.model.request.SQLDatabase;
+import oxfordDictionaries.model.request.responseClasses.RetrieveEntry;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -13,10 +14,14 @@ public class OnlineInputEngine implements InputEngine {
     private RetrieveEntry retrieveEntry;
     private List<List<String>> history;
     private int currentPageInd;
+    private SQLDatabase db;
 
-    public OnlineInputEngine(Request request) {
+    public OnlineInputEngine(Request request, SQLDatabase db) {
         this.request = request;
         this.history = new ArrayList<>();
+        this.db = db;
+
+        db.setupDB();
     }
 
     public List<String> entrySearch(String lang, String word, String field, String gramFeat, String lexiCate,
@@ -26,11 +31,24 @@ public class OnlineInputEngine implements InputEngine {
         uri = createUriFields(uri, field, gramFeat, lexiCate, domains, registers, match);
         uri = uriEscape(uri);
 
-        List<String> response = request.getRequest(uri);
-//        System.out.println(response);
+        List<String> response = db.getEntry(uri);
+        boolean cached = true;
+        if (response.size() == 0) {
+            response = request.getRequest(uri);
+            cached = false;
+        }
 
+//        System.out.println(response);
         if (response.size() == 2) {
             int statusCode = Integer.parseInt(response.get(0));
+            if (!cached) {
+                String error = db.addEntry(uri, response.get(1), statusCode);
+                if (error != null) {
+                    response.clear();
+                    response.add(error);
+                    return response;
+                }
+            }
 //            System.out.println("Response body was:\n" + response.get(1));
 
             if (statusCode >= 200 && statusCode < 300) {
@@ -70,11 +88,25 @@ public class OnlineInputEngine implements InputEngine {
         uri = uriEscape(uri);
 //        System.out.println(uri);
 
-        List<String> response = request.getRequest(uri);
+        List<String> response = db.getLemma(uri);
+        boolean cached = true;
+        if (response.size() == 0) {
+            response = request.getRequest(uri);
+            cached = false;
+        }
+
 //        System.out.println(response);
         if (response.size() == 2) {
             int statusCode = Integer.parseInt(response.get(0));
 //            System.out.println("Response body was:\n" + response.get(1));
+            if (!cached) {
+                String error = db.addLemma(uri, response.get(1), statusCode);
+                if (error != null) {
+                    response.clear();
+                    response.add(error);
+                    return response;
+                }
+            }
 
             if (statusCode >= 200 && statusCode < 300) {
                 Gson gson = new Gson();
