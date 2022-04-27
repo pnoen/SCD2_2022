@@ -1,4 +1,4 @@
-package oxfordDictionaries.model.request;
+package OxfordDictionaries.model.request;
 
 
 import java.io.IOException;

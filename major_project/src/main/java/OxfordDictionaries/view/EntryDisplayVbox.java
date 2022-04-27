@@ -1,6 +1,6 @@
-package oxfordDictionaries.view;
+package OxfordDictionaries.view;
 
-import oxfordDictionaries.model.request.responseClasses.*;
+import OxfordDictionaries.model.request.responseClasses.*;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;

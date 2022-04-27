@@ -1,11 +1,11 @@
-package oxfordDictionaries;
+package OxfordDictionaries;
 
-import oxfordDictionaries.model.*;
-import oxfordDictionaries.model.request.DummyAPI;
-import oxfordDictionaries.model.request.PastebinPostBuilder;
-import oxfordDictionaries.model.request.Request;
-import oxfordDictionaries.model.request.SQLDatabase;
-import oxfordDictionaries.view.GameWindow;
+import OxfordDictionaries.model.*;
+import OxfordDictionaries.model.request.DummyAPI;
+import OxfordDictionaries.model.request.PastebinPostBuilder;
+import OxfordDictionaries.model.request.Request;
+import OxfordDictionaries.model.request.SQLDatabase;
+import OxfordDictionaries.view.GameWindow;
 import javafx.application.Application;
 import javafx.stage.Stage;
 

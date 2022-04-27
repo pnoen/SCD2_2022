@@ -1,6 +1,6 @@
-package oxfordDictionaries;
+package OxfordDictionaries;
 
-import oxfordDictionaries.model.*;
+import OxfordDictionaries.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

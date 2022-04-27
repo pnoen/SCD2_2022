@@ -1,9 +1,9 @@
-package oxfordDictionaries.model;
+package OxfordDictionaries.model;
 
-import oxfordDictionaries.model.request.PastebinPost;
-import oxfordDictionaries.model.request.PastebinPostBuilder;
-import oxfordDictionaries.model.request.Request;
-import oxfordDictionaries.model.request.responseClasses.RetrieveEntry;
+import OxfordDictionaries.model.request.PastebinPost;
+import OxfordDictionaries.model.request.PastebinPostBuilder;
+import OxfordDictionaries.model.request.Request;
+import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
 import com.google.gson.Gson;
 
 import java.util.List;

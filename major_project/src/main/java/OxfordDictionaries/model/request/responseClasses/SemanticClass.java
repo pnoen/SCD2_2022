@@ -1,4 +1,4 @@
-package oxfordDictionaries.model.request.responseClasses;
+package OxfordDictionaries.model.request.responseClasses;
 
 // Inline model 13
 public class SemanticClass {

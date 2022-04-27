@@ -1,4 +1,4 @@
-package oxfordDictionaries.model.request.responseClasses;
+package OxfordDictionaries.model.request.responseClasses;
 
 public class Inflection {
     private String id;

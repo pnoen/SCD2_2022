@@ -1,4 +1,4 @@
-package oxfordDictionaries.model.request.responseClasses;
+package OxfordDictionaries.model.request.responseClasses;
 
 public class ThesaurusLink {
     private String entry_id;

@@ -1,7 +1,7 @@
-package oxfordDictionaries.model;
+package OxfordDictionaries.model;
 
-import oxfordDictionaries.model.request.DummyAPI;
-import oxfordDictionaries.model.request.responseClasses.RetrieveEntry;
+import OxfordDictionaries.model.request.DummyAPI;
+import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

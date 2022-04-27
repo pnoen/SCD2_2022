@@ -1,6 +1,6 @@
-package oxfordDictionaries.view;
+package OxfordDictionaries.view;
 
-import oxfordDictionaries.model.request.responseClasses.*;
+import OxfordDictionaries.model.request.responseClasses.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;

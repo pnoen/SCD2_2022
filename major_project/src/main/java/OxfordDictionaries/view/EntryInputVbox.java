@@ -1,4 +1,4 @@
-package oxfordDictionaries.view;
+package OxfordDictionaries.view;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;

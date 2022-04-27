@@ -1,8 +1,8 @@
-package oxfordDictionaries.model;
+package OxfordDictionaries.model;
 
-import oxfordDictionaries.model.request.Request;
-import oxfordDictionaries.model.request.SQLDatabase;
-import oxfordDictionaries.model.request.responseClasses.RetrieveEntry;
+import OxfordDictionaries.model.request.Request;
+import OxfordDictionaries.model.request.SQLDatabase;
+import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;

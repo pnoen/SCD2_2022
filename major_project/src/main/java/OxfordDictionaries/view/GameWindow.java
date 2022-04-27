@@ -1,13 +1,13 @@
-package oxfordDictionaries.view;
+package OxfordDictionaries.view;
 
-import oxfordDictionaries.model.request.responseClasses.RetrieveEntry;
+import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import oxfordDictionaries.model.InputEngine;
-import oxfordDictionaries.model.OutputEngine;
+import OxfordDictionaries.model.InputEngine;
+import OxfordDictionaries.model.OutputEngine;
 import javafx.scene.Scene;
 
 import java.util.ArrayList;

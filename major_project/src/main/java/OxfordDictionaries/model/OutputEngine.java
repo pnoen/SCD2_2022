@@ -1,6 +1,6 @@
-package oxfordDictionaries.model;
+package OxfordDictionaries.model;
 
-import oxfordDictionaries.model.request.responseClasses.RetrieveEntry;
+import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
 
 import java.util.List;
 

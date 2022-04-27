@@ -1,6 +1,6 @@
-package oxfordDictionaries.view;
+package OxfordDictionaries.view;
 
-import oxfordDictionaries.model.request.responseClasses.RetrieveEntry;
+import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
