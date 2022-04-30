@@ -4,7 +4,6 @@ import OxfordDictionaries.model.*;
 import OxfordDictionaries.model.request.DummyAPI;
 import OxfordDictionaries.model.request.PastebinPostBuilder;
 import OxfordDictionaries.model.request.Request;
-import OxfordDictionaries.model.request.SQLDatabase;
 import OxfordDictionaries.view.GameWindow;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -55,7 +54,7 @@ public class Main extends Application {
             return new OfflineInputEngine(new DummyAPI());
         }
         else if (engine.equals("online")) {
-            return new OnlineInputEngine(new Request(INPUT_API_APP_ID, INPUT_APP_KEY), new SQLDatabase());
+            return new OnlineInputEngine(new Request(INPUT_API_APP_ID, INPUT_APP_KEY));
         }
         return null;
     }
