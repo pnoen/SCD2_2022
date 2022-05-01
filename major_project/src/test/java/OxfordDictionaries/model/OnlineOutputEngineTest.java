@@ -1,5 +1,6 @@
 package OxfordDictionaries.model;
 
+import OxfordDictionaries.model.request.PastebinFormatter;
 import OxfordDictionaries.model.request.PastebinPost;
 import OxfordDictionaries.model.request.PastebinPostBuilder;
 import OxfordDictionaries.model.request.Request;
@@ -18,12 +19,14 @@ public class OnlineOutputEngineTest {
     private OnlineOutputEngine onlineOutputEngine;
     private Request requestMock;
     private PastebinPostBuilder pastebinPostBuilderMock;
+    private PastebinFormatter pastebinFormatterMock;
 
     @BeforeEach
     public void setup() {
         this.requestMock = mock(Request.class);
         this.pastebinPostBuilderMock = mock(PastebinPostBuilder.class);
-        this.onlineOutputEngine = new OnlineOutputEngine("your_key", requestMock, pastebinPostBuilderMock);
+        this.pastebinFormatterMock = mock(PastebinFormatter.class);
+        this.onlineOutputEngine = new OnlineOutputEngine("your_key", requestMock, pastebinPostBuilderMock, pastebinFormatterMock);
     }
 
     @Test
@@ -50,6 +53,34 @@ public class OnlineOutputEngineTest {
 
         verify(pastebinPostBuilderMock, times(1)).getPastebinPost();
         verify(requestMock, times(1)).postRequest(uri, postBody);
+        verify(pastebinFormatterMock, times(1)).format(any(RetrieveEntry.class));
+    }
+
+    @Test
+    public void sendReportFormatter() {
+        String entry = "ID: donkey\nMetadata: \n\tOperation: retrieve\n\tProvider: Oxford University Press\n\tSchema: entry";
+        when(pastebinFormatterMock.format(any(RetrieveEntry.class))).thenReturn(entry);
+
+        PastebinPost pastebinPost = new PastebinPost("your_key", "paste", entry, 0);
+        when(pastebinPostBuilderMock.getPastebinPost()).thenReturn(pastebinPost);
+
+        String postBody = "api_dev_key=your_key&api_option=paste&api_paste_code=" + entry + "&api_paste_private=0";
+
+        String uri = "https://pastebin.com/api/api_post.php";
+
+        List<String> response = new ArrayList<>();
+        response.add("200");
+        response.add("https://pastebin.com/fakeLink");
+        when(requestMock.postRequest(uri, postBody)).thenReturn(response);
+
+        List<String> actual = onlineOutputEngine.sendReport(new RetrieveEntry(), 0, null,
+                null, null, null);
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineOutputEngine.getPastebinLink(),equalTo("https://pastebin.com/fakeLink"));
+
+        verify(pastebinPostBuilderMock, times(1)).getPastebinPost();
+        verify(requestMock, times(1)).postRequest(uri, postBody);
+        verify(pastebinFormatterMock, times(1)).format(any(RetrieveEntry.class));
     }
 
     @Test
@@ -75,6 +106,7 @@ public class OnlineOutputEngineTest {
 
         verify(pastebinPostBuilderMock, times(1)).getPastebinPost();
         verify(requestMock, times(1)).postRequest(uri, postBody);
+        verify(pastebinFormatterMock, times(1)).format(any(RetrieveEntry.class));
     }
 
     @Test
@@ -102,15 +134,16 @@ public class OnlineOutputEngineTest {
 
         verify(pastebinPostBuilderMock, times(1)).getPastebinPost();
         verify(requestMock, times(1)).postRequest(uri, postBody);
+        verify(pastebinFormatterMock, times(1)).format(any(RetrieveEntry.class));
     }
 
     @Test
     public void createPastebinPost() {
-        String entry = "{\"id\": \"donkey\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}";
+        String entry = "ID: donkey\nmetadata: \n\toperation: retrieve\n\tprovider: Oxford University Press\n\tschema: entry";
+
         onlineOutputEngine.createPastebinPost(entry, 0, "", "", "", "");
 
         verify(pastebinPostBuilderMock, times(1)).newItem("your_key", "paste", entry, 0);
-        verify(pastebinPostBuilderMock, times(1)).setPasteFormat("json");
         verify(pastebinPostBuilderMock, times(1)).setPasteName("");
         verify(pastebinPostBuilderMock, times(1)).setUserKey("");
         verify(pastebinPostBuilderMock, times(1)).setPasteExpireDate("");

@@ -2,6 +2,7 @@ package OxfordDictionaries;
 
 import OxfordDictionaries.model.*;
 import OxfordDictionaries.model.request.DummyAPI;
+import OxfordDictionaries.model.request.PastebinFormatter;
 import OxfordDictionaries.model.request.PastebinPostBuilder;
 import OxfordDictionaries.model.request.Request;
 import OxfordDictionaries.view.GameWindow;
@@ -64,7 +65,7 @@ public class Main extends Application {
             return new OfflineOutputEngine(new DummyAPI());
         }
         else if (engine.equals("online")) {
-            return new OnlineOutputEngine(PASTEBIN_API_KEY, new Request(INPUT_API_APP_ID, INPUT_APP_KEY), new PastebinPostBuilder());
+            return new OnlineOutputEngine(PASTEBIN_API_KEY, new Request(INPUT_API_APP_ID, INPUT_APP_KEY), new PastebinPostBuilder(), new PastebinFormatter());
         }
         return null;
     }

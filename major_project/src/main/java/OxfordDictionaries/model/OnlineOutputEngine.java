@@ -1,10 +1,10 @@
 package OxfordDictionaries.model;
 
+import OxfordDictionaries.model.request.PastebinFormatter;
 import OxfordDictionaries.model.request.PastebinPost;
 import OxfordDictionaries.model.request.PastebinPostBuilder;
 import OxfordDictionaries.model.request.Request;
 import OxfordDictionaries.model.request.responseClasses.RetrieveEntry;
-import com.google.gson.Gson;
 
 import java.util.List;
 
@@ -13,18 +13,20 @@ public class OnlineOutputEngine implements OutputEngine {
     private Request request;
     private PastebinPostBuilder pastebinPostBuilder;
     private String pastebinLink;
+    private PastebinFormatter pastebinFormatter;
 
-    public OnlineOutputEngine(String PASTEBIN_API_KEY, Request request, PastebinPostBuilder pastebinPostBuilder) {
+    public OnlineOutputEngine(String PASTEBIN_API_KEY, Request request, PastebinPostBuilder pastebinPostBuilder, PastebinFormatter pastebinFormatter) {
         this.PASTEBIN_API_KEY = PASTEBIN_API_KEY;
         this.request = request;
         this.pastebinPostBuilder = pastebinPostBuilder;
+        this.pastebinFormatter = pastebinFormatter;
     }
 
     public List<String> sendReport(RetrieveEntry retrieveEntry, int apiPastePrivate, String apiPasteName, String apiUserKey,
                            String apiPasteExpireDate, String apiFolderKey) {
         String uri = "https://pastebin.com/api/api_post.php";
-        Gson gson = new Gson();
-        String entry = gson.toJson(retrieveEntry);
+        String entry = pastebinFormatter.format(retrieveEntry);
+//        System.out.println(entry);
 
         PastebinPost pastebinPost = createPastebinPost(entry, apiPastePrivate, apiPasteName, apiUserKey, apiPasteExpireDate, apiFolderKey);
 
@@ -50,7 +52,7 @@ public class OnlineOutputEngine implements OutputEngine {
 
     public PastebinPost createPastebinPost(String entry, int apiPastePrivate, String apiPasteName, String apiUserKey, String apiPasteExpireDate, String apiFolderKey) {
         pastebinPostBuilder.newItem(PASTEBIN_API_KEY, "paste", entry, apiPastePrivate);
-        pastebinPostBuilder.setPasteFormat("json");
+//        pastebinPostBuilder.setPasteFormat("json");
         pastebinPostBuilder.setPasteName(apiPasteName);
         pastebinPostBuilder.setUserKey(apiUserKey);
         pastebinPostBuilder.setPasteExpireDate(apiPasteExpireDate);

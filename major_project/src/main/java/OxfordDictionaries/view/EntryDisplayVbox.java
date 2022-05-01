@@ -979,7 +979,7 @@ public class EntryDisplayVbox {
 
     public void handleLexicalCategory(LexicalCategory lexicalCategory, TreeItem<CustomItem> parent) {
         customItemBuilder.newItem();
-        Label lexiCateLbl = new Label("Lexical Category");
+        Label lexiCateLbl = new Label("Lexical Category: ");
         lexiCateLbl.setWrapText(true);
         customItemBuilder.setLabel(lexiCateLbl);
         TreeItem<CustomItem> lexiCateItem = new TreeItem<>(customItemBuilder.getCustomItem());

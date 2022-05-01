@@ -67,7 +67,7 @@ public class Request {
             msg.add(String.valueOf(response.statusCode()));
 //            msg.add(String.valueOf(response.headers()));
             msg.add(response.body());
-            System.out.println(response.body());
+//            System.out.println(response.body());
 
         } catch (IOException | InterruptedException e) {
             System.out.println("Something went wrong with our request!");
