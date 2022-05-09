@@ -2,7 +2,7 @@ package oxforddictionaries.model.request.responseclasses;
 
 import java.util.List;
 
-public class Inline_model_2 {
+public class InlineModel2 {
     private List<Domain> domains; // optional
     private List<ExampleText> examples; // optional
     private List<CategorizedText> notes; // optional

@@ -348,7 +348,7 @@ public class PastebinFormatter {
 
         if (sense.getConstructions() != null) {
             formatted += "\n" + "\t".repeat(level) + "Constructions: ";
-            for (Inline_model_2 con : sense.getConstructions()) {
+            for (InlineModel2 con : sense.getConstructions()) {
                 formatted += createConstruction(con, level + 1);
             }
         }
@@ -469,7 +469,7 @@ public class PastebinFormatter {
         return formatted;
     }
 
-    public String createConstruction(Inline_model_2 construction, int level) {
+    public String createConstruction(InlineModel2 construction, int level) {
         String formatted = "";
 
         if (construction.getDomains() != null) {

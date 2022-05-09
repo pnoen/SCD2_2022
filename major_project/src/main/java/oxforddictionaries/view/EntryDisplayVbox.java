@@ -424,7 +424,7 @@ public class EntryDisplayVbox {
             parent.getChildren().add(conItem);
 
             int count = 1;
-            for (Inline_model_2 con : sense.getConstructions()) {
+            for (InlineModel2 con : sense.getConstructions()) {
                 customItemBuilder.newItem();
                 Label conChildLbl = new Label(String.valueOf(count));
                 conChildLbl.setWrapText(true);
@@ -610,7 +610,7 @@ public class EntryDisplayVbox {
         handleStringLbl(synonymAntonym.getText(), parent, "Text: ", true);
     }
 
-    public void createConstruction(Inline_model_2 construction, TreeItem<CustomItem> parent) {
+    public void createConstruction(InlineModel2 construction, TreeItem<CustomItem> parent) {
         if (construction.getDomains() != null) {
             handleDomains(construction.getDomains(), parent);
         }

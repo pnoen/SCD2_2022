@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Sense {
     private List<SynonymsAntonyms> antonyms; // optional
-    private List<Inline_model_2> constructions; // optional
+    private List<InlineModel2> constructions; // optional
     private List<String> crossReferenceMarkers; // optional
     private List<CrossReference> crossReferences; // optional
     private List<String> definitions; // optional
@@ -29,7 +29,7 @@ public class Sense {
         return antonyms;
     }
 
-    public List<Inline_model_2> getConstructions() {
+    public List<InlineModel2> getConstructions() {
         return constructions;
     }
 
