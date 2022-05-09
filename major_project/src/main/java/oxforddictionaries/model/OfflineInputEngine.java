@@ -21,7 +21,7 @@ public class OfflineInputEngine implements InputEngine {
 
     public List<String> entrySearch(String lang, String word, String field, String gramFeat, String lexiCate,
                                     String domains, String registers, String match, boolean newSearch, boolean historyEntry, boolean lemma) {
-        String json = dummyAPI.getentrySearchJSON();
+        String json = dummyAPI.getEntrySearchJSON();
         Gson gson = new Gson();
         this.retrieveEntry = gson.fromJson(json, RetrieveEntry.class);
         return new ArrayList<>();

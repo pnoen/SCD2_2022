@@ -4,8 +4,18 @@ import oxforddictionaries.model.request.responseclasses.*;
 
 import java.util.List;
 
+/**
+ * Creates a formatted string of the entry to be sent to the pastebin api
+ * E.g. ID: word/nMetadata:/n/tOperation: entry
+ */
 public class PastebinFormatter {
 
+
+    /**
+     * Retrieves the attributes from the entry and formats it into a string
+     * @param retrieveEntry POJO
+     * @return string form of entry
+     */
     public String format(RetrieveEntry retrieveEntry) {
         String formatted = "";
         int level = 0;
@@ -28,6 +38,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the metadata and formats it into a string
+     * @param metadata POJO
+     * @param level indentation
+     * @return string form of metadata
+     */
     public String createMetaData(Metadata metadata, int level) {
         String formatted = "\n" + "\t".repeat(level) + "Metadata: ";
 
@@ -45,6 +61,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the headword entry and formats it into a string
+     * @param headwordEntry POJO
+     * @param level indentation
+     * @return string form of headwordEntry
+     */
     public String createHeadwordEntry(HeadwordEntry headwordEntry, int level) {
         String formatted = "";
 
@@ -67,6 +89,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the lexical entry and formats it into a string
+     * @param lexicalEntry POJO
+     * @param level indentation
+     * @return string form of lexical entry
+     */
     public String createLexicalEntry(LexicalEntry lexicalEntry, int level) {
         String formatted = "";
         if (lexicalEntry.getCompounds() != null) {
@@ -124,6 +152,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the entry and formats it into a string
+     * @param entry POJO
+     * @param level indentation
+     * @return string form of entry
+     */
     public String createEntry(Entry entry, int level) {
         String formatted = "";
 
@@ -170,6 +204,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the pronunciation and formats it into a string
+     * @param pronunciation POJO
+     * @param level indentation
+     * @return string form of pronunciation
+     */
     public String createPronunciation(Pronunciation pronunciation, int level) {
         String formatted = "";
         if (pronunciation.getAudioFile() != null) {
@@ -198,6 +238,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the related entry and formats it into a string
+     * @param relatedEntry POJO
+     * @param level indentation
+     * @return string form of related entry
+     */
     public String createRelatedEntry(RelatedEntry relatedEntry, int level) {
         String formatted = "";
         if (relatedEntry.getDomains() != null) {
@@ -222,6 +268,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the grammatical feature and formats it into a string
+     * @param grammaticalFeature POJO
+     * @param level indentation
+     * @return string form of grammatical feature
+     */
     public String createGrammaticalFeature(GrammaticalFeature grammaticalFeature, int level) {
         String formatted = "";
         formatted += handleString(grammaticalFeature.getId(), "ID: ", level);
@@ -230,6 +282,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the lexical category and formats it into a string
+     * @param lexicalCategory POJO
+     * @param level indentation
+     * @return string form of lexical category
+     */
     public String createLexicalCategory(LexicalCategory lexicalCategory, int level) {
         String formatted = "";
         formatted += handleString(lexicalCategory.getId(), "ID: ", level);
@@ -237,6 +295,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the categorised text and formats it into a string
+     * @param categorizedText POJO
+     * @param level indentation
+     * @return string form of categorised text
+     */
     public String createCategorizedText(CategorizedText categorizedText, int level) {
         String formatted = "";
         if (categorizedText.getId() != null) {
@@ -248,6 +312,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the variant form and formats it into a string
+     * @param variantForm POJO
+     * @param level indentation
+     * @return string form of variant form
+     */
     public String createVariantForm(VariantForm variantForm, int level) {
         String formatted = "";
         if (variantForm.getDomains() != null) {
@@ -274,11 +344,23 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Formats the string with indentations
+     * @param str string
+     * @param level indentation
+     * @return formatted string
+     */
     public String createString(String str, int level) {
         String formatted = "\n" + "\t".repeat(level) + str;
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the region and formats it into a string
+     * @param region POJO
+     * @param level indentation
+     * @return string form of region
+     */
     public String createRegion(Region region, int level) {
         String formatted = "";
         formatted += handleString(region.getId(), "ID: ", level);
@@ -286,6 +368,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the register and formats it into a string
+     * @param register POJO
+     * @param level indentation
+     * @return string form of register
+     */
     public String createRegister(Register register, int level) {
         String formatted = "";
         formatted += handleString(register.getId(), "ID: ", level);
@@ -293,6 +381,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the domain and formats it into a string
+     * @param domain POJO
+     * @param level indentation
+     * @return string format of domain
+     */
     public String createDomain(Domain domain, int level) {
         String formatted = "";
         formatted += handleString(domain.getId(), "ID: ", level);
@@ -300,6 +394,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the cross reference and formats it into a string
+     * @param crossReference POJO
+     * @param level indentation
+     * @return string format of cross reference
+     */
     public String createCrossReference(CrossReference crossReference, int level) {
         String formatted = "";
         formatted += handleString(crossReference.getId(), "ID: ", level);
@@ -308,6 +408,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the inflected form and formats it into a string
+     * @param inflectedForm POJO
+     * @param level indentation
+     * @return string format of inflected form
+     */
     public String createInflectedForm(InflectedForm inflectedForm, int level) {
         String formatted = "";
 
@@ -339,6 +445,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the sense and formats it into a string
+     * @param sense POJO
+     * @param level indentation
+     * @return string format of sense
+     */
     public String createSense(Sense sense, int level) {
         String formatted = "";
 
@@ -443,6 +555,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the synonym/antonym and formats it into a string
+     * @param synonymAntonym POJO
+     * @param level indentation
+     * @return string format of synonym/antonym
+     */
     public String createSynonymAntonym(SynonymsAntonyms synonymAntonym, int level) {
         String formatted = "";
         if (synonymAntonym.getDomains() != null) {
@@ -469,6 +587,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the construction and formats it into a string
+     * @param construction POJO
+     * @param level indentation
+     * @return string format of construction
+     */
     public String createConstruction(InlineModel2 construction, int level) {
         String formatted = "";
 
@@ -499,6 +623,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the domain class and formats it into a string
+     * @param domainClass POJO
+     * @param level indentation
+     * @return string format of domain class
+     */
     public String createDomainClass(DomainClass domainClass, int level) {
         String formatted = "";
 
@@ -507,6 +637,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the example and formats it into a string
+     * @param example POJO
+     * @param level indentation
+     * @return string format of example
+     */
     public String createExample(Example example, int level) {
         String formatted = "";
 
@@ -538,6 +674,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the semantic class and formats it into a string
+     * @param semanticClass POJO
+     * @param level indentation
+     * @return string format of semantic class
+     */
     public String createSemanticClass(SemanticClass semanticClass, int level) {
         String formatted = "";
 
@@ -546,14 +688,26 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the thesaurus link and formats it into a string
+     * @param thesaurusLink POJO
+     * @param level indentation
+     * @return string format of thesaurus link
+     */
     public String createThesaurusLink(ThesaurusLink thesaurusLink, int level) {
         String formatted = "";
 
-        formatted += handleString(thesaurusLink.getEntry_id(), "Entry ID: ", level);
-        formatted += handleString(thesaurusLink.getSense_id(), "Sense ID: ", level);
+        formatted += handleString(thesaurusLink.getEntryId(), "Entry ID: ", level);
+        formatted += handleString(thesaurusLink.getSenseId(), "Sense ID: ", level);
         return formatted;
     }
 
+    /**
+     * Retrieves the attributes from the example text and formats it into a string
+     * @param exampleText POJO
+     * @param level indentation
+     * @return string format of example text
+     */
     public String createExampleText(ExampleText exampleText, int level) {
         String formatted = "";
 
@@ -561,11 +715,24 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Formats the string by adding indentation and the key
+     * @param value value
+     * @param key key
+     * @param level indentation
+     * @return formatted string
+     */
     public String handleString(String value, String key, int level) {
         String formatted = "\n" + "\t".repeat(level) + key + value;
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the pronunciation string from the list
+     * @param pronunciations list of pronunciations
+     * @param level indentation
+     * @return string form of list of pronunciations
+     */
     public String handlePronunciations(List<Pronunciation> pronunciations, int level) {
         String formatted = "\n" + "\t".repeat(level) + "Pronunciations: ";
         for (Pronunciation pro : pronunciations) {
@@ -574,6 +741,13 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the related entries string from the list
+     * @param relatedEntries list of related entries
+     * @param key key
+     * @param level indentation
+     * @return string form of list of related entries
+     */
     public String handleRelatedEntries(List<RelatedEntry> relatedEntries, String key, int level) {
         String formatted = "\n" + "\t".repeat(level) + key;
         for (RelatedEntry entry : relatedEntries) {
@@ -582,6 +756,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the grammatical features string from the list
+     * @param grammaticalFeatures list of grammatical features
+     * @param level indentation
+     * @return string form of list of grammatical features
+     */
     public String handleGrammaticalFeatures(List<GrammaticalFeature> grammaticalFeatures, int level) {
         String formatted = "\n" + "\t".repeat(level) + "Grammatical Features: ";
         for (GrammaticalFeature gram :  grammaticalFeatures) {
@@ -590,12 +770,24 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the lexical category string from the list
+     * @param lexicalCategory list of lexical category
+     * @param level indentation
+     * @return string form of list of lexical category
+     */
     public String handleLexicalCategory(LexicalCategory lexicalCategory, int level) {
         String formatted = "\n" + "\t".repeat(level) + "Lexical Category: ";
         formatted += createLexicalCategory(lexicalCategory, level + 1);
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the notes string from the list
+     * @param notes list of notes
+     * @param level indentation
+     * @return string form of list of notes
+     */
     public String handleNotes(List<CategorizedText> notes, int level) {
         String formatted = "\n" + "\t".repeat(level) + "Notes: ";
         for (CategorizedText note : notes) {
@@ -604,6 +796,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the variant forms string from the list
+     * @param variantForms list of variant forms
+     * @param level indentation
+     * @return string form of list of variant forms
+     */
     public String handleVariantForms(List<VariantForm> variantForms, int level) {
         String formatted = "\n" + "\t".repeat(level) + "Variant Forms: ";
         for (VariantForm var : variantForms) {
@@ -612,6 +810,13 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the string from the list
+     * @param strings list of strings
+     * @param key key
+     * @param level indentation
+     * @return formmated string for the list of strings
+     */
     public String handleStrings(List<String> strings, String key, int level) {
         String formatted = "\n" + "\t".repeat(level) + key;
         for (String str : strings) {
@@ -620,6 +825,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the cross references string from the list
+     * @param crossReferences list of cross references
+     * @param level indentation
+     * @return string for of list of cross references
+     */
     public String handleCrossReferences(List<CrossReference> crossReferences, int level) {
         String formatted = "\n" + "\t".repeat(level) + "Cross Reference: ";
         for (CrossReference cross : crossReferences) {
@@ -628,6 +839,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the inflected forms string from the list
+     * @param inflectedForms list of inflected forms
+     * @param level indentation
+     * @return string form of list of inflected forms
+     */
     public String handleInflections(List<InflectedForm> inflectedForms, int level) {
         String formatted = "\n" + "\t".repeat(level) + "Inflections: ";
         for (InflectedForm inf : inflectedForms) {
@@ -636,6 +853,13 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the senses string from the list
+     * @param senses list of senses
+     * @param key key
+     * @param level indentation
+     * @return string form of list of senses
+     */
     public String handleSenses(List<Sense> senses, String key, int level) {
         String formatted = "\n" + "\t".repeat(level) + key;
         for (Sense sen : senses) {
@@ -644,6 +868,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the regions string from the list
+     * @param regions list of regions
+     * @param level indentation
+     * @return string form of list of regions
+     */
     public String handleRegions(List<Region> regions, int level) {
         String formatted = "\n" + "\t".repeat(level) + "Regions: ";
         for (Region reg : regions) {
@@ -652,6 +882,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the registers string from the list
+     * @param registers list of registers
+     * @param level indentation
+     * @return string form of list of registers
+     */
     public String handleRegisters(List<Register> registers, int level) {
         String formatted = "\n" + "\t".repeat(level) + "Registers: ";
         for (Register reg : registers) {
@@ -660,6 +896,12 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the domains string from the list
+     * @param domains list of domains
+     * @param level indentation
+     * @return string form of list of domains
+     */
     public String handleDomains(List<Domain> domains, int level) {
         String formatted = "\n" + "\t".repeat(level) + "Domains: ";
         for (Domain dom : domains) {
@@ -668,6 +910,13 @@ public class PastebinFormatter {
         return formatted;
     }
 
+    /**
+     * Creates a loop that creates the synonyms/antonyms string from the list
+     * @param synonymsAntonyms list of synonyms/antonyms
+     * @param key key
+     * @param level indenation
+     * @return string form of list of synonyms/antonyms
+     */
     public String handleSynonymsAntonyms(List<SynonymsAntonyms> synonymsAntonyms, String key, int level) {
         String formatted = "\n" + "\t".repeat(level) + key;
         for (SynonymsAntonyms synAnt : synonymsAntonyms) {

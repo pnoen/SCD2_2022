@@ -2,6 +2,9 @@ package oxforddictionaries.model.request.responseclasses;
 
 import java.util.List;
 
+/**
+ * POJO
+ */
 // Inline model 5
 public class VariantForm {
     private List<Domain> domains; // optional
@@ -11,26 +14,44 @@ public class VariantForm {
     private List<Register> registers; // optional
     private String text;
 
+    /**
+     * @return domains
+     */
     public List<Domain> getDomains() {
         return domains;
     }
 
+    /**
+     * @return notes
+     */
     public List<CategorizedText> getNotes() {
         return notes;
     }
 
+    /**
+     * @return pronunciations
+     */
     public List<Pronunciation> getPronunciations() {
         return pronunciations;
     }
 
+    /**
+     * @return regions
+     */
     public List<Region> getRegions() {
         return regions;
     }
 
+    /**
+     * @return registers
+     */
     public List<Register> getRegisters() {
         return registers;
     }
 
+    /**
+     * @return text
+     */
     public String getText() {
         return text;
     }

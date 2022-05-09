@@ -1,8 +1,15 @@
 package oxforddictionaries.model.request;
 
+/**
+ * Acts as a mock of the Oxford Dictionaries api by providing a set json string.
+ */
 public class DummyAPI {
 
-    public String getentrySearchJSON() {
+    /**
+     * Creates a fake JSON string for entry searches
+     * @return json string
+     */
+    public String getEntrySearchJSON() {
         String json = "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"RetrieveEntry\"" +
                 "},\"results\": [{\"id\": \"noun\",\"language\": \"en-gb\",\"lexicalEntries\": [{\"derivatives\": [{\"id\": \"nounal\",\"text\": \"nounal\"" +
                 "}],\"entries\": [{\"etymologies\": [\"late Middle English: from Anglo-Norman French, from Latin nomen ‘name’\"],\"pronunciations\": [{" +
@@ -18,6 +25,10 @@ public class DummyAPI {
         return json;
     }
 
+    /**
+     * Creates a fake JSON string for lemma searches
+     * @return json string
+     */
     public String getLemmaSearchJSON() {
         String json = "{\"metadata\": {\"provider\": \"Oxford University Press\"},\"results\": [{\"id\": \"aces\",\"language\": \"en\",\"lexicalEntries\": [{" +
                 "\"inflectionOf\": [{\"id\": \"ace\",\"text\": \"ace\"}],\"language\": \"en\",\"lexicalCategory\": {\"id\": \"noun\",\"text\": \"Noun\"}," +
@@ -26,6 +37,10 @@ public class DummyAPI {
         return json;
     }
 
+    /**
+     * Creates a fake URL for sending reports
+     * @return url
+     */
     public String getSendReportResponse() {
         String response = "https://pastebin.com/DummyAPI";
         return response;

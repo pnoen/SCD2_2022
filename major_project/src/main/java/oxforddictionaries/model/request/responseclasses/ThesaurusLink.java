@@ -1,14 +1,27 @@
 package oxforddictionaries.model.request.responseclasses;
 
-public class ThesaurusLink {
-    private String entry_id;
-    private String sense_id;
+import com.google.gson.annotations.SerializedName;
 
-    public String getEntry_id() {
-        return entry_id;
+/**
+ * POJO
+ */
+public class ThesaurusLink {
+    @SerializedName(value = "entry_id")
+    private String entryId;
+    @SerializedName(value = "sense_id")
+    private String senseId;
+
+    /**
+     * @return entry id
+     */
+    public String getEntryId() {
+        return entryId;
     }
 
-    public String getSense_id() {
-        return sense_id;
+    /**
+     * @return sense id
+     */
+    public String getSenseId() {
+        return senseId;
     }
 }

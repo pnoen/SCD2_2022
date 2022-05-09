@@ -691,8 +691,8 @@ public class EntryDisplayVbox {
     }
 
     public void createThesaurusLink(ThesaurusLink thesaurusLink, TreeItem<CustomItem> parent) {
-        handleStringLbl(thesaurusLink.getEntry_id(), parent, "Entry ID: ", false);
-        handleStringLbl(thesaurusLink.getSense_id(), parent, "Sense ID: ", false);
+        handleStringLbl(thesaurusLink.getEntryId(), parent, "Entry ID: ", false);
+        handleStringLbl(thesaurusLink.getSenseId(), parent, "Sense ID: ", false);
     }
 
     public void createExampleText(ExampleText exampleText, TreeItem<CustomItem> parent) {

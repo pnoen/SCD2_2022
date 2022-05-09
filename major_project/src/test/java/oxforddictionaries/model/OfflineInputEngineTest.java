@@ -24,73 +24,73 @@ public class OfflineInputEngineTest {
     @Test
     public void entrySearchValid() {
         String response = "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}";
-        when(dummyAPIMock.getentrySearchJSON()).thenReturn(response);
+        when(dummyAPIMock.getEntrySearchJSON()).thenReturn(response);
 
         List<String> actual = offlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
                 "", "", "", true, false, false);
         assertThat(actual.size(), equalTo(0));
 
-        verify(dummyAPIMock, times(1)).getentrySearchJSON();
+        verify(dummyAPIMock, times(1)).getEntrySearchJSON();
     }
 
     @Test
     public void entrySearchNull() {
         String response = "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}";
-        when(dummyAPIMock.getentrySearchJSON()).thenReturn(response);
+        when(dummyAPIMock.getEntrySearchJSON()).thenReturn(response);
 
         List<String> actual = offlineInputEngine.entrySearch("en-gb", "noun", null, null, null,
                 null, "", "", true, false, false);
         assertThat(actual.size(), equalTo(0));
 
-        verify(dummyAPIMock, times(1)).getentrySearchJSON();
+        verify(dummyAPIMock, times(1)).getEntrySearchJSON();
     }
 
     @Test
     public void entrySearchSpaces() {
         String response = "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}";
-        when(dummyAPIMock.getentrySearchJSON()).thenReturn(response);
+        when(dummyAPIMock.getEntrySearchJSON()).thenReturn(response);
 
         List<String> actual = offlineInputEngine.entrySearch("en-gb", "noun", "", "  ", " ",
                 "", "", "", true, false, false);
         assertThat(actual.size(), equalTo(0));
 
-        verify(dummyAPIMock, times(1)).getentrySearchJSON();
+        verify(dummyAPIMock, times(1)).getEntrySearchJSON();
     }
 
     @Test
     public void entrySearchEmptyWord() {
         String response = "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}";
-        when(dummyAPIMock.getentrySearchJSON()).thenReturn(response);
+        when(dummyAPIMock.getEntrySearchJSON()).thenReturn(response);
 
         List<String> actual = offlineInputEngine.entrySearch("en-gb", "", "", "", "",
                 "", "", "", true, false, false);
         assertThat(actual.size(), equalTo(0));
 
-        verify(dummyAPIMock, times(1)).getentrySearchJSON();
+        verify(dummyAPIMock, times(1)).getEntrySearchJSON();
     }
 
     @Test
     public void entrySearchHistorySearch() {
         String response = "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}";
-        when(dummyAPIMock.getentrySearchJSON()).thenReturn(response);
+        when(dummyAPIMock.getEntrySearchJSON()).thenReturn(response);
 
         List<String> actual = offlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
                 "", "", "", true, true, false);
         assertThat(actual.size(), equalTo(0));
 
-        verify(dummyAPIMock, times(1)).getentrySearchJSON();
+        verify(dummyAPIMock, times(1)).getEntrySearchJSON();
     }
 
     @Test
     public void entrySearchNotNewSearch() {
         String response = "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}";
-        when(dummyAPIMock.getentrySearchJSON()).thenReturn(response);
+        when(dummyAPIMock.getEntrySearchJSON()).thenReturn(response);
 
         List<String> actual = offlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
                 "", "", "", false, false, false);
         assertThat(actual.size(), equalTo(0));
 
-        verify(dummyAPIMock, times(1)).getentrySearchJSON();
+        verify(dummyAPIMock, times(1)).getEntrySearchJSON();
     }
 
     @Test
