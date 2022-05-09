@@ -28,7 +28,7 @@ dependencies {
 }
 
 application {
-    mainClass = 'OxfordDictionaries.Main'
+    mainClass = 'oxforddictionaries.Main'
 }
 
 tasks.named('test') {
