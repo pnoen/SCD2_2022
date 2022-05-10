@@ -1,6 +1,7 @@
 package oxforddictionaries.model;
 
 import oxforddictionaries.model.request.Request;
+import oxforddictionaries.model.request.SqlDatabase;
 import oxforddictionaries.model.request.responseclasses.RetrieveEntry;
 import com.google.gson.Gson;
 
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Calls the Oxford Dictionaries Api with GET requests
+ * Calls the Oxford Dictionaries Api with GET requests. Checks if the entry exists in the database before requesting.
  */
 public class OnlineInputEngine implements InputEngine {
     private Request request;
@@ -17,19 +18,25 @@ public class OnlineInputEngine implements InputEngine {
     private List<List<String>> history;
     private int currentPageInd;
     private LemmaProcessor lemmaProcessor;
+    private SqlDatabase db;
 
     /**
-     * Creates the online input engine
+     * Creates the online input engine. Setups the database.
      * @param request request
      * @param lemmaProcessor lemma processor
+     * @param db sql database
      */
-    public OnlineInputEngine(Request request, LemmaProcessor lemmaProcessor) {
+    public OnlineInputEngine(Request request, LemmaProcessor lemmaProcessor, SqlDatabase db) {
         this.request = request;
         this.history = new ArrayList<>();
         this.lemmaProcessor = lemmaProcessor;
+        this.db = db;
+
+        db.setupDB();
     }
 
     /**
+     * Check the database if the uri exists. If it doesn't then request from the api.
      * Check if the response is OK. If the response errors then return the list of errors.
      * If valid, create the POJO. If it is not a history search then add it to the history
      * and move the current entry to the end if it is not a new search. Return an empty list if valid.
@@ -53,11 +60,24 @@ public class OnlineInputEngine implements InputEngine {
         uri = createUriFields(uri, field, gramFeat, lexiCate, domains, registers, match);
         uri = uriEscape(uri);
 
-        List<String> response = response = request.getRequest(uri);
+        List<String> response = db.getEntry(uri);
+        boolean cached = true;
+        if (response.size() == 0) {
+            response = request.getRequest(uri);
+            cached = false;
+        }
 
 //        System.out.println(response);
         if (response.size() == 2) {
             int statusCode = Integer.parseInt(response.get(0));
+            if (!cached) {
+                String error = db.addEntry(uri, response.get(1), statusCode);
+                if (error != null) {
+                    response.clear();
+                    response.add(error);
+                    return response;
+                }
+            }
 
 //            System.out.println("Response body was:\n" + response.get(1));
 
@@ -96,7 +116,8 @@ public class OnlineInputEngine implements InputEngine {
     }
 
     /**
-     * Creates the uri and performs a GET request. if the response errors then return the list of errors.
+     * Creates the uri and performs a GET request. Before requesting the api, it checks the database.
+     * If the response errors then return the list of errors.
      * If valid, create the POJO and return an empty list.
      * @param lang language
      * @param word word
@@ -111,12 +132,25 @@ public class OnlineInputEngine implements InputEngine {
         uri = uriEscape(uri);
 //        System.out.println(uri);
 
-        List<String> response = request.getRequest(uri);
+        List<String> response = db.getLemma(uri);
+        boolean cached = true;
+        if (response.size() == 0) {
+            response = request.getRequest(uri);
+            cached = false;
+        }
 
 //        System.out.println(response);
         if (response.size() == 2) {
             int statusCode = Integer.parseInt(response.get(0));
 //            System.out.println("Response body was:\n" + response.get(1));
+            if (!cached) {
+                String error = db.addLemma(uri, response.get(1), statusCode);
+                if (error != null) {
+                    response.clear();
+                    response.add(error);
+                    return response;
+                }
+            }
 
             if (statusCode >= 200 && statusCode < 300) {
                 Gson gson = new Gson();
@@ -289,5 +323,14 @@ public class OnlineInputEngine implements InputEngine {
      */
     public List<List<String>> findLemmas() {
         return lemmaProcessor.createData(retrieveEntry);
+    }
+
+    /**
+     * Clears the database tables.
+     * @return error message
+     */
+    public String clearCache() {
+        String error = db.clearDatabase();
+        return error;
     }
 }

@@ -1,6 +1,7 @@
 package oxforddictionaries.model;
 
 import oxforddictionaries.model.request.Request;
+import oxforddictionaries.model.request.SqlDatabase;
 import oxforddictionaries.model.request.responseclasses.RetrieveEntry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,12 +19,14 @@ public class OnlineInputEngineTest {
     private OnlineInputEngine onlineInputEngine;
     private Request requestMock;
     private LemmaProcessor lemmaProcessorMock;
+    private SqlDatabase sqlDatabaseMock;
 
     @BeforeEach
     public void setup() {
         this.requestMock = mock(Request.class);
         this.lemmaProcessorMock = mock(LemmaProcessor.class);
-        this.onlineInputEngine = new OnlineInputEngine(requestMock, lemmaProcessorMock);
+        this.sqlDatabaseMock = mock(SqlDatabase.class);
+        this.onlineInputEngine = new OnlineInputEngine(requestMock, lemmaProcessorMock, sqlDatabaseMock);
     }
 
     @Test

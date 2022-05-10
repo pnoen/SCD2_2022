@@ -131,7 +131,13 @@ public class GameWindow {
         }));
         reportBtn.setDisable(true);
 
-        this.leftVbox.getChildren().addAll(entryBtn, historyBtn, reportBtn);
+        Button clearDbBtn = new Button("Clear Cache");
+        clearDbBtn.setPrefWidth(btnWidth);
+        clearDbBtn.setOnAction((event -> {
+            clearCache();
+        }));
+
+        this.leftVbox.getChildren().addAll(entryBtn, historyBtn, reportBtn, clearDbBtn);
     }
 
     /**
@@ -297,5 +303,23 @@ public class GameWindow {
             linkDialog.showAndWait();
         });
         dialog.showAndWait();
+    }
+
+    /**
+     * Clears the database tables. Display whether it was successful or it caused an error.
+     */
+    public void clearCache() {
+        String error = inputEngine.clearCache();
+        if (error != null) {
+            List<String> errorList = new ArrayList<>();
+            errorList.add(error);
+            handleError(errorList);
+            return;
+        }
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Database");
+        alert.setHeaderText("Success!");
+        alert.setContentText("Cache has been cleared.");
+        alert.showAndWait();
     }
 }

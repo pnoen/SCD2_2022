@@ -126,4 +126,12 @@ public class OfflineInputEngine implements InputEngine {
     public List<List<String>> findLemmas() {
         return lemmaProcessor.createData(retrieveEntry);
     }
+
+    /**
+     * Clears the database tables.
+     * @return null
+     */
+    public String clearCache() {
+        return null;
+    }
 }

@@ -1,10 +1,7 @@
 package oxforddictionaries;
 
 import oxforddictionaries.model.*;
-import oxforddictionaries.model.request.DummyAPI;
-import oxforddictionaries.model.request.PastebinFormatter;
-import oxforddictionaries.model.request.PastebinPostBuilder;
-import oxforddictionaries.model.request.Request;
+import oxforddictionaries.model.request.*;
 import oxforddictionaries.view.GameWindow;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -67,7 +64,7 @@ public class Main extends Application {
             return new OfflineInputEngine(new DummyAPI(), new LemmaProcessor());
         }
         else if (engine.equals("online")) {
-            return new OnlineInputEngine(new Request(inputApiAppId, inputAppKey), new LemmaProcessor());
+            return new OnlineInputEngine(new Request(inputApiAppId, inputAppKey), new LemmaProcessor(), new SqlDatabase());
         }
         return null;
     }

@@ -60,4 +60,10 @@ public interface InputEngine {
      * @return List of lemmas
      */
     List<List<String>> findLemmas();
+
+    /**
+     * Clears the database tables.
+     * @return error message
+     */
+     String clearCache();
 }
