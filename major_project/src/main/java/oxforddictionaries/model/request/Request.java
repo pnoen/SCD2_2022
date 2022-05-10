@@ -11,15 +11,28 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Performs the POST and GET requests
+ */
 public class Request {
     private final String INPUT_APP_KEY;
     private final String INPUT_API_APP_ID;
 
+    /**
+     * Creates the Request object
+     * @param INPUT_API_APP_ID Oxford Dictionaries api id
+     * @param INPUT_APP_KEY Oxford Dictionaries app key
+     */
     public Request(String INPUT_API_APP_ID, String INPUT_APP_KEY) {
         this.INPUT_API_APP_ID = INPUT_API_APP_ID;
         this.INPUT_APP_KEY = INPUT_APP_KEY;
     }
 
+    /**
+     * Sends a GET request to the API and constructs a list of strings with the response status code and response body
+     * @param uri url
+     * @return http response
+     */
     public List<String> getRequest(String uri) {
         List<String> msg = new ArrayList<String>();
 //        System.out.println(INPUT_API_APP_ID + " " + INPUT_APP_KEY);
@@ -52,6 +65,12 @@ public class Request {
         return msg;
     }
 
+    /**
+     * Sends a POST request to the api and sends the data in UTF_8. Constructs a list of strings with the response status code and response body
+     * @param uri url
+     * @param postBody data to be sent to the api
+     * @return http response
+     */
     public List<String> postRequest(String uri, String postBody) {
         List<String> msg = new ArrayList<String>();
         try {

@@ -9,7 +9,7 @@ import oxforddictionaries.model.request.responseclasses.RetrieveEntry;
 import java.util.List;
 
 public class OnlineOutputEngine implements OutputEngine {
-    private String PASTEBIN_API_KEY;
+    private final String PASTEBIN_API_KEY;
     private Request request;
     private PastebinPostBuilder pastebinPostBuilder;
     private String pastebinLink;
@@ -52,7 +52,6 @@ public class OnlineOutputEngine implements OutputEngine {
 
     public PastebinPost createPastebinPost(String entry, int apiPastePrivate, String apiPasteName, String apiUserKey, String apiPasteExpireDate, String apiFolderKey) {
         pastebinPostBuilder.newItem(PASTEBIN_API_KEY, "paste", entry, apiPastePrivate);
-//        pastebinPostBuilder.setPasteFormat("json");
         pastebinPostBuilder.setPasteName(apiPasteName);
         pastebinPostBuilder.setUserKey(apiUserKey);
         pastebinPostBuilder.setPasteExpireDate(apiPasteExpireDate);

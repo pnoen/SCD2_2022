@@ -1,32 +1,57 @@
 package oxforddictionaries.model.request;
 
+/**
+ * Builds the PastebinPost as there may be situations where the object will have different attributes set
+ */
 public class PastebinPostBuilder {
     private PastebinPost pastebinPost;
 
-    public void newItem(String api_dev_key, String api_option, String api_paste_code, int api_paste_private) {
-        this.pastebinPost = new PastebinPost(api_dev_key, api_option, api_paste_code, api_paste_private);
+    /**
+     * Creates a new PastebinPost object
+     * @param apiDevKey pastebin dev key
+     * @param apiOption pastebin option
+     * @param apiPasteCode pastebin code
+     * @param apiPastePrivate pastebin privacy
+     */
+    public void newItem(String apiDevKey, String apiOption, String apiPasteCode, int apiPastePrivate) {
+        this.pastebinPost = new PastebinPost(apiDevKey, apiOption, apiPasteCode, apiPastePrivate);
     }
 
-    public void setUserKey(String api_user_key) {
-        pastebinPost.setApi_user_key(api_user_key);
+    /**
+     * Sets the PastebinPost user key
+     * @param apiUserKey pastebin user key
+     */
+    public void setUserKey(String apiUserKey) {
+        pastebinPost.setApiUserKey(apiUserKey);
     }
 
-    public void setPasteName(String api_paste_name) {
-        pastebinPost.setApi_paste_name(api_paste_name);
+    /**
+     * Sets the PastebinPost post name
+     * @param apiPasteName pastebin post name
+     */
+    public void setPasteName(String apiPasteName) {
+        pastebinPost.setApiPasteName(apiPasteName);
     }
 
-    public void setPasteFormat(String api_paste_format) {
-        pastebinPost.setApi_paste_format(api_paste_format);
+    /**
+     * Sets the PastebinPost expiration length
+     * @param apiPasteExpireDate pastebin expiration length
+     */
+    public void setPasteExpireDate(String apiPasteExpireDate) {
+        pastebinPost.setApiPasteExpireDate(apiPasteExpireDate);
     }
 
-    public void setPasteExpireDate(String api_paste_expire_date) {
-        pastebinPost.setApi_paste_expire_date(api_paste_expire_date);
+    /**
+     * Sets the PastebinPost folder key
+     * @param apiFolderKey pastebin folder key
+     */
+    public void setFolderKey(String apiFolderKey) {
+        pastebinPost.setApiFolderKey(apiFolderKey);
     }
 
-    public void setFolderKey(String api_folder_key) {
-        pastebinPost.setApi_folder_key(api_folder_key);
-    }
-
+    /**
+     * @return pastebin post
+     */
     public PastebinPost getPastebinPost() {
         return pastebinPost;
     }

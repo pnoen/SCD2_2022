@@ -1,60 +1,87 @@
 package oxforddictionaries.model.request;
 
+/**
+ * Holds all the information that is going to be added to the POST uri
+ */
 public class PastebinPost {
-    private String api_dev_key;
-    private String api_option;
-    private String api_paste_code;
-    private int api_paste_private;
-    private String api_user_key;
-    private String api_paste_name;
-    private String api_paste_format;
-    private String api_paste_expire_date;
-    private String api_folder_key;
+    private String apiDevKey;
+    private String apiOption;
+    private String apiPasteCode;
+    private int apiPastePrivate;
+    private String apiUserKey;
+    private String apiPasteName;
+    private String apiPasteFormat;
+    private String apiPasteExpireDate;
+    private String apiFolderKey;
 
-    public PastebinPost(String api_dev_key, String api_option, String api_paste_code, int api_paste_private) {
-        this.api_dev_key = api_dev_key;
-        this.api_option = api_option;
-        this.api_paste_code = api_paste_code;
-        this.api_paste_private = api_paste_private;
+    /**
+     * Creates the PastebinPost
+     * @param apiDevKey pastebin dev key
+     * @param apiOption pastebin option
+     * @param apiPasteCode pastebin code
+     * @param apiPastePrivate pastebin privacy
+     */
+    public PastebinPost(String apiDevKey, String apiOption, String apiPasteCode, int apiPastePrivate) {
+        this.apiDevKey = apiDevKey;
+        this.apiOption = apiOption;
+        this.apiPasteCode = apiPasteCode;
+        this.apiPastePrivate = apiPastePrivate;
     }
 
-    public void setApi_user_key(String api_user_key) {
-        this.api_user_key = api_user_key;
+    /**
+     * Sets the pastebin user key
+     * @param apiUserKey pastebin user key
+     */
+    public void setApiUserKey(String apiUserKey) {
+        this.apiUserKey = apiUserKey;
     }
 
-    public void setApi_paste_name(String api_paste_name) {
-        this.api_paste_name = api_paste_name;
+    /**
+     * Sets the pastebin post name
+     * @param apiPasteName pastebin post name
+     */
+    public void setApiPasteName(String apiPasteName) {
+        this.apiPasteName = apiPasteName;
     }
 
-    public void setApi_paste_format(String api_paste_format) {
-        this.api_paste_format = api_paste_format;
+    /**
+     * Sets the pastebin post expire length
+     * @param apiPasteExpireDate pastebin post expire length
+     */
+    public void setApiPasteExpireDate(String apiPasteExpireDate) {
+        this.apiPasteExpireDate = apiPasteExpireDate;
     }
 
-    public void setApi_paste_expire_date(String api_paste_expire_date) {
-        this.api_paste_expire_date = api_paste_expire_date;
+    /**
+     * Sets the pastebin folder key
+     * @param apiFolderKey pastebin folder key
+     */
+    public void setApiFolderKey(String apiFolderKey) {
+        this.apiFolderKey = apiFolderKey;
     }
 
-    public void setApi_folder_key(String api_folder_key) {
-        this.api_folder_key = api_folder_key;
-    }
-
+    /**
+     * Formats the string to include every attribute that is not null
+     * E.g. api_dev_key=key&api_option=option&api_paste_code=code&api_paste_private=0
+     * @return string form of PastebinPost
+     */
     @Override
     public String toString() {
-        String str = "api_dev_key=" + api_dev_key + "&api_option=" + api_option + "&api_paste_code=" + api_paste_code + "&api_paste_private=" + api_paste_private;
-        if (api_paste_name != null) {
-            str += "&api_paste_name=" + api_paste_name;
+        String str = "api_dev_key=" + apiDevKey + "&api_option=" + apiOption + "&api_paste_code=" + apiPasteCode + "&api_paste_private=" + apiPastePrivate;
+        if (apiPasteName != null) {
+            str += "&api_paste_name=" + apiPasteName;
         }
-        if (api_paste_format != null) {
-            str += "&api_paste_format=" + api_paste_format;
+        if (apiPasteFormat != null) {
+            str += "&api_paste_format=" + apiPasteFormat;
         }
-        if (api_user_key != null) {
-            str += "&api_user_key=" + api_user_key;
+        if (apiUserKey != null) {
+            str += "&api_user_key=" + apiUserKey;
         }
-        if (api_paste_expire_date != null) {
-            str += "&api_paste_expire_date=" + api_paste_expire_date;
+        if (apiPasteExpireDate != null) {
+            str += "&api_paste_expire_date=" + apiPasteExpireDate;
         }
-        if (api_folder_key != null) {
-            str += "&api_folder_key=" + api_folder_key;
+        if (apiFolderKey != null) {
+            str += "&api_folder_key=" + apiFolderKey;
         }
         return str;
     }
