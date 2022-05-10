@@ -10,11 +10,19 @@ import javafx.scene.text.FontWeight;
 
 import java.util.List;
 
+/**
+ * This is the display pane for the history
+ */
 public class HistoryDisplayVbox {
     private VBox vbox;
     private Button goBtn;
     private ToggleGroup historyRadioBtns;
 
+    /**
+     * Displays the history and allows the user to select an entry to revisit.
+     * @param history list of history
+     * @return vbox
+     */
     public VBox create(List<List<String>> history) {
         this.vbox = new VBox(5);
 
@@ -36,10 +44,17 @@ public class HistoryDisplayVbox {
         return vbox;
     }
 
+    /**
+     * @return revisit button
+     */
     public Button getGoBtn() {
         return goBtn;
     }
 
+    /**
+     * Gets the index of the selected entry on the history page. If no entry has been selected, return -1.
+     * @return index of selected entry
+     */
     public int getSelectedBtnVal() {
         if (historyRadioBtns.getSelectedToggle() == null) {
             return -1;

@@ -12,6 +12,9 @@ import javafx.scene.text.FontWeight;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is the display pane for the entry input
+ */
 public class EntryInputVbox {
     private VBox vbox;
     private ComboBox<String> langsMenu;
@@ -24,6 +27,11 @@ public class EntryInputVbox {
     private ComboBox<String> matchMenu;
     private Button searchBtn;
 
+    /**
+     * Creates the input fields for language, word, field, grammatical feature,
+     * lexical category, domains, registers and strict match
+     * @return vbox
+     */
     public VBox create() {
         Label titleLbl = new Label("Search for an entry");
         titleLbl.setWrapText(true);
@@ -50,6 +58,10 @@ public class EntryInputVbox {
         return vbox;
     }
 
+    /**
+     * Creates the dropdown menu for language
+     * @return hbox
+     */
     public HBox createLangHbox() {
         Label langLbl = new Label("Language: ");
         langLbl.setWrapText(true);
@@ -63,6 +75,10 @@ public class EntryInputVbox {
         return langHbox;
     }
 
+    /**
+     * Creates the text field for word
+     * @return hbox
+     */
     public HBox createWordHbox() {
         Label wordLbl = new Label("Word: ");
         wordLbl.setWrapText(true);
@@ -71,6 +87,10 @@ public class EntryInputVbox {
         return wordHbox;
     }
 
+    /**
+     * Creates the dropdown for field
+     * @return hbox
+     */
     public HBox createFieldHBox() {
         Label fieldLbl = new Label("Field: (Opt.) ");
         fieldLbl.setWrapText(true);
@@ -91,6 +111,10 @@ public class EntryInputVbox {
         return fieldHbox;
     }
 
+    /**
+     * Creates the text field for grammatical features
+     * @return hbox
+     */
     public HBox createGramFeatHbox() {
         Label gramFeatLbl = new Label("Grammatical Feature: (Opt.) ");
         gramFeatLbl.setWrapText(true);
@@ -99,6 +123,10 @@ public class EntryInputVbox {
         return gramFeatHbox;
     }
 
+    /**
+     * Creates the text field for lexical categories
+     * @return hbox
+     */
     public HBox createLexiCateHbox() {
         Label lexiCateLbl = new Label("Lexical Category: (Opt.) ");
         lexiCateLbl.setWrapText(true);
@@ -107,6 +135,10 @@ public class EntryInputVbox {
         return lexiCateHbox;
     }
 
+    /**
+     * Creates the text field for domains
+     * @return hbox
+     */
     public HBox createDomainsHbox() {
         Label domainsLbl = new Label("Domains: (Opt.) ");
         domainsLbl.setWrapText(true);
@@ -115,6 +147,10 @@ public class EntryInputVbox {
         return domainsHbox;
     }
 
+    /**
+     * Creates the text field for registers
+     * @return hbox
+     */
     public HBox createRegistersHbox() {
         Label registersLbl = new Label("Registers: (Opt.) ");
         registersLbl.setWrapText(true);
@@ -123,6 +159,10 @@ public class EntryInputVbox {
         return registersHbox;
     }
 
+    /**
+     * Create the dropdown menu for strict match
+     * @return hbox
+     */
     public HBox createMatchHbox() {
         Label matchLbl = new Label("Strict Match: (Opt.) ");
         matchLbl.setWrapText(true);
@@ -137,10 +177,18 @@ public class EntryInputVbox {
         return matchHbox;
     }
 
+    /**
+     * Gets the language from the dropdown
+     * @return language
+     */
     public String getLang() {
         return langsMenu.getValue();
     }
 
+    /**
+     * Gets the word from the dropdown. If the word is empty, return null.
+     * @return word
+     */
     public String getWord() {
         if (wordTxt.getText().trim().equals("")) {
             return null;
@@ -148,30 +196,58 @@ public class EntryInputVbox {
         return wordTxt.getText();
     }
 
+    /**
+     * Gets the field from the dropdown
+     * @return field
+     */
     public String getField() {
         return fieldMenu.getValue();
     }
 
+    /**
+     * Gets the grammatical features from the text field
+     * @return grammatical features
+     */
     public String getGramFeat() {
         return gramFeatTxt.getText();
     }
 
+    /**
+     * Gets the lexical categories from the text field
+     * @return lexical categories
+     */
     public String getLexiCate() {
         return lexiCateTxt.getText();
     }
 
+    /**
+     * Gets the domains from the text field
+     * @return domains
+     */
     public String getDomains() {
         return domainsTxt.getText();
     }
 
+    /**
+     * Gets the registers from the text field
+     * @return registers
+     */
     public String getRegisters() {
         return registersTxt.getText();
     }
 
+    /**
+     * Gets the strict match from the dropdown
+     * @return match
+     */
     public String getMatch() {
         return matchMenu.getValue();
     }
 
+    /**
+     * Gets the search button
+     * @return search button
+     */
     public Button getSearchBtn() {
         return searchBtn;
     }

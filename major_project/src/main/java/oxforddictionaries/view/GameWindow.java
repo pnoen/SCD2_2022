@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Main GUI class of the application. Handles what the window will display.
+ */
 public class GameWindow {
     private final int width;
     private final int height;
@@ -32,6 +35,13 @@ public class GameWindow {
     private Button reportBtn;
     private ReportDialog reportDialog;
 
+    /**
+     * Creates the game window. Creates the border pane and initialises the bottom hbox, left vbox and center scroll pane.
+     * @param width window width
+     * @param height window height
+     * @param inputEngine input engine
+     * @param outputEngine output engine
+     */
     public GameWindow(int width, int height, InputEngine inputEngine, OutputEngine outputEngine) {
         this.width = width;
         this.height = height;
@@ -52,10 +62,16 @@ public class GameWindow {
         this.borderPane.setLeft(this.leftVbox);
     }
 
+    /**
+     * @return scene
+     */
     public Scene getScene() {
         return scene;
     }
 
+    /**
+     * Setups the border pane, side bar buttons and other displays. The application starts with the entry input display.
+     */
     public void draw() {
         setupBorderPane();
         sidebarBtns();
@@ -68,6 +84,9 @@ public class GameWindow {
         entry();
     }
 
+    /**
+     * Sets the width, padding and style of the border pane children
+     */
     public void setupBorderPane() {
         this.borderPane.setStyle("-fx-background-color: #d0d0d0;");
 
@@ -87,6 +106,9 @@ public class GameWindow {
         this.contentScrollPane.setStyle("-fx-background: #d0d0d0; -fx-background-color:transparent;");
     }
 
+    /**
+     * Creates the sidebar buttons Home, History and Create report
+     */
     public void sidebarBtns() {
         double btnWidth = 90.0;
 
@@ -112,6 +134,10 @@ public class GameWindow {
         this.leftVbox.getChildren().addAll(entryBtn, historyBtn, reportBtn);
     }
 
+    /**
+     * Creates the entry input display and sets it to the scroll pane. The search button is set to request the Oxford Dictionaries Api.
+     * If the word field is empty, the application should not proceed.
+     */
     public void entry() {
         this.reportBtn.setDisable(true);
         VBox entryVbox = entryInputVbox.create();
@@ -131,6 +157,21 @@ public class GameWindow {
 
     }
 
+    /**
+     * Requests the Oxford Dictionaries Api. If the response is null, request the api for the lemma. If the response list size is greater
+     * than 0, display the error message.
+     * @param lang language
+     * @param word word
+     * @param field field
+     * @param gramFeat grammatical features
+     * @param lexiCate lexical categories
+     * @param domain domains
+     * @param register registers
+     * @param match match
+     * @param newSearch new search
+     * @param historySearch history search
+     * @param lemma lemma
+     */
     public void displayEntry(String lang, String word, String field, String gramFeat, String lexiCate,
                              String domain, String register, String match, boolean newSearch, boolean historySearch, boolean lemma) {
         List<String> error = inputEngine.entrySearch(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma);
@@ -163,6 +204,10 @@ public class GameWindow {
         }
     }
 
+    /**
+     * Creates an alert box and displays the error messages
+     * @param error list of error messages
+     */
     public void handleError(List<String> error) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
@@ -172,6 +217,15 @@ public class GameWindow {
         alert.showAndWait();
     }
 
+    /**
+     * Requests the api for the lemma of the word. If the response is null, display that there are no lemmas.
+     * If the response list size is greater than 0, display the error. Otherwise, find the lemmas in the POJO.
+     * The user will select the lemma to pick to search. If there is 1 lemma, then it should search for the entry.
+     * @param word word
+     * @param gramFeat grammatical features
+     * @param lexiCate lexical categories
+     * @param newSearch new search
+     */
     public void lemma(String word, String gramFeat, String lexiCate, boolean newSearch) {
         List<String> error = inputEngine.lemmaSearch("en", word, gramFeat, lexiCate);
         if (error == null) {
@@ -183,8 +237,8 @@ public class GameWindow {
             handleError(error);
             return;
         }
-        RetrieveEntry retrieveEntry = inputEngine.getRetrieveEntry();
-        VBox lemmaVbox = lemmaDisplayVbox.create(retrieveEntry);
+        List<List<String>> lemmas = inputEngine.findLemmas();
+        VBox lemmaVbox = lemmaDisplayVbox.create(lemmas);
         this.contentScrollPane.setContent(lemmaVbox);
 
         lemmaDisplayVbox.getSelectBtn().setOnAction((event) -> {
@@ -202,6 +256,9 @@ public class GameWindow {
         }
     }
 
+    /**
+     * Creates the history page. The user can select a page to search.
+     */
     public void history() {
         reportBtn.setDisable(true);
         List<List<String>> history = inputEngine.getHistory();
@@ -222,6 +279,9 @@ public class GameWindow {
         });
     }
 
+    /**
+     * Creates the report dialog window. The user enters the pastebin information and sends a POST request to the Pastebin Api
+     */
     public void sendReport() {
         Dialog<String> dialog = reportDialog.create();
         reportDialog.getSendBtn().addEventFilter(ActionEvent.ACTION, event -> {

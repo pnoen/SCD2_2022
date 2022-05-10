@@ -17,11 +17,13 @@ import static org.hamcrest.Matchers.equalTo;
 public class OnlineInputEngineTest {
     private OnlineInputEngine onlineInputEngine;
     private Request requestMock;
+    private LemmaProcessor lemmaProcessorMock;
 
     @BeforeEach
     public void setup() {
         this.requestMock = mock(Request.class);
-        this.onlineInputEngine = new OnlineInputEngine(requestMock);
+        this.lemmaProcessorMock = mock(LemmaProcessor.class);
+        this.onlineInputEngine = new OnlineInputEngine(requestMock, lemmaProcessorMock);
     }
 
     @Test

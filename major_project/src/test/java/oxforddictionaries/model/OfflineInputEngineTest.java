@@ -14,11 +14,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class OfflineInputEngineTest {
     private OfflineInputEngine offlineInputEngine;
     private DummyAPI dummyAPIMock;
+    private LemmaProcessor lemmaProcessorMock;
 
     @BeforeEach
     public void setup() {
         this.dummyAPIMock = mock(DummyAPI.class);
-        this.offlineInputEngine = new OfflineInputEngine(dummyAPIMock);
+        this.lemmaProcessorMock = mock(LemmaProcessor.class);
+        this.offlineInputEngine = new OfflineInputEngine(dummyAPIMock, lemmaProcessorMock);
     }
 
     @Test

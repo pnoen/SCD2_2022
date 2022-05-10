@@ -1,7 +1,6 @@
 package oxforddictionaries.view;
 
 import oxforddictionaries.model.request.responseclasses.*;
-import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
@@ -16,22 +15,29 @@ import javafx.scene.text.FontWeight;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is the display pane for the searched entry
+ */
 public class EntryDisplayVbox {
     private VBox vbox;
-    private Insets padding;
-    private Insets listPadding;
     private List<String> synAntTexts;
     private List<HBox> synAntHboxes;
     private CustomItemBuilder customItemBuilder;
 
+    /**
+     * Creates the entry display vbox.
+     */
     public EntryDisplayVbox() {
-        this.padding = new Insets(0, 0, 0, 20);
-        this.listPadding = new Insets(0, 0, 10, 15);
         this.synAntTexts = new ArrayList<>();
         this.synAntHboxes = new ArrayList<>();
         this.customItemBuilder = new CustomItemBuilder();
     }
 
+    /**
+     * Creates the tree view and adds it to the vbox
+     * @param retrieveEntry POJO
+     * @return vbox
+     */
     public VBox create(RetrieveEntry retrieveEntry) {
         synAntTexts.clear();
         synAntHboxes.clear();
@@ -80,6 +86,11 @@ public class EntryDisplayVbox {
         return vbox;
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param metadata POJO
+     * @param parent parent tree node
+     */
     public void createMetadata(Metadata metadata, TreeItem<CustomItem> parent) {
         if (metadata.getOperation() != null) {
             handleStringLbl(metadata.getOperation(), parent, "Operation: ", false);
@@ -94,6 +105,11 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param headwordEntry POJO
+     * @param parent parent tree node
+     */
     public void createHeadwordEntry(HeadwordEntry headwordEntry, TreeItem<CustomItem> parent) {
         handleStringLbl(headwordEntry.getId(), parent, "ID: ", false);
         handleStringLbl(headwordEntry.getLanguage(), parent, "Language: ", false);
@@ -131,6 +147,11 @@ public class EntryDisplayVbox {
         handleStringLbl(headwordEntry.getWord(), parent, "Word: ", false);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param lexicalEntry POJO
+     * @param parent parent tree node
+     */
     public void createLexicalEntry(LexicalEntry lexicalEntry, TreeItem<CustomItem> parent) {
         if (lexicalEntry.getCompounds() != null) {
             handleRelatedEntries(lexicalEntry.getCompounds(), parent, "Compounds: ");
@@ -200,6 +221,11 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param pronunciation POJO
+     * @param parent parent tree node
+     */
     public void createPronunciation(Pronunciation pronunciation, TreeItem<CustomItem> parent) {
         if (pronunciation.getAudioFile() != null) {
             customItemBuilder.newItem();
@@ -243,6 +269,11 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param relatedEntry POJO
+     * @param parent parent tree node
+     */
     public void createRelatedEntry(RelatedEntry relatedEntry, TreeItem<CustomItem> parent) {
         if (relatedEntry.getDomains() != null) {
             handleDomains(relatedEntry.getDomains(), parent);
@@ -266,6 +297,11 @@ public class EntryDisplayVbox {
 
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param entry POJO
+     * @param parent parent tree node
+     */
     public void createEntry(Entry entry, TreeItem<CustomItem> parent) {
         if (entry.getCrossReferenceMarkers() != null) {
             handleStrings(entry.getCrossReferenceMarkers(), parent, "Cross Reference Markers: ");
@@ -308,17 +344,32 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param grammaticalFeature POJO
+     * @param parent parent tree node
+     */
     public void createGrammaticalFeature(GrammaticalFeature grammaticalFeature, TreeItem<CustomItem> parent) {
         handleStringLbl(grammaticalFeature.getId(), parent, "ID: ", false);
         handleStringLbl(grammaticalFeature.getText(), parent, "Text: ", false);
         handleStringLbl(grammaticalFeature.getType(), parent, "Type: ", false);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param lexicalCategory POJO
+     * @param parent parent tree node
+     */
     public void createLexicalCategory(LexicalCategory lexicalCategory, TreeItem<CustomItem> parent) {
         handleStringLbl(lexicalCategory.getId(), parent, "ID: ", false);
         handleStringLbl(lexicalCategory.getText(), parent, "Text: ", false);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param categorizedText POJO
+     * @param parent parent tree node
+     */
     public void createCategorizedText(CategorizedText categorizedText, TreeItem<CustomItem> parent) {
         if (categorizedText.getId() != null) {
             handleStringLbl(categorizedText.getId(), parent, "ID: ", false);
@@ -328,6 +379,11 @@ public class EntryDisplayVbox {
         handleStringLbl(categorizedText.getType(), parent, "Type: ", false);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param variantForm POJO
+     * @param parent parent tree node
+     */
     public void createVariantForm(VariantForm variantForm, TreeItem<CustomItem> parent) {
         if (variantForm.getDomains() != null) {
             handleDomains(variantForm.getDomains(), parent);
@@ -352,6 +408,11 @@ public class EntryDisplayVbox {
         handleStringLbl(variantForm.getText(), parent, "Text: ", false);
     }
 
+    /**
+     * Adds the string to the tree node
+     * @param str string
+     * @param parent parent tree node
+     */
     public void createString(String str, TreeItem<CustomItem> parent) {
         customItemBuilder.newItem();
         Label strLbl = new Label(str);
@@ -361,27 +422,52 @@ public class EntryDisplayVbox {
         parent.getChildren().add(strItem);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param region POJO
+     * @param parent parent tree node
+     */
     public void createRegion(Region region, TreeItem<CustomItem> parent) {
         handleStringLbl(region.getId(), parent, "ID: ", false);
         handleStringLbl(region.getText(), parent, "Text: ", false);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param register POJO
+     * @param parent parent tree node
+     */
     public void createRegister(Register register, TreeItem<CustomItem> parent) {
         handleStringLbl(register.getId(), parent, "ID: ", false);
         handleStringLbl(register.getText(), parent, "Text: ", false);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param domain POJO
+     * @param parent parent tree node
+     */
     public void createDomain(Domain domain, TreeItem<CustomItem> parent) {
         handleStringLbl(domain.getId(), parent, "ID: ", false);
         handleStringLbl(domain.getText(), parent, "Text: ", false);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param crossReference POJO
+     * @param parent parent tree node
+     */
     public void createCrossReference(CrossReference crossReference, TreeItem<CustomItem> parent) {
         handleStringLbl(crossReference.getId(), parent, "ID: ", false);
         handleStringLbl(crossReference.getText(), parent, "Text: ", false);
         handleStringLbl(crossReference.getType(), parent, "Type: ", false);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param inflectedForm POJO
+     * @param parent parent tree node
+     */
     public void createInflectedForm(InflectedForm inflectedForm, TreeItem<CustomItem> parent) {
         if (inflectedForm.getDomains() != null) {
             handleDomains(inflectedForm.getDomains(), parent);
@@ -410,6 +496,11 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param sense POJO
+     * @param parent parent tree node
+     */
     public void createSense(Sense sense, TreeItem<CustomItem> parent) {
         if (sense.getAntonyms() != null) {
             handleSynonymsAntonyms(sense.getAntonyms(), parent, "Antonyms: ");
@@ -586,6 +677,11 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param synonymAntonym POJO
+     * @param parent parent tree node
+     */
     public void createSynonymAntonym(SynonymsAntonyms synonymAntonym, TreeItem<CustomItem> parent) {
         if (synonymAntonym.getDomains() != null) {
             handleDomains(synonymAntonym.getDomains(), parent);
@@ -610,6 +706,11 @@ public class EntryDisplayVbox {
         handleStringLbl(synonymAntonym.getText(), parent, "Text: ", true);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param construction POJO
+     * @param parent parent tree node
+     */
     public void createConstruction(InlineModel2 construction, TreeItem<CustomItem> parent) {
         if (construction.getDomains() != null) {
             handleDomains(construction.getDomains(), parent);
@@ -652,11 +753,21 @@ public class EntryDisplayVbox {
         handleStringLbl(construction.getText(), parent, "Text: ", false);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param domainClass POJO
+     * @param parent parent tree node
+     */
     public void createDomainClass(DomainClass domainClass, TreeItem<CustomItem> parent) {
         handleStringLbl(domainClass.getId(), parent, "ID: ", false);
         handleStringLbl(domainClass.getText(), parent, "Text: ", false);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param example POJO
+     * @param parent parent tree node
+     */
     public void createExample(Example example, TreeItem<CustomItem> parent) {
         if (example.getDefinitions() != null) {
             handleStrings(example.getDefinitions(), parent, "Definitions: ");
@@ -685,20 +796,40 @@ public class EntryDisplayVbox {
         handleStringLbl(example.getText(), parent, "Text: ", false);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param semanticClass POJO
+     * @param parent parent tree node
+     */
     public void createSemanticClass(SemanticClass semanticClass, TreeItem<CustomItem> parent) {
         handleStringLbl(semanticClass.getId(), parent, "ID: ", false);
         handleStringLbl(semanticClass.getText(), parent, "Text: ", false);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param thesaurusLink POJO
+     * @param parent parent tree node
+     */
     public void createThesaurusLink(ThesaurusLink thesaurusLink, TreeItem<CustomItem> parent) {
         handleStringLbl(thesaurusLink.getEntryId(), parent, "Entry ID: ", false);
         handleStringLbl(thesaurusLink.getSenseId(), parent, "Sense ID: ", false);
     }
 
+    /**
+     * Adds the attributes to the tree node
+     * @param exampleText POJO
+     * @param parent parent tree node
+     */
     public void createExampleText(ExampleText exampleText, TreeItem<CustomItem> parent) {
         handleStringLbl(exampleText.getText(), parent, "Text: ", false);
     }
 
+    /**
+     * Adds the list of pronunciations to the tree node
+     * @param pronunciations list of pronunciations
+     * @param parent parent tree node
+     */
     public void handlePronunciations(List<Pronunciation> pronunciations, TreeItem<CustomItem> parent) {
         customItemBuilder.newItem();
         Label proLbl = new Label("Pronunciations: ");
@@ -721,6 +852,11 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the list of grammatical features to the tree node
+     * @param grammaticalFeatures list of grammatical features
+     * @param parent parent tree node
+     */
     public void handleGrammaticalFeatures(List<GrammaticalFeature> grammaticalFeatures, TreeItem<CustomItem> parent) {
         customItemBuilder.newItem();
         Label gramLbl = new Label("Grammatical Features: ");
@@ -743,6 +879,12 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the list of related entries to the tree node
+     * @param relatedEntries list of related entries
+     * @param parent parent tree node
+     * @param label key
+     */
     public void handleRelatedEntries(List<RelatedEntry> relatedEntries, TreeItem<CustomItem> parent, String label) {
         customItemBuilder.newItem();
         Label relaLbl = new Label(label);
@@ -765,6 +907,11 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the list of notes to the tree node
+     * @param notes list of notes
+     * @param parent parent tree node
+     */
     public void handleNotes(List<CategorizedText> notes, TreeItem<CustomItem> parent) {
         customItemBuilder.newItem();
         Label notesLbl = new Label("Notes: ");
@@ -787,6 +934,11 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the list of variant forms to the tree node
+     * @param variantForms list of variant forms
+     * @param parent parent tree node
+     */
     public void handleVariantForms(List<VariantForm> variantForms, TreeItem<CustomItem> parent) {
         customItemBuilder.newItem();
         Label varLbl = new Label("Variant Forms: ");
@@ -809,6 +961,12 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the list of strings to the tree node
+     * @param strings list of strings
+     * @param parent parent tree node
+     * @param label key
+     */
     public void handleStrings(List<String> strings, TreeItem<CustomItem> parent, String label) {
         customItemBuilder.newItem();
         Label strLbl = new Label(label);
@@ -831,6 +989,11 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the list of regions to the tree node
+     * @param regions list of regions
+     * @param parent parent tree node
+     */
     public void handleRegions(List<Region> regions, TreeItem<CustomItem> parent) {
         customItemBuilder.newItem();
         Label regLbl = new Label("Regions: ");
@@ -853,6 +1016,11 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the list of registers to the tree node
+     * @param registers list of registers
+     * @param parent parent tree node
+     */
     public void handleRegisters(List<Register> registers, TreeItem<CustomItem> parent) {
         customItemBuilder.newItem();
         Label regLbl = new Label("Registers: ");
@@ -875,6 +1043,11 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the list of domains to the tree node
+     * @param domains list of domains
+     * @param parent parent tree node
+     */
     public void handleDomains(List<Domain> domains, TreeItem<CustomItem> parent) {
         customItemBuilder.newItem();
         Label domLbl = new Label("Domains: ");
@@ -897,6 +1070,11 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the list of cross references to the tree node
+     * @param crossReferences list of cross references
+     * @param parent parent tree node
+     */
     public void handleCrossReferences(List<CrossReference> crossReferences, TreeItem<CustomItem> parent) {
         customItemBuilder.newItem();
         Label crossLbl = new Label("Cross Reference: ");
@@ -919,6 +1097,11 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the list of inflected forms to the tree node
+     * @param inflectedForms list of inflected forms
+     * @param parent parent tree form
+     */
     public void handleInflections(List<InflectedForm> inflectedForms, TreeItem<CustomItem> parent) {
         customItemBuilder.newItem();
         Label infLbl = new Label("Inflections: ");
@@ -941,6 +1124,12 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the list of senses to the tree node
+     * @param senses list of senses
+     * @param parent parent tree node
+     * @param label key
+     */
     public void handleSenses(List<Sense> senses, TreeItem<CustomItem> parent, String label) {
         customItemBuilder.newItem();
         Label senLbl = new Label(label);
@@ -963,6 +1152,13 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * Adds the string to the tree node. If it is a synonym/antonym add it to the list of hboxes and texts.
+     * @param string value
+     * @param parent parent tree node
+     * @param label key
+     * @param synAnt is synonym/antonym
+     */
     public void handleStringLbl(String string, TreeItem<CustomItem> parent, String label, boolean synAnt) {
         if (synAnt) {
             synAntHboxes.add(parent.getValue());
@@ -977,6 +1173,11 @@ public class EntryDisplayVbox {
         parent.getChildren().add(strTree);
     }
 
+    /**
+     * Adds the list of lexical categories to the tree node
+     * @param lexicalCategory list of lexical categories
+     * @param parent parent tree node
+     */
     public void handleLexicalCategory(LexicalCategory lexicalCategory, TreeItem<CustomItem> parent) {
         customItemBuilder.newItem();
         Label lexiCateLbl = new Label("Lexical Category: ");
@@ -988,6 +1189,12 @@ public class EntryDisplayVbox {
         createLexicalCategory(lexicalCategory, lexiCateItem);
     }
 
+    /**
+     * Adds the list of synonyms/antonyms to the tree node
+     * @param synonymsAntonyms list of synonyms/antonyms
+     * @param parent parent tree node
+     * @param label key
+     */
     public void handleSynonymsAntonyms(List<SynonymsAntonyms> synonymsAntonyms, TreeItem<CustomItem> parent, String label) {
         customItemBuilder.newItem();
         Label synAntLbl = new Label(label);
@@ -1010,10 +1217,18 @@ public class EntryDisplayVbox {
         }
     }
 
+    /**
+     * @return list of synonyms/antonyms hboxes
+     */
     public List<HBox> getSynAntHboxes() {
         return synAntHboxes;
     }
 
+    /**
+     * Gets the synonym/antonym text at the index
+     * @param ind index
+     * @return synonym/antonym
+     */
     public String getSynAntText(int ind) {
         return synAntTexts.get(ind);
     }

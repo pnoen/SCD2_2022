@@ -8,6 +8,9 @@ import javafx.scene.layout.VBox;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is the dialog window for send report
+ */
 public class ReportDialog {
     private Dialog<String> dialog;
     private ComboBox<String> privateMenu;
@@ -17,6 +20,10 @@ public class ReportDialog {
     private TextField folderTxt;
     private Node sendBtn;
 
+    /**
+     * Creates the window and fields for the user to enter privacy, name, user key, expiration length and folder key
+     * @return dialog
+     */
     public Dialog<String> create() {
         this.dialog = new Dialog<>();
         dialog.setTitle("Send Report");
@@ -41,6 +48,10 @@ public class ReportDialog {
         return dialog;
     }
 
+    /**
+     * Creates the dropdown for privacy
+     * @return hbox
+     */
     public HBox createPrivate() {
         Label privateLbl = new Label("Paste privacy: ");
         privateLbl.setWrapText(true);
@@ -56,6 +67,10 @@ public class ReportDialog {
         return new HBox(privateLbl, privateMenu);
     }
 
+    /**
+     * Creates the text field for post name
+     * @return hbox
+     */
     public HBox createName() {
         Label nameLbl = new Label("Paste name: (Opt.) ");
         nameLbl.setWrapText(true);
@@ -65,6 +80,10 @@ public class ReportDialog {
         return new HBox(nameLbl, nameTxt);
     }
 
+    /**
+     * Creates the text field for the user key
+     * @return hbox
+     */
     public HBox createUserKey() {
         Label userKeyLbl = new Label("User key: (Opt.) ");
         userKeyLbl.setWrapText(true);
@@ -74,6 +93,10 @@ public class ReportDialog {
         return new HBox(userKeyLbl, userKeyTxt);
     }
 
+    /**
+     * Creates the dropdown for the expiration length
+     * @return hbox
+     */
     public HBox createExpire() {
         Label expireLbl = new Label("Expiration date: ");
         expireLbl.setWrapText(true);
@@ -95,6 +118,10 @@ public class ReportDialog {
         return new HBox(expireLbl, expireMenu);
     }
 
+    /**
+     * Creates the text field for the folder key
+     * @return hbox
+     */
     public HBox createFolder() {
         Label folderLbl = new Label("Folder key: (Opt.) ");
         folderLbl.setWrapText(true);
@@ -104,10 +131,18 @@ public class ReportDialog {
         return new HBox(folderLbl, folderTxt);
     }
 
+    /**
+     * Gets the index of the inputted privacy
+     * @return index
+     */
     public int getPrivateVal() {
         return privateMenu.getItems().indexOf(privateMenu.getValue());
     }
 
+    /**
+     * Gets the post name from the text field. If it is empty, return null
+     * @return post name
+     */
     public String getNameVal() {
         if (nameTxt.getText().trim().isEmpty()) {
             return null;
@@ -115,6 +150,10 @@ public class ReportDialog {
         return nameTxt.getText();
     }
 
+    /**
+     * Gets the user key from the text field. If it is empty, return null
+     * @return user key
+     */
     public String getUserKeyVal() {
         if (userKeyTxt.getText().trim().isEmpty()) {
             return null;
@@ -122,10 +161,18 @@ public class ReportDialog {
         return userKeyTxt.getText();
     }
 
+    /**
+     * Gets the expiration length from the dropdown
+     * @return expiration length
+     */
     public String getExpireVal() {
         return expireMenu.getValue();
     }
 
+    /**
+     * Gets the folder key from the text field. If it is empty, return null
+     * @return folder key
+     */
     public String getFolderVal() {
         if (folderTxt.getText().trim().isEmpty()) {
             return null;
@@ -133,6 +180,9 @@ public class ReportDialog {
         return folderTxt.getText();
     }
 
+    /**
+     * @return send button
+     */
     public Node getSendBtn() {
         return sendBtn;
     }

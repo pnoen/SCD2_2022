@@ -8,17 +8,44 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Calls the Oxford Dictionaries Api with GET requests
+ */
 public class OnlineInputEngine implements InputEngine {
     private Request request;
     private RetrieveEntry retrieveEntry;
     private List<List<String>> history;
     private int currentPageInd;
+    private LemmaProcessor lemmaProcessor;
 
-    public OnlineInputEngine(Request request) {
+    /**
+     * Creates the online input engine
+     * @param request request
+     * @param lemmaProcessor lemma processor
+     */
+    public OnlineInputEngine(Request request, LemmaProcessor lemmaProcessor) {
         this.request = request;
         this.history = new ArrayList<>();
+        this.lemmaProcessor = lemmaProcessor;
     }
 
+    /**
+     * Check if the response is OK. If the response errors then return the list of errors.
+     * If valid, create the POJO. If it is not a history search then add it to the history
+     * and move the current entry to the end if it is not a new search. Return an empty list if valid.
+     * @param lang language
+     * @param word word
+     * @param field field
+     * @param gramFeat grammatical features
+     * @param lexiCate lexical categories
+     * @param domains domains
+     * @param registers registers
+     * @param match match
+     * @param newSearch new search
+     * @param historyEntry history search
+     * @param lemma lemma search
+     * @return list of error messages
+     */
     public List<String> entrySearch(String lang, String word, String field, String gramFeat, String lexiCate,
                             String domains, String registers, String match, boolean newSearch, boolean historyEntry, boolean lemma) {
         String uri = "https://od-api.oxforddictionaries.com/api/v2/entries/" + lang + "/" + word;
@@ -60,10 +87,23 @@ public class OnlineInputEngine implements InputEngine {
         return response;
     }
 
+    /**
+     * Gets the POJO
+     * @return entry
+     */
     public RetrieveEntry getRetrieveEntry() {
         return retrieveEntry;
     }
 
+    /**
+     * Creates the uri and performs a GET request. if the response errors then return the list of errors.
+     * If valid, create the POJO and return an empty list.
+     * @param lang language
+     * @param word word
+     * @param gramFeat grammatical features
+     * @param lexiCate lexical categories
+     * @return list of error messages
+     */
     public List<String> lemmaSearch(String lang, String word, String gramFeat, String lexiCate) {
         String uri = "https://od-api.oxforddictionaries.com/api/v2/lemmas/" + lang + "/" + word;
 
@@ -93,6 +133,12 @@ public class OnlineInputEngine implements InputEngine {
         return response;
     }
 
+    /**
+     * Maps the raw JSON and adds the status code and message to a list
+     * @param code status code
+     * @param body raw json
+     * @return list of error messages
+     */
     public List<String> handleErrorReq(String code, String body) {
         Gson gson = new Gson();
         List<String> response = new ArrayList<>();
@@ -103,14 +149,26 @@ public class OnlineInputEngine implements InputEngine {
         return response;
     }
 
+    /**
+     * @return history
+     */
     public List<List<String>> getHistory() {
         return history;
     }
 
+    /**
+     * Updates the current page index
+     * @param ind page index
+     */
     public void setCurrentPageInd(int ind) {
         this.currentPageInd = ind;
     }
 
+    /**
+     * Formats the uri to remove %, $ and spaces to remove
+     * @param uri uri
+     * @return escaped uri
+     */
     public String uriEscape(String uri) {
         String uriClean = uri.replace("%", "%25");
         uriClean = uriClean.replace(" ", "%20");
@@ -118,6 +176,17 @@ public class OnlineInputEngine implements InputEngine {
         return uriClean;
     }
 
+    /**
+     * Adds the parameters to the uri if they exist
+     * @param uri uri
+     * @param field field
+     * @param gramFeat grammatical features
+     * @param lexiCate lexical categories
+     * @param domains domains
+     * @param registers registers
+     * @param match match
+     * @return uri
+     */
     public String createUriFields(String uri, String field, String gramFeat, String lexiCate, String domains, String registers, String match) {
         List<String> parameters = new ArrayList<>();
         parameters.add("fields=");
@@ -154,6 +223,19 @@ public class OnlineInputEngine implements InputEngine {
         return uri;
     }
 
+    /**
+     * Adds all the parameters to a list, if they are null, set them to an empty string.
+     * @param lang language
+     * @param word word
+     * @param field field
+     * @param gramFeat grammatical features
+     * @param lexiCate lexical categories
+     * @param domains domains
+     * @param registers registers
+     * @param match match
+     * @param newSearch new search
+     * @return history
+     */
     public List<String> createHistoryEntry(String lang, String word, String field, String gramFeat, String lexiCate, String domains,
                                            String registers, String match, boolean newSearch) {
         if (field == null) {
@@ -193,8 +275,19 @@ public class OnlineInputEngine implements InputEngine {
         return search;
     }
 
+    /**
+     * Gets the index it is currently at for the history
+     * @return page index
+     */
     public int getCurrentPageInd() {
         return currentPageInd;
     }
 
+    /**
+     * Finds the lemmas from the POJO
+     * @return List of lemmas
+     */
+    public List<List<String>> findLemmas() {
+        return lemmaProcessor.createData(retrieveEntry);
+    }
 }

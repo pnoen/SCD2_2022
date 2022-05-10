@@ -11,11 +11,18 @@ import javafx.stage.Stage;
 
 import java.util.List;
 
+/**
+ * Main class of the application
+ */
 public class Main extends Application {
-    private String INPUT_API_APP_ID;
-    private String INPUT_APP_KEY;
-    private String PASTEBIN_API_KEY;
+    private String inputApiAppId;
+    private String inputAppKey;
+    private String pastebinApiKey;
 
+    /**
+     * Checks if the arguments exist, exit if it doesn't. Start the JavaFx stage.
+     * @param primaryStage stage
+     */
     @Override
     public void start(Stage primaryStage) {
         setEnvVar();
@@ -50,26 +57,39 @@ public class Main extends Application {
         gameWindow.draw();
     }
 
+    /**
+     * Decides which input engine to use. If it is neither online or offline, return null.
+     * @param engine argument
+     * @return input engine
+     */
     public InputEngine getInputEngine(String engine) {
         if (engine.equals("offline")) {
-            return new OfflineInputEngine(new DummyAPI());
+            return new OfflineInputEngine(new DummyAPI(), new LemmaProcessor());
         }
         else if (engine.equals("online")) {
-            return new OnlineInputEngine(new Request(INPUT_API_APP_ID, INPUT_APP_KEY));
+            return new OnlineInputEngine(new Request(inputApiAppId, inputAppKey), new LemmaProcessor());
         }
         return null;
     }
 
+    /**
+     * Decides which output engine to use. If it is neither online or offline, return null.
+     * @param engine argument
+     * @return output engine
+     */
     public OutputEngine getOutputEngine(String engine) {
         if (engine.equals("offline")) {
             return new OfflineOutputEngine(new DummyAPI());
         }
         else if (engine.equals("online")) {
-            return new OnlineOutputEngine(PASTEBIN_API_KEY, new Request(INPUT_API_APP_ID, INPUT_APP_KEY), new PastebinPostBuilder(), new PastebinFormatter());
+            return new OnlineOutputEngine(pastebinApiKey, new Request(inputApiAppId, inputAppKey), new PastebinPostBuilder(), new PastebinFormatter());
         }
         return null;
     }
 
+    /**
+     * Gets the keys from the system environment. If any of them do not exist, exit the program.
+     */
     public void setEnvVar() {
         String apiId = System.getenv("INPUT_API_APP_ID");
         String appKey = System.getenv("INPUT_API_KEY");
@@ -79,11 +99,15 @@ public class Main extends Application {
             System.exit(-1);
         }
 
-        this.INPUT_API_APP_ID = apiId;
-        this.INPUT_APP_KEY = appKey;
-        this.PASTEBIN_API_KEY = pastebinKey;
+        this.inputApiAppId = apiId;
+        this.inputAppKey = appKey;
+        this.pastebinApiKey = pastebinKey;
     }
 
+    /**
+     * Run the application
+     * @param args arguments
+     */
     public static void main(String[] args) {
         launch(args);
     }

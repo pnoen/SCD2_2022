@@ -1,4 +1,4 @@
-package oxforddictionaries.view;
+package oxforddictionaries.model;
 
 import oxforddictionaries.model.request.responseclasses.RetrieveEntry;
 import com.google.gson.Gson;
@@ -10,12 +10,12 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-public class LemmaDisplayVboxTest {
-    private LemmaDisplayVbox lemmaDisplayVbox;
+public class LemmaProcessorTest {
+    private LemmaProcessor lemmaDisplayVbox;
 
     @BeforeEach
     public void setup() {
-        this.lemmaDisplayVbox = new LemmaDisplayVbox();
+        this.lemmaDisplayVbox = new LemmaProcessor();
     }
 
     @Test

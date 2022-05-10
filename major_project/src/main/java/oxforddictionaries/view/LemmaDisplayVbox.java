@@ -1,6 +1,5 @@
 package oxforddictionaries.view;
 
-import oxforddictionaries.model.request.responseclasses.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -11,17 +10,28 @@ import javafx.scene.text.FontWeight;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is the display pane for the lemmas
+ */
 public class LemmaDisplayVbox {
     private VBox vbox;
     private List<List<String>> lemmas;
     private ComboBox<Integer> lemmaMenu;
     private Button selectBtn;
 
+    /**
+     * Creates the lemma display vbox
+     */
     public LemmaDisplayVbox() {
         this.lemmas = new ArrayList<>();
     }
 
-    public VBox create(RetrieveEntry retrieveEntry) {
+    /**
+     * Creates the table for lemmas and a dropdown for the user to select the lemma.
+     * @param lemmas list of lemmas
+     * @return vbox
+     */
+    public VBox create(List<List<String>> lemmas) {
         Label titleLbl = new Label("Couldn't find the entry");
         titleLbl.setWrapText(true);
         titleLbl.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
@@ -30,7 +40,8 @@ public class LemmaDisplayVbox {
         descLbl.setWrapText(true);
         descLbl.setFont(new Font(14));
 
-        this.lemmas = createData(retrieveEntry);
+//        this.lemmas = createData(retrieveEntry);
+        this.lemmas = lemmas;
 
         TableView<List<String>> table = new TableView<>();
         table.setFixedCellSize(25);
@@ -75,46 +86,32 @@ public class LemmaDisplayVbox {
         return vbox;
     }
 
-    public List<List<String>> createData(RetrieveEntry retrieveEntry) {
-        List<List<String>> lemmas = new ArrayList<>();
-        if (retrieveEntry.getResults() != null) {
-            for (HeadwordEntry headwordEntry : retrieveEntry.getResults()) {
-                for (LexicalEntry entry : headwordEntry.getLexicalEntries()) {
-                    for (Inflection inflection : entry.getInflectionOf()) {
-                        List<String> lemma = new ArrayList<>();
-                        lemma.add(String.valueOf(lemmas.size() + 1));
-                        lemma.add(inflection.getId());
-                        lemma.add(entry.getLexicalCategory().getId());
-
-                        if (entry.getGrammaticalFeatures() != null) {
-                            for (GrammaticalFeature gramFeat : entry.getGrammaticalFeatures()) {
-                                List<String> lemmaCopy = new ArrayList<>(lemma);
-                                lemmaCopy.add(gramFeat.getId());
-                                lemmas.add(lemmaCopy);
-                            }
-                            continue;
-                        }
-                        lemma.add("");
-                        lemmas.add(lemma);
-                    }
-                }
-            }
-        }
-        return lemmas;
-    }
-
+    /**
+     * @return lemma id
+     */
     public Integer getLemmaId() {
         return lemmaMenu.getValue();
     }
 
+    /**
+     * @return select button
+     */
     public Button getSelectBtn() {
         return selectBtn;
     }
 
+    /**
+     * Gets the lemma from the list of lemmas
+     * @param id index
+     * @return lemma
+     */
     public List<String> getLemma(int id) {
         return lemmas.get(id);
     }
 
+    /**
+     * @return list size
+     */
     public int getLemmaSize() {
         return lemmas.size();
     }
