@@ -2,7 +2,7 @@ package oxforddictionaries.view;
 
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
@@ -19,12 +19,17 @@ public class ReportDialog {
     private ComboBox<String> expireMenu;
     private TextField folderTxt;
     private Node sendBtn;
+    private GridPane gridPane;
 
     /**
      * Creates the window and fields for the user to enter privacy, name, user key, expiration length and folder key
      * @return dialog
      */
     public Dialog<String> create() {
+        this.gridPane = new GridPane();
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+
         this.dialog = new Dialog<>();
         dialog.setTitle("Send Report");
         dialog.setHeaderText("Create a Pastebin post");
@@ -32,16 +37,16 @@ public class ReportDialog {
         ButtonType sendBtnType = new ButtonType("Send", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().add(sendBtnType);
 
-        HBox privateHbox = createPrivate();
-        HBox nameHbox = createName();
-        HBox userKeyHbox = createUserKey();
-        HBox expireHbox = createExpire();
-        HBox folderHbox = createFolder();
+        createPrivate();
+        createName();
+        createUserKey();
+        createExpire();
+        createFolder();
 
         this.sendBtn = dialog.getDialogPane().lookupButton(sendBtnType);
 
         VBox vbox = new VBox(5);
-        vbox.getChildren().addAll(privateHbox, nameHbox, userKeyHbox, expireHbox, folderHbox);
+        vbox.getChildren().addAll(gridPane);
 
         dialog.getDialogPane().setContent(vbox);
 
@@ -50,9 +55,8 @@ public class ReportDialog {
 
     /**
      * Creates the dropdown for privacy
-     * @return hbox
      */
-    public HBox createPrivate() {
+    public void createPrivate() {
         Label privateLbl = new Label("Paste privacy: ");
         privateLbl.setWrapText(true);
 
@@ -64,40 +68,40 @@ public class ReportDialog {
         privateMenu.getItems().addAll(privateVals);
         privateMenu.getSelectionModel().selectFirst();
 
-        return new HBox(privateLbl, privateMenu);
+        gridPane.add(privateLbl, 0, 0);
+        gridPane.add(privateMenu, 1, 0);
     }
 
     /**
      * Creates the text field for post name
-     * @return hbox
      */
-    public HBox createName() {
+    public void createName() {
         Label nameLbl = new Label("Paste name: (Opt.) ");
         nameLbl.setWrapText(true);
 
         this.nameTxt = new TextField();
 
-        return new HBox(nameLbl, nameTxt);
+        gridPane.add(nameLbl, 0, 1);
+        gridPane.add(nameTxt, 1, 1);
     }
 
     /**
      * Creates the text field for the user key
-     * @return hbox
      */
-    public HBox createUserKey() {
+    public void createUserKey() {
         Label userKeyLbl = new Label("User key: (Opt.) ");
         userKeyLbl.setWrapText(true);
 
         this.userKeyTxt = new TextField();
 
-        return new HBox(userKeyLbl, userKeyTxt);
+        gridPane.add(userKeyLbl, 0, 2);
+        gridPane.add(userKeyTxt, 1, 2);
     }
 
     /**
      * Creates the dropdown for the expiration length
-     * @return hbox
      */
-    public HBox createExpire() {
+    public void createExpire() {
         Label expireLbl = new Label("Expiration date: ");
         expireLbl.setWrapText(true);
 
@@ -115,20 +119,21 @@ public class ReportDialog {
         expireMenu.getItems().addAll(expireVals);
         expireMenu.getSelectionModel().selectFirst();
 
-        return new HBox(expireLbl, expireMenu);
+        gridPane.add(expireLbl, 0, 3);
+        gridPane.add(expireMenu, 1, 3);
     }
 
     /**
      * Creates the text field for the folder key
-     * @return hbox
      */
-    public HBox createFolder() {
+    public void createFolder() {
         Label folderLbl = new Label("Folder key: (Opt.) ");
         folderLbl.setWrapText(true);
 
         this.folderTxt = new TextField();
 
-        return new HBox(folderLbl, folderTxt);
+        gridPane.add(folderLbl, 0, 4);
+        gridPane.add(folderTxt, 1, 4);
     }
 
     /**

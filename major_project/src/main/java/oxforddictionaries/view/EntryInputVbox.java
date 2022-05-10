@@ -4,7 +4,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -17,6 +17,7 @@ import java.util.List;
  */
 public class EntryInputVbox {
     private VBox vbox;
+    private GridPane gridPane;
     private ComboBox<String> langsMenu;
     private TextField wordTxt;
     private ComboBox<String> fieldMenu;
@@ -33,36 +34,41 @@ public class EntryInputVbox {
      * @return vbox
      */
     public VBox create() {
+        this.gridPane = new GridPane();
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+
         Label titleLbl = new Label("Search for an entry");
         titleLbl.setWrapText(true);
         titleLbl.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
 
-        HBox langHbox = createLangHbox();
-        HBox wordHbox = createWordHbox();
-        HBox fieldHbox = createFieldHBox();
-        HBox gramFeatHbox = createGramFeatHbox();
-        HBox lexiCateHbox = createLexiCateHbox();
-        HBox domainsHbox = createDomainsHbox();
-        HBox registersHbox = createRegistersHbox();
-        HBox matchHbox = createMatchHbox();
+        createLangHbox();
+        createWordHbox();
+        createFieldHBox();
+        createGramFeatHbox();
+        createLexiCateHbox();
+        createDomainsHbox();
+        createRegistersHbox();
+        createMatchHbox();
 
         Label delimiterLbl = new Label("The filters are comma-delimited.");
         delimiterLbl.setWrapText(true);
 
         this.searchBtn = new Button("Search");
 
+        gridPane.add(delimiterLbl, 0, 8);
+        gridPane.add(searchBtn, 0, 9);
+
         this.vbox = new VBox(5);
-        vbox.getChildren().addAll(titleLbl, langHbox, wordHbox, fieldHbox, gramFeatHbox,
-                lexiCateHbox, domainsHbox, registersHbox, matchHbox, delimiterLbl, searchBtn);
+        vbox.getChildren().addAll(titleLbl, gridPane);
 
         return vbox;
     }
 
     /**
      * Creates the dropdown menu for language
-     * @return hbox
      */
-    public HBox createLangHbox() {
+    public void createLangHbox() {
         Label langLbl = new Label("Language: ");
         langLbl.setWrapText(true);
         List<String> langs = new ArrayList<>();
@@ -71,27 +77,27 @@ public class EntryInputVbox {
         this.langsMenu = new ComboBox<>();
         langsMenu.getItems().addAll(langs);
         langsMenu.getSelectionModel().selectFirst();
-        HBox langHbox = new HBox(langLbl, langsMenu);
-        return langHbox;
+
+        gridPane.add(langLbl, 0, 0);
+        gridPane.add(langsMenu, 1, 0);
     }
 
     /**
      * Creates the text field for word
-     * @return hbox
      */
-    public HBox createWordHbox() {
+    public void createWordHbox() {
         Label wordLbl = new Label("Word: ");
         wordLbl.setWrapText(true);
         this.wordTxt = new TextField();
-        HBox wordHbox = new HBox(wordLbl, wordTxt);
-        return wordHbox;
+
+        gridPane.add(wordLbl, 0, 1);
+        gridPane.add(wordTxt, 1, 1);
     }
 
     /**
      * Creates the dropdown for field
-     * @return hbox
      */
-    public HBox createFieldHBox() {
+    public void createFieldHBox() {
         Label fieldLbl = new Label("Field: (Opt.) ");
         fieldLbl.setWrapText(true);
         List<String> fields = new ArrayList<>();
@@ -107,63 +113,63 @@ public class EntryInputVbox {
         this.fieldMenu = new ComboBox<>();
         fieldMenu.getItems().addAll(fields);
         fieldMenu.getSelectionModel().selectFirst();
-        HBox fieldHbox = new HBox(fieldLbl, fieldMenu);
-        return fieldHbox;
+
+        gridPane.add(fieldLbl, 0, 2);
+        gridPane.add(fieldMenu, 1, 2);
     }
 
     /**
      * Creates the text field for grammatical features
-     * @return hbox
      */
-    public HBox createGramFeatHbox() {
+    public void createGramFeatHbox() {
         Label gramFeatLbl = new Label("Grammatical Feature: (Opt.) ");
         gramFeatLbl.setWrapText(true);
         this.gramFeatTxt = new TextField();
-        HBox gramFeatHbox = new HBox(gramFeatLbl, gramFeatTxt);
-        return gramFeatHbox;
+
+        gridPane.add(gramFeatLbl, 0, 3);
+        gridPane.add(gramFeatTxt, 1, 3);
     }
 
     /**
      * Creates the text field for lexical categories
-     * @return hbox
      */
-    public HBox createLexiCateHbox() {
+    public void createLexiCateHbox() {
         Label lexiCateLbl = new Label("Lexical Category: (Opt.) ");
         lexiCateLbl.setWrapText(true);
         this.lexiCateTxt = new TextField();
-        HBox lexiCateHbox = new HBox(lexiCateLbl, lexiCateTxt);
-        return lexiCateHbox;
+
+        gridPane.add(lexiCateLbl, 0, 4);
+        gridPane.add(lexiCateTxt, 1, 4);
     }
 
     /**
      * Creates the text field for domains
-     * @return hbox
      */
-    public HBox createDomainsHbox() {
+    public void createDomainsHbox() {
         Label domainsLbl = new Label("Domains: (Opt.) ");
         domainsLbl.setWrapText(true);
         this.domainsTxt = new TextField();
-        HBox domainsHbox = new HBox(domainsLbl, domainsTxt);
-        return domainsHbox;
+
+        gridPane.add(domainsLbl, 0, 5);
+        gridPane.add(domainsTxt, 1, 5);
     }
 
     /**
      * Creates the text field for registers
-     * @return hbox
      */
-    public HBox createRegistersHbox() {
+    public void createRegistersHbox() {
         Label registersLbl = new Label("Registers: (Opt.) ");
         registersLbl.setWrapText(true);
         this.registersTxt = new TextField();
-        HBox registersHbox = new HBox(registersLbl, registersTxt);
-        return registersHbox;
+
+        gridPane.add(registersLbl, 0, 6);
+        gridPane.add(registersTxt, 1, 6);
     }
 
     /**
      * Create the dropdown menu for strict match
-     * @return hbox
      */
-    public HBox createMatchHbox() {
+    public void createMatchHbox() {
         Label matchLbl = new Label("Strict Match: (Opt.) ");
         matchLbl.setWrapText(true);
         List<String> matches = new ArrayList<>();
@@ -173,8 +179,9 @@ public class EntryInputVbox {
         this.matchMenu = new ComboBox<>();
         matchMenu.getItems().addAll(matches);
         matchMenu.getSelectionModel().selectFirst();
-        HBox matchHbox = new HBox(matchLbl, matchMenu);
-        return matchHbox;
+
+        gridPane.add(matchLbl, 0, 7);
+        gridPane.add(matchMenu, 1, 7);
     }
 
     /**
