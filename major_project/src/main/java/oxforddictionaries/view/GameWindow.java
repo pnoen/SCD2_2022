@@ -181,6 +181,8 @@ public class GameWindow {
      * @param newSearch new search
      * @param historySearch history search
      * @param lemma lemma
+     * @param cacheDecided cached been decided
+     * @param useCache cache or request new data
      */
     public void displayEntry(String lang, String word, String field, String gramFeat, String lexiCate,
                              String domain, String register, String match, boolean newSearch, boolean historySearch, boolean lemma,
@@ -253,6 +255,8 @@ public class GameWindow {
      * @param gramFeat grammatical features
      * @param lexiCate lexical categories
      * @param newSearch new search
+     * @param cacheDecided cached been decided
+     * @param useCache cache or request new data
      */
     public void lemma(String word, String gramFeat, String lexiCate, boolean newSearch, boolean cacheDecided, boolean useCache) {
         List<String> error = inputEngine.lemmaSearch("en", word, gramFeat, lexiCate, cacheDecided, useCache);

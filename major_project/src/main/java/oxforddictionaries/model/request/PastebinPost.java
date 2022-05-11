@@ -62,7 +62,7 @@ public class PastebinPost {
 
     /**
      * Formats the string to include every attribute that is not null
-     * E.g. api_dev_key=key&api_option=option&api_paste_code=code&api_paste_private=0
+     * E.g. api_dev_key=key{@literal &}api_option=option{@literal &}api_paste_code=code{@literal &}api_paste_private=0
      * @return string form of PastebinPost
      */
     @Override

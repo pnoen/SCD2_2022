@@ -42,6 +42,8 @@ public class OfflineInputEngine implements InputEngine {
      * @param newSearch new search
      * @param historyEntry history search
      * @param lemma lemma search
+     * @param cacheDecided notified user
+     * @param useCache cache or request new data
      * @return empty list
      */
     public List<String> entrySearch(String lang, String word, String field, String gramFeat, String lexiCate,
@@ -67,6 +69,8 @@ public class OfflineInputEngine implements InputEngine {
      * @param word word
      * @param gramFeat grammatical features
      * @param lexiCate lexical categories
+     * @param cacheDecided cached been decided
+     * @param useCache cache or request new data
      * @return empty list
      */
     public List<String> lemmaSearch(String lang, String word, String gramFeat, String lexiCate, boolean cacheDecided, boolean useCache) {

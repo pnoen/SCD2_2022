@@ -11,6 +11,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -178,6 +179,9 @@ public class OnlineInputEngineTest {
 
     @Test
     public void entrySearchValid() {
+        List<String> sqlResponse = new ArrayList<>();
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
         List<String> response = new ArrayList<>();
         response.add("200");
         response.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
@@ -193,10 +197,81 @@ public class OnlineInputEngineTest {
         assertThat(retrieveEntry.getMetadata().getSchema(), equalTo("entry"));
 
         verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).addEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}",
+                200);
+    }
+
+    @Test
+    public void entrySearchValidCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, true, true);
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(1));
+        assertThat(onlineInputEngine.getHistory().get(0).get(1), equalTo("noun"));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getMetadata().getSchema(), equalTo("entry"));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+    }
+
+    @Test
+    public void entrySearchValidCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("200");
+        response.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(requestMock.getRequest(anyString())).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, true, false);
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(1));
+        assertThat(onlineInputEngine.getHistory().get(0).get(1), equalTo("noun"));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getMetadata().getSchema(), equalTo("entry"));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).updateEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}",
+                200);
+    }
+
+    @Test
+    public void entrySearchValidCachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
     }
 
     @Test
     public void entrySearchNull() {
+        List<String> sqlResponse = new ArrayList<>();
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
         List<String> response = new ArrayList<>();
         response.add("200");
         response.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
@@ -212,10 +287,81 @@ public class OnlineInputEngineTest {
         assertThat(retrieveEntry.getMetadata().getSchema(), equalTo("entry"));
 
         verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).addEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}",
+                200);
+    }
+
+    @Test
+    public void entrySearchNullCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", null, "", null,
+                "", "", "", true, false, false, true, true);
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(1));
+        assertThat(onlineInputEngine.getHistory().get(0).get(1), equalTo("noun"));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getMetadata().getSchema(), equalTo("entry"));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+    }
+
+    @Test
+    public void entrySearchNullCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("200");
+        response.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(requestMock.getRequest(anyString())).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", null, "", null,
+                "", "", "", true, false, false, true, false);
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(1));
+        assertThat(onlineInputEngine.getHistory().get(0).get(1), equalTo("noun"));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getMetadata().getSchema(), equalTo("entry"));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).updateEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}",
+                200);
+    }
+
+    @Test
+    public void entrySearchNullCachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", null, "", null,
+                "", "", "", true, false, false, false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
     }
 
     @Test
     public void entrySearchSpaces() {
+        List<String> sqlResponse = new ArrayList<>();
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
         List<String> response = new ArrayList<>();
         response.add("200");
         response.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
@@ -231,10 +377,81 @@ public class OnlineInputEngineTest {
         assertThat(retrieveEntry.getMetadata().getSchema(), equalTo("entry"));
 
         verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).addEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}",
+                200);
+    }
+
+    @Test
+    public void entrySearchSpacesCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "  ", "  ", "",
+                " ", "", "", true, false, false, true, true);
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(1));
+        assertThat(onlineInputEngine.getHistory().get(0).get(1), equalTo("noun"));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getMetadata().getSchema(), equalTo("entry"));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+    }
+
+    @Test
+    public void entrySearchSpacesCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("200");
+        response.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(requestMock.getRequest(anyString())).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "  ", "  ", "",
+                " ", "", "", true, false, false, true, false);
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(1));
+        assertThat(onlineInputEngine.getHistory().get(0).get(1), equalTo("noun"));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getMetadata().getSchema(), equalTo("entry"));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).updateEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}",
+                200);
+    }
+
+    @Test
+    public void entrySearchSpacesCachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "  ", "  ", "",
+                " ", "", "", true, false, false, false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
     }
 
     @Test
     public void entrySearchExceptionCaused() {
+        List<String> sqlResponse = new ArrayList<>();
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
         List<String> response = new ArrayList<>();
         response.add("Caught some exception here");
         when(requestMock.getRequest(anyString())).thenReturn(response);
@@ -246,10 +463,72 @@ public class OnlineInputEngineTest {
         assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
 
         verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+    }
+
+    @Test
+    public void entrySearchExceptionCausedCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("Caught some exception here");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, true, true);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), equalTo("Caught some exception here"));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+    }
+
+    @Test
+    public void entrySearchExceptionCausedCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("Caught some exception here");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("200");
+        response.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(requestMock.getRequest(anyString())).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, true, false);
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(1));
+        assertThat(onlineInputEngine.getHistory().get(0).get(1), equalTo("noun"));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getMetadata().getSchema(), equalTo("entry"));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).updateEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}",
+                200);
+    }
+
+    @Test
+    public void entrySearchExceptionCausedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("Caught some exception here");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
     }
 
     @Test
     public void entrySearchResponseError() {
+        List<String> sqlResponse = new ArrayList<>();
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
         List<String> response = new ArrayList<>();
         response.add("400");
         response.add("{\"error\": \"error body\"}");
@@ -263,6 +542,70 @@ public class OnlineInputEngineTest {
         assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
 
         verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).addEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"error\": \"error body\"}",
+                400);
+    }
+
+    @Test
+    public void entrySearchResponseErrorCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("400");
+        sqlResponse.add("{\"error\": \"error body\"}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, true, true);
+        assertThat(actual.size(), equalTo(2));
+        assertThat(actual.get(0), equalTo("400"));
+        assertThat(actual.get(1), equalTo("error body"));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+    }
+
+    @Test
+    public void entrySearchResponseErrorCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("400");
+        sqlResponse.add("{\"error\": \"error body\"}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("400");
+        response.add("{\"error\": \"error body\"}");
+        when(requestMock.getRequest(anyString())).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, true, false);
+        assertThat(actual.size(), equalTo(2));
+        assertThat(actual.get(0), equalTo("400"));
+        assertThat(actual.get(1), equalTo("error body"));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).updateEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"error\": \"error body\"}",
+                400);
+    }
+
+    @Test
+    public void entrySearchResponseErrorCachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("400");
+        sqlResponse.add("{\"error\": \"error body\"}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
     }
 
     @Test
@@ -270,7 +613,7 @@ public class OnlineInputEngineTest {
         List<String> response = new ArrayList<>();
         response.add("404");
         response.add("{\"error\": \"no entry found\"}");
-        when(requestMock.getRequest(anyString())).thenReturn(response);
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(response);
 
         List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
                 "", "", "", true, false, false, false, false);
@@ -278,6 +621,66 @@ public class OnlineInputEngineTest {
         assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
 
         verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).addEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"error\": \"no entry found\"}",
+                404);
+    }
+
+    @Test
+    public void entrySearchNoResultsFoundCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("404");
+        sqlResponse.add("{\"error\": \"no entry found\"}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, true, true);
+        assertThat(actual, is(nullValue()));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+    }
+
+    @Test
+    public void entrySearchNoResultsFoundCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("404");
+        sqlResponse.add("{\"error\": \"no entry found\"}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("404");
+        response.add("{\"error\": \"no entry found\"}");
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, true, false);
+        assertThat(actual, is(nullValue()));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).updateEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"error\": \"no entry found\"}",
+                404);
+    }
+
+    @Test
+    public void entrySearchNoResultsFoundCachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("404");
+        sqlResponse.add("{\"error\": \"no entry found\"}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
     }
 
     @Test
@@ -294,6 +697,68 @@ public class OnlineInputEngineTest {
         assertThat(actual.get(1), equalTo("no entry found"));
 
         verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).addEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"error\": \"no entry found\"}",
+                404);
+    }
+
+    @Test
+    public void entrySearchNoResultsFoundLemmaCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("404");
+        sqlResponse.add("{\"error\": \"no entry found\"}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, true, true, true);
+        assertThat(actual.size(), equalTo(2));
+        assertThat(actual.get(0), equalTo("404"));
+        assertThat(actual.get(1), equalTo("no entry found"));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+    }
+
+    @Test
+    public void entrySearchNoResultsFoundLemmaCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("404");
+        sqlResponse.add("{\"error\": \"no entry found\"}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("404");
+        response.add("{\"error\": \"no entry found\"}");
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, true, true, false);
+        assertThat(actual.size(), equalTo(2));
+        assertThat(actual.get(0), equalTo("404"));
+        assertThat(actual.get(1), equalTo("no entry found"));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).updateEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"error\": \"no entry found\"}",
+                404);
+    }
+
+    @Test
+    public void entrySearchNoResultsFoundLemmaCachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("404");
+        sqlResponse.add("{\"error\": \"no entry found\"}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, true, false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
     }
 
     @Test
@@ -319,6 +784,77 @@ public class OnlineInputEngineTest {
         assertThat(onlineInputEngine.getCurrentPageInd(), equalTo(1));
 
         verify(requestMock, times(2)).getRequest(anyString());
+        verify(sqlDatabaseMock, times(2)).getEntry(anyString());
+        verify(sqlDatabaseMock, times(2)).addEntry(anyString(),
+                anyString(),
+                anyInt());
+    }
+
+    @Test
+    public void entrySearchMultipleSearchesCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry(anyString())).thenReturn(sqlResponse);
+
+        onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, true, true);
+
+        sqlResponse.clear();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"donkey\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry(anyString())).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "donkey", "", "", "",
+                "", "", "", true, false, false, true, true);
+
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(2));
+        assertThat(onlineInputEngine.getHistory().get(1).get(1), equalTo("donkey"));
+        assertThat(onlineInputEngine.getCurrentPageInd(), equalTo(1));
+
+        verify(requestMock, times(0)).getRequest(anyString());
+        verify(sqlDatabaseMock, times(2)).getEntry(anyString());
+    }
+
+    @Test
+    public void entrySearchMultipleSearchesCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry(anyString())).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("200");
+        response.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(requestMock.getRequest(anyString())).thenReturn(response);
+
+        onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, true, false);
+
+        sqlResponse.clear();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"donkey\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry(anyString())).thenReturn(sqlResponse);
+
+        response.clear();
+        response.add("200");
+        response.add("{\"id\": \"donkey\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(requestMock.getRequest(anyString())).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "donkey", "", "", "",
+                "", "", "", true, false, false, true, false);
+
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(2));
+        assertThat(onlineInputEngine.getHistory().get(1).get(1), equalTo("donkey"));
+        assertThat(onlineInputEngine.getCurrentPageInd(), equalTo(1));
+
+        verify(requestMock, times(2)).getRequest(anyString());
+        verify(sqlDatabaseMock, times(2)).getEntry(anyString());
+        verify(sqlDatabaseMock, times(2)).updateEntry(anyString(),
+                anyString(),
+                anyInt());
     }
 
     @Test
@@ -326,7 +862,7 @@ public class OnlineInputEngineTest {
         List<String> response = new ArrayList<>();
         response.add("200");
         response.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
-        when(requestMock.getRequest(anyString())).thenReturn(response);
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(response);
 
         List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
                 "", "", "", true, true, false, false, false);
@@ -335,6 +871,66 @@ public class OnlineInputEngineTest {
         assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
 
         verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).addEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}",
+                200);
+    }
+
+    @Test
+    public void entrySearchHistorySearchNewSearchCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, true, false, true, true);
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+    }
+
+    @Test
+    public void entrySearchHistorySearchNewSearchCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("200");
+        response.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, true, false, true, false);
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).updateEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}",
+                200);
+    }
+
+    @Test
+    public void entrySearchHistorySearchNewSearchCachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, true, false, false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
     }
 
     @Test
@@ -351,6 +947,68 @@ public class OnlineInputEngineTest {
         assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
 
         verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).addEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}",
+                200);
+    }
+
+    @Test
+    public void entrySearchHistorySearchNotNewSearchCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", false, true, false, true, true);
+
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+    }
+
+    @Test
+    public void entrySearchHistorySearchNotNewSearchCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("200");
+        response.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", false, true, false, true, false);
+
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).updateEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun",
+                "{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}",
+                200);
+    }
+
+    @Test
+    public void entrySearchHistorySearchNotNewSearchCachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", false, true, false, false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
+        verify(sqlDatabaseMock, times(1)).getEntry("https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/noun");
     }
 
     @Test
@@ -390,6 +1048,108 @@ public class OnlineInputEngineTest {
         assertThat(onlineInputEngine.getCurrentPageInd(), equalTo(2));
 
         verify(requestMock, times(3)).getRequest(anyString());
+        verify(sqlDatabaseMock, times(3)).getEntry(anyString());
+        verify(sqlDatabaseMock, times(3)).addEntry(anyString(),
+                anyString(),
+                anyInt());
+    }
+
+    @Test
+    public void entrySearchNotNewSearchCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry(anyString())).thenReturn(sqlResponse);
+
+        onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, true, true);
+
+        sqlResponse.clear();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"donkey\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry(anyString())).thenReturn(sqlResponse);
+
+        onlineInputEngine.entrySearch("en-gb", "donkey", "", "", "",
+                "", "", "", true, false, false, true, true);
+
+        assertThat(onlineInputEngine.getHistory().get(1).get(1), equalTo("donkey"));
+        assertThat(onlineInputEngine.getCurrentPageInd(), equalTo(1));
+        onlineInputEngine.setCurrentPageInd(0);
+
+        sqlResponse.clear();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"cow\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry(anyString())).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "cow", "", "", "",
+                "", "", "", false, false, false, true, true);
+
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(3));
+        assertThat(onlineInputEngine.getHistory().get(0).get(1), equalTo("donkey"));
+        assertThat(onlineInputEngine.getHistory().get(1).get(1), equalTo("noun"));
+        assertThat(onlineInputEngine.getCurrentPageInd(), equalTo(2));
+
+        verify(requestMock, times(0)).getRequest(anyString());
+        verify(sqlDatabaseMock, times(3)).getEntry(anyString());
+    }
+
+    @Test
+    public void entrySearchNotNewSearchCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry(anyString())).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("200");
+        response.add("{\"id\": \"noun\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(requestMock.getRequest(anyString())).thenReturn(response);
+
+        onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
+                "", "", "", true, false, false, true, false);
+
+        sqlResponse.clear();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"donkey\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry(anyString())).thenReturn(sqlResponse);
+
+        response.clear();
+        response.add("200");
+        response.add("{\"id\": \"donkey\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(requestMock.getRequest(anyString())).thenReturn(response);
+
+        onlineInputEngine.entrySearch("en-gb", "donkey", "", "", "",
+                "", "", "", true, false, false, true, false);
+
+        assertThat(onlineInputEngine.getHistory().get(1).get(1), equalTo("donkey"));
+        assertThat(onlineInputEngine.getCurrentPageInd(), equalTo(1));
+        onlineInputEngine.setCurrentPageInd(0);
+
+        sqlResponse.clear();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"id\": \"cow\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(sqlDatabaseMock.getEntry(anyString())).thenReturn(sqlResponse);
+
+        response.clear();
+        response.add("200");
+        response.add("{\"id\": \"cow\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
+        when(requestMock.getRequest(anyString())).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.entrySearch("en-gb", "cow", "", "", "",
+                "", "", "", false, false, false, true, false);
+
+        assertThat(actual.size(), equalTo(0));
+        assertThat(onlineInputEngine.getHistory().size(), equalTo(3));
+        assertThat(onlineInputEngine.getHistory().get(0).get(1), equalTo("donkey"));
+        assertThat(onlineInputEngine.getHistory().get(1).get(1), equalTo("noun"));
+        assertThat(onlineInputEngine.getCurrentPageInd(), equalTo(2));
+
+        verify(requestMock, times(3)).getRequest(anyString());
+        verify(sqlDatabaseMock, times(3)).getEntry(anyString());
+        verify(sqlDatabaseMock, times(3)).updateEntry(anyString(),
+                anyString(),
+                anyInt());
     }
 
     @Test
@@ -397,7 +1157,7 @@ public class OnlineInputEngineTest {
         List<String> response = new ArrayList<>();
         response.add("200");
         response.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
-        when(requestMock.getRequest(anyString())).thenReturn(response);
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(response);
 
         List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", false, false);
         assertThat(actual.size(), equalTo(0));
@@ -406,6 +1166,63 @@ public class OnlineInputEngineTest {
         assertThat(retrieveEntry.getResults().get(0).getId(), equalTo("forehead"));
 
         verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+    }
+
+    @Test
+    public void lemmaSearchValidCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", true, true);
+        assertThat(actual.size(), equalTo(0));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getResults().get(0).getId(), equalTo("forehead"));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+    }
+
+    @Test
+    public void lemmaSearchValidCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("200");
+        response.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", true, false);
+        assertThat(actual.size(), equalTo(0));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getResults().get(0).getId(), equalTo("forehead"));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).updateLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead",
+                "{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}",
+                200);
+    }
+
+    @Test
+    public void lemmaSearchValidCachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
     }
 
     @Test
@@ -425,6 +1242,63 @@ public class OnlineInputEngineTest {
     }
 
     @Test
+    public void lemmaSearchNullCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", null, null, true, true);
+        assertThat(actual.size(), equalTo(0));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getResults().get(0).getId(), equalTo("forehead"));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+    }
+
+    @Test
+    public void lemmaSearchNullCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("200");
+        response.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", null, null, true, false);
+        assertThat(actual.size(), equalTo(0));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getResults().get(0).getId(), equalTo("forehead"));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).updateLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead",
+                "{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}",
+                200);
+    }
+
+    @Test
+    public void lemmaSearchNullCachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", null, null, false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+    }
+
+    @Test
     public void lemmaSearchSpaces() {
         List<String> response = new ArrayList<>();
         response.add("200");
@@ -441,10 +1315,67 @@ public class OnlineInputEngineTest {
     }
 
     @Test
+    public void lemmaSearchSpacesCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "  ", " ", true, true);
+        assertThat(actual.size(), equalTo(0));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getResults().get(0).getId(), equalTo("forehead"));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+    }
+
+    @Test
+    public void lemmaSearchSpacesCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("200");
+        response.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "  ", " ", true, false);
+        assertThat(actual.size(), equalTo(0));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getResults().get(0).getId(), equalTo("forehead"));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).updateLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead",
+                "{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}",
+                200);
+    }
+
+    @Test
+    public void lemmaSearchSpacesCachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("200");
+        sqlResponse.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "  ", " ", false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+    }
+
+    @Test
     public void lemmaSearchExceptionCaused() {
         List<String> response = new ArrayList<>();
         response.add("Exception caught somewhere here");
-        when(requestMock.getRequest(anyString())).thenReturn(response);
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(response);
 
         List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", false, false);
         assertThat(actual.size(), equalTo(1));
@@ -454,11 +1385,63 @@ public class OnlineInputEngineTest {
     }
 
     @Test
+    public void lemmaSearchExceptionCausedCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("Exception caught somewhere here");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", true, true);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), equalTo("Exception caught somewhere here"));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+    }
+
+    @Test
+    public void lemmaSearchExceptionCausedCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("Exception caught somewhere here");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("200");
+        response.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
+        when(requestMock.getRequest(anyString())).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", true, false);
+        assertThat(actual.size(), equalTo(0));
+
+        RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
+        assertThat(retrieveEntry.getResults().get(0).getId(), equalTo("forehead"));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).updateLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead",
+                "{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}",
+                200);
+    }
+
+    @Test
+    public void lemmaSearchExceptionCausedCachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("Exception caught somewhere here");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+    }
+
+    @Test
     public void lemmaSearchErrorCode() {
         List<String> response = new ArrayList<>();
         response.add("400");
         response.add("{\"error\": \"no lemmas found\"}");
-        when(requestMock.getRequest(anyString())).thenReturn(response);
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(response);
 
         List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", false, false);
         assertThat(actual.size(), equalTo(2));
@@ -466,6 +1449,61 @@ public class OnlineInputEngineTest {
         assertThat(actual.get(1), equalTo("no lemmas found"));
 
         verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+    }
+
+    @Test
+    public void lemmaSearchErrorCodeCachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("400");
+        sqlResponse.add("{\"error\": \"no lemmas found\"}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", true, true);
+        assertThat(actual.size(), equalTo(2));
+        assertThat(actual.get(0), equalTo("400"));
+        assertThat(actual.get(1), equalTo("no lemmas found"));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+    }
+
+    @Test
+    public void lemmaSearchErrorCodeCachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("400");
+        sqlResponse.add("{\"error\": \"no lemmas found\"}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("400");
+        response.add("{\"error\": \"no lemmas found\"}");
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", true, false);
+        assertThat(actual.size(), equalTo(2));
+        assertThat(actual.get(0), equalTo("400"));
+        assertThat(actual.get(1), equalTo("no lemmas found"));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).updateLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead",
+                "{\"error\": \"no lemmas found\"}",
+                400);
+    }
+
+    @Test
+    public void lemmaSearchErrorCodeCachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("400");
+        sqlResponse.add("{\"error\": \"no lemmas found\"}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
     }
 
     @Test
@@ -479,5 +1517,56 @@ public class OnlineInputEngineTest {
         assertThat(actual, is(nullValue()));
 
         verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+    }
+
+    @Test
+    public void lemmaSearchErrorCode404CachedUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("404");
+        sqlResponse.add("{\"error\": \"no lemmas found\"}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", true, true);
+        assertThat(actual, is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+    }
+
+    @Test
+    public void lemmaSearchErrorCode404CachedNoUseCache() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("404");
+        sqlResponse.add("{\"error\": \"no lemmas found\"}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> response = new ArrayList<>();
+        response.add("404");
+        response.add("{\"error\": \"no lemmas found\"}");
+        when(requestMock.getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(response);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", true, false);
+        assertThat(actual, is(nullValue()));
+
+        verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).updateLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead",
+                "{\"error\": \"no lemmas found\"}",
+                404);
+    }
+
+    @Test
+    public void lemmaSearchErrorCode404CachedNotDecided() {
+        List<String> sqlResponse = new ArrayList<>();
+        sqlResponse.add("404");
+        sqlResponse.add("{\"error\": \"no lemmas found\"}");
+        when(sqlDatabaseMock.getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead")).thenReturn(sqlResponse);
+
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", false, false);
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0), is(nullValue()));
+
+        verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
+        verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
     }
 }

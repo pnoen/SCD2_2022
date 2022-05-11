@@ -52,7 +52,7 @@ public class OnlineInputEngine implements InputEngine {
      * @param newSearch new search
      * @param historyEntry history search
      * @param lemma lemma search
-     * @param cacheDecided cached been decided
+     * @param cacheDecided notified user
      * @param useCache cache or request new data
      * @return list of error messages
      */
