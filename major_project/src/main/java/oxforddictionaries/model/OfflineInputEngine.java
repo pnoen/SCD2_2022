@@ -45,7 +45,8 @@ public class OfflineInputEngine implements InputEngine {
      * @return empty list
      */
     public List<String> entrySearch(String lang, String word, String field, String gramFeat, String lexiCate,
-                                    String domains, String registers, String match, boolean newSearch, boolean historyEntry, boolean lemma) {
+                                    String domains, String registers, String match, boolean newSearch, boolean historyEntry, boolean lemma,
+                                    boolean cacheDecided, boolean useCache) {
         String json = dummyAPI.getEntrySearchJSON();
         Gson gson = new Gson();
         this.retrieveEntry = gson.fromJson(json, RetrieveEntry.class);
@@ -68,7 +69,7 @@ public class OfflineInputEngine implements InputEngine {
      * @param lexiCate lexical categories
      * @return empty list
      */
-    public List<String> lemmaSearch(String lang, String word, String gramFeat, String lexiCate) {
+    public List<String> lemmaSearch(String lang, String word, String gramFeat, String lexiCate, boolean cacheDecided, boolean useCache) {
         String json = dummyAPI.getLemmaSearchJSON();
         Gson gson = new Gson();
         this.retrieveEntry = gson.fromJson(json, RetrieveEntry.class);

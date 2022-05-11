@@ -25,7 +25,8 @@ public interface InputEngine {
      * @return list of error messages
      */
     List<String> entrySearch(String lang, String word, String field, String gramFeat, String lexiCate,
-                             String domains, String registers, String match, boolean newSearch, boolean historyEntry, boolean lemma);
+                             String domains, String registers, String match, boolean newSearch, boolean historyEntry, boolean lemma,
+                             boolean cacheDecided, boolean useCache);
 
     /**
      * Gets the POJO
@@ -34,14 +35,14 @@ public interface InputEngine {
     RetrieveEntry getRetrieveEntry();
 
     /**
-     * Creates the uri and performs a GET request
+     * Creates the uri and performs a GET request.
      * @param lang language
      * @param word word
      * @param gramFeat grammatical features
      * @param lexiCate lexical categories
      * @return list of error messages
      */
-    List<String> lemmaSearch(String lang, String word, String gramFeat, String lexiCate);
+    List<String> lemmaSearch(String lang, String word, String gramFeat, String lexiCate, boolean cacheDecided, boolean useCache);
 
     /**
      * Contains a list of list with entry information

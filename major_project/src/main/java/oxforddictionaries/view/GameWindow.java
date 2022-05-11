@@ -13,6 +13,7 @@ import javafx.scene.Scene;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Main GUI class of the application. Handles what the window will display.
@@ -34,6 +35,7 @@ public class GameWindow {
     private HistoryDisplayVbox historyDisplayVbox;
     private Button reportBtn;
     private ReportDialog reportDialog;
+    private CacheConfirmation cacheConfirmation;
 
     /**
      * Creates the game window. Creates the border pane and initialises the bottom hbox, left vbox and center scroll pane.
@@ -81,6 +83,7 @@ public class GameWindow {
         this.lemmaDisplayVbox = new LemmaDisplayVbox();
         this.historyDisplayVbox = new HistoryDisplayVbox();
         this.reportDialog = new ReportDialog();
+        this.cacheConfirmation = new CacheConfirmation();
         entry();
     }
 
@@ -158,14 +161,15 @@ public class GameWindow {
 
             displayEntry(entryInputVbox.getLang(), entryInputVbox.getWord(), entryInputVbox.getField(), entryInputVbox.getGramFeat(),
                     entryInputVbox.getLexiCate(), entryInputVbox.getDomains(), entryInputVbox.getRegisters(), entryInputVbox.getMatch(),
-                    true, false, false);
+                    true, false, false, false, false);
         });
 
     }
 
     /**
-     * Requests the Oxford Dictionaries Api. If the response is null, request the api for the lemma. If the response list size is greater
-     * than 0, display the error message.
+     * Requests the Oxford Dictionaries Api. If the response is null, request the api for the lemma.
+     * If the first element in the response is null, notify the user to pick whether they want ot request new data or not.
+     * If the response list size is greater than 0, display the error message.
      * @param lang language
      * @param word word
      * @param field field
@@ -179,15 +183,31 @@ public class GameWindow {
      * @param lemma lemma
      */
     public void displayEntry(String lang, String word, String field, String gramFeat, String lexiCate,
-                             String domain, String register, String match, boolean newSearch, boolean historySearch, boolean lemma) {
-        List<String> error = inputEngine.entrySearch(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma);
+                             String domain, String register, String match, boolean newSearch, boolean historySearch, boolean lemma,
+                             boolean cacheDecided, boolean useCache) {
+        List<String> error = inputEngine.entrySearch(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma,
+                cacheDecided, useCache);
 //        System.out.println(error);
         if (error == null) {
 //            System.out.println("No entry");
-            lemma(word, gramFeat, lexiCate, newSearch);
+            lemma(word, gramFeat, lexiCate, newSearch, false, false);
             return;
         }
         if (error.size() > 0) {
+            if (error.size() == 1 && error.get(0) == null) {
+                Alert alert = cacheConfirmation.create(true);
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent()) {
+                    if (result.get() == cacheConfirmation.getYesBtnType()){
+                        displayEntry(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma,
+                                true, true);
+                    } else if (result.get() == cacheConfirmation.getNoBtnType()) {
+                        displayEntry(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma,
+                                true, false);
+                    }
+                }
+                return;
+            }
             handleError(error);
             if (lemma) {
                 entry();
@@ -205,7 +225,8 @@ public class GameWindow {
             int ind = i;
             synAntHboxes.get(ind).setOnMouseClicked((event) -> {
                 String text = entryDisplayVbox.getSynAntText(ind);
-                displayEntry(lang, text, "", "", "", "", "", "", false, false, false);
+                displayEntry(lang, text, "", "", "", "", "", "", false, false, false,
+                        false, false);
             });
         }
     }
@@ -225,6 +246,7 @@ public class GameWindow {
 
     /**
      * Requests the api for the lemma of the word. If the response is null, display that there are no lemmas.
+     * If the first element in the response is null, notify the user to pick whether they want ot request new data or not.
      * If the response list size is greater than 0, display the error. Otherwise, find the lemmas in the POJO.
      * The user will select the lemma to pick to search. If there is 1 lemma, then it should search for the entry.
      * @param word word
@@ -232,14 +254,26 @@ public class GameWindow {
      * @param lexiCate lexical categories
      * @param newSearch new search
      */
-    public void lemma(String word, String gramFeat, String lexiCate, boolean newSearch) {
-        List<String> error = inputEngine.lemmaSearch("en", word, gramFeat, lexiCate);
+    public void lemma(String word, String gramFeat, String lexiCate, boolean newSearch, boolean cacheDecided, boolean useCache) {
+        List<String> error = inputEngine.lemmaSearch("en", word, gramFeat, lexiCate, cacheDecided, useCache);
         if (error == null) {
             List<String> errorMsg = Arrays.asList("No lemma was found for the entry.");
             handleError(errorMsg);
             return;
         }
         if (error.size() > 0) {
+            if (error.size() == 1 && error.get(0) == null) {
+                Alert alert = cacheConfirmation.create(false);
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent()) {
+                    if (result.get() == cacheConfirmation.getYesBtnType()){
+                        lemma(word, gramFeat, lexiCate, newSearch, true, true);
+                    } else if (result.get() == cacheConfirmation.getNoBtnType()) {
+                        lemma(word, gramFeat, lexiCate, newSearch, true, false);
+                    }
+                }
+                return;
+            }
             handleError(error);
             return;
         }
@@ -251,13 +285,13 @@ public class GameWindow {
             int id = lemmaDisplayVbox.getLemmaId();
             List<String> lemma = lemmaDisplayVbox.getLemma(id - 1);
             displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true",
-                    newSearch, false, true);
+                    newSearch, false, true, false, false);
         });
 
         if (lemmaDisplayVbox.getLemmaSize() == 1) {
             List<String> lemma = lemmaDisplayVbox.getLemma(0);
             displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true",
-                    newSearch, false, true);
+                    newSearch, false, true, false, false);
             return;
         }
     }
@@ -280,7 +314,7 @@ public class GameWindow {
             }
             List<String> entry = history.get(ind);
             displayEntry(entry.get(0), entry.get(1), entry.get(2), entry.get(3), entry.get(4), entry.get(5),
-                    entry.get(6), entry.get(7), true, true, false);
+                    entry.get(6), entry.get(7), true, true, false, false, false);
             inputEngine.setCurrentPageInd(ind);
         });
     }

@@ -243,5 +243,71 @@ public class SqlDatabase {
         return error;
     }
 
+    /**
+     * Updates the entry in the table with the new data
+     * @param uri uri
+     * @param json json
+     * @param code status code
+     * @return error message
+     */
+    public String updateEntry(String uri, String json, int code) {
+        String error = null;
+        String updateState =
+                """
+                UPDATE entries
+                SET json = ?, code = ?
+                WHERE uri = ?
+                """;
+
+        SQLiteConfig config = new SQLiteConfig();
+        config.enforceForeignKeys(true);
+
+        try (Connection conn = DriverManager.getConnection(dbURL, config.toProperties());
+             PreparedStatement preparedStatement = conn.prepareStatement(updateState)) {
+            preparedStatement.setString(1, json);
+            preparedStatement.setInt(2, code);
+            preparedStatement.setString(3, uri);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            error = e.getMessage();
+        }
+        return error;
+    }
+
+    /**
+     * Updates the lemma in the table with the new data
+     * @param uri uri
+     * @param json json
+     * @param code status code
+     * @return error message
+     */
+    public String updateLemma(String uri, String json, int code) {
+        String error = null;
+        String updateState =
+                """
+                UPDATE lemmas
+                SET json = ?, code = ?
+                WHERE uri = ?
+                """;
+
+        SQLiteConfig config = new SQLiteConfig();
+        config.enforceForeignKeys(true);
+
+        try (Connection conn = DriverManager.getConnection(dbURL, config.toProperties());
+             PreparedStatement preparedStatement = conn.prepareStatement(updateState)) {
+            preparedStatement.setString(1, json);
+            preparedStatement.setInt(2, code);
+            preparedStatement.setString(3, uri);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            error = e.getMessage();
+        }
+        return error;
+    }
+
 
 }

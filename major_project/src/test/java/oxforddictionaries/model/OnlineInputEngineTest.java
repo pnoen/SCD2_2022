@@ -184,7 +184,7 @@ public class OnlineInputEngineTest {
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
         List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
-                "", "", "", true, false, false);
+                "", "", "", true, false, false, false, false);
         assertThat(actual.size(), equalTo(0));
         assertThat(onlineInputEngine.getHistory().size(), equalTo(1));
         assertThat(onlineInputEngine.getHistory().get(0).get(1), equalTo("noun"));
@@ -203,7 +203,7 @@ public class OnlineInputEngineTest {
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
         List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", null, "", null,
-                "", "", "", true, false, false);
+                "", "", "", true, false, false, false, false);
         assertThat(actual.size(), equalTo(0));
         assertThat(onlineInputEngine.getHistory().size(), equalTo(1));
         assertThat(onlineInputEngine.getHistory().get(0).get(1), equalTo("noun"));
@@ -222,7 +222,7 @@ public class OnlineInputEngineTest {
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
         List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "  ", "  ", "",
-                " ", "", "", true, false, false);
+                " ", "", "", true, false, false, false, false);
         assertThat(actual.size(), equalTo(0));
         assertThat(onlineInputEngine.getHistory().size(), equalTo(1));
         assertThat(onlineInputEngine.getHistory().get(0).get(1), equalTo("noun"));
@@ -240,7 +240,7 @@ public class OnlineInputEngineTest {
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
         List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
-                "", "", "", true, false, false);
+                "", "", "", true, false, false, false, false);
         assertThat(actual.size(), equalTo(1));
         assertThat(actual.get(0), equalTo("Caught some exception here"));
         assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
@@ -256,7 +256,7 @@ public class OnlineInputEngineTest {
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
         List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
-                "", "", "", true, false, false);
+                "", "", "", true, false, false, false, false);
         assertThat(actual.size(), equalTo(2));
         assertThat(actual.get(0), equalTo("400"));
         assertThat(actual.get(1), equalTo("error body"));
@@ -273,7 +273,7 @@ public class OnlineInputEngineTest {
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
         List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
-                "", "", "", true, false, false);
+                "", "", "", true, false, false, false, false);
         assertThat(actual, is(nullValue()));
         assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
 
@@ -288,7 +288,7 @@ public class OnlineInputEngineTest {
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
         List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
-                "", "", "", true, false, true);
+                "", "", "", true, false, true, false, false);
         assertThat(actual.size(), equalTo(2));
         assertThat(actual.get(0), equalTo("404"));
         assertThat(actual.get(1), equalTo("no entry found"));
@@ -304,14 +304,14 @@ public class OnlineInputEngineTest {
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
         onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
-                "", "", "", true, false, false);
+                "", "", "", true, false, false, false, false);
 
         response.clear();
         response.add("200");
         response.add("{\"id\": \"donkey\",\"metadata\": {\"operation\": \"retrieve\",\"provider\": \"Oxford University Press\",\"schema\": \"entry\"}}");
         when(requestMock.getRequest(anyString())).thenReturn(response);
         List<String> actual = onlineInputEngine.entrySearch("en-gb", "donkey", "", "", "",
-                "", "", "", true, false, false);
+                "", "", "", true, false, false, false, false);
 
         assertThat(actual.size(), equalTo(0));
         assertThat(onlineInputEngine.getHistory().size(), equalTo(2));
@@ -329,7 +329,7 @@ public class OnlineInputEngineTest {
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
         List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
-                "", "", "", true, true, false);
+                "", "", "", true, true, false, false, false);
 
         assertThat(actual.size(), equalTo(0));
         assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
@@ -345,7 +345,7 @@ public class OnlineInputEngineTest {
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
         List<String> actual = onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
-                "", "", "", false, true, false);
+                "", "", "", false, true, false, false, false);
 
         assertThat(actual.size(), equalTo(0));
         assertThat(onlineInputEngine.getHistory().size(), equalTo(0));
@@ -361,7 +361,7 @@ public class OnlineInputEngineTest {
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
         onlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
-                "", "", "", true, false, false);
+                "", "", "", true, false, false, false, false);
 
         response.clear();
         response.add("200");
@@ -369,7 +369,7 @@ public class OnlineInputEngineTest {
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
         onlineInputEngine.entrySearch("en-gb", "donkey", "", "", "",
-                "", "", "", true, false, false);
+                "", "", "", true, false, false, false, false);
 
         assertThat(onlineInputEngine.getHistory().get(1).get(1), equalTo("donkey"));
         assertThat(onlineInputEngine.getCurrentPageInd(), equalTo(1));
@@ -381,7 +381,7 @@ public class OnlineInputEngineTest {
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
         List<String> actual = onlineInputEngine.entrySearch("en-gb", "cow", "", "", "",
-                "", "", "", false, false, false);
+                "", "", "", false, false, false, false, false);
 
         assertThat(actual.size(), equalTo(0));
         assertThat(onlineInputEngine.getHistory().size(), equalTo(3));
@@ -399,7 +399,7 @@ public class OnlineInputEngineTest {
         response.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
-        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "");
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", false, false);
         assertThat(actual.size(), equalTo(0));
 
         RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
@@ -415,7 +415,7 @@ public class OnlineInputEngineTest {
         response.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
-        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", null, null);
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", null, null, false, false);
         assertThat(actual.size(), equalTo(0));
 
         RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
@@ -431,7 +431,7 @@ public class OnlineInputEngineTest {
         response.add("{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}");
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
-        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "  ", " ");
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "  ", " ", false, false);
         assertThat(actual.size(), equalTo(0));
 
         RetrieveEntry retrieveEntry = onlineInputEngine.getRetrieveEntry();
@@ -446,7 +446,7 @@ public class OnlineInputEngineTest {
         response.add("Exception caught somewhere here");
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
-        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "");
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", false, false);
         assertThat(actual.size(), equalTo(1));
         assertThat(actual.get(0), equalTo("Exception caught somewhere here"));
 
@@ -460,7 +460,7 @@ public class OnlineInputEngineTest {
         response.add("{\"error\": \"no lemmas found\"}");
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
-        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "");
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", false, false);
         assertThat(actual.size(), equalTo(2));
         assertThat(actual.get(0), equalTo("400"));
         assertThat(actual.get(1), equalTo("no lemmas found"));
@@ -475,7 +475,7 @@ public class OnlineInputEngineTest {
         response.add("{\"error\": \"no lemmas found\"}");
         when(requestMock.getRequest(anyString())).thenReturn(response);
 
-        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "");
+        List<String> actual = onlineInputEngine.lemmaSearch("en", "forehead", "", "", false, false);
         assertThat(actual, is(nullValue()));
 
         verify(requestMock, times(1)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");

@@ -29,7 +29,7 @@ public class OfflineInputEngineTest {
         when(dummyAPIMock.getEntrySearchJSON()).thenReturn(response);
 
         List<String> actual = offlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
-                "", "", "", true, false, false);
+                "", "", "", true, false, false, false, false);
         assertThat(actual.size(), equalTo(0));
 
         verify(dummyAPIMock, times(1)).getEntrySearchJSON();
@@ -41,7 +41,7 @@ public class OfflineInputEngineTest {
         when(dummyAPIMock.getEntrySearchJSON()).thenReturn(response);
 
         List<String> actual = offlineInputEngine.entrySearch("en-gb", "noun", null, null, null,
-                null, "", "", true, false, false);
+                null, "", "", true, false, false, false, false);
         assertThat(actual.size(), equalTo(0));
 
         verify(dummyAPIMock, times(1)).getEntrySearchJSON();
@@ -53,7 +53,7 @@ public class OfflineInputEngineTest {
         when(dummyAPIMock.getEntrySearchJSON()).thenReturn(response);
 
         List<String> actual = offlineInputEngine.entrySearch("en-gb", "noun", "", "  ", " ",
-                "", "", "", true, false, false);
+                "", "", "", true, false, false, false, false);
         assertThat(actual.size(), equalTo(0));
 
         verify(dummyAPIMock, times(1)).getEntrySearchJSON();
@@ -65,7 +65,7 @@ public class OfflineInputEngineTest {
         when(dummyAPIMock.getEntrySearchJSON()).thenReturn(response);
 
         List<String> actual = offlineInputEngine.entrySearch("en-gb", "", "", "", "",
-                "", "", "", true, false, false);
+                "", "", "", true, false, false, false, false);
         assertThat(actual.size(), equalTo(0));
 
         verify(dummyAPIMock, times(1)).getEntrySearchJSON();
@@ -77,7 +77,7 @@ public class OfflineInputEngineTest {
         when(dummyAPIMock.getEntrySearchJSON()).thenReturn(response);
 
         List<String> actual = offlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
-                "", "", "", true, true, false);
+                "", "", "", true, true, false, false, false);
         assertThat(actual.size(), equalTo(0));
 
         verify(dummyAPIMock, times(1)).getEntrySearchJSON();
@@ -89,7 +89,7 @@ public class OfflineInputEngineTest {
         when(dummyAPIMock.getEntrySearchJSON()).thenReturn(response);
 
         List<String> actual = offlineInputEngine.entrySearch("en-gb", "noun", "", "", "",
-                "", "", "", false, false, false);
+                "", "", "", false, false, false, false, false);
         assertThat(actual.size(), equalTo(0));
 
         verify(dummyAPIMock, times(1)).getEntrySearchJSON();
@@ -107,7 +107,7 @@ public class OfflineInputEngineTest {
         String response = "{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}";
         when(dummyAPIMock.getLemmaSearchJSON()).thenReturn(response);
 
-        List<String> actual = offlineInputEngine.lemmaSearch("en", "forehead", "", "");
+        List<String> actual = offlineInputEngine.lemmaSearch("en", "forehead", "", "", false, false);
         assertThat(actual.size(), equalTo(0));
         RetrieveEntry retrieveEntry = offlineInputEngine.getRetrieveEntry();
         assertThat(retrieveEntry, is(notNullValue()));
@@ -121,7 +121,7 @@ public class OfflineInputEngineTest {
         String response = "{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}";
         when(dummyAPIMock.getLemmaSearchJSON()).thenReturn(response);
 
-        List<String> actual = offlineInputEngine.lemmaSearch("en", "forehead", null, null);
+        List<String> actual = offlineInputEngine.lemmaSearch("en", "forehead", null, null, false, false);
         assertThat(actual.size(), equalTo(0));
         RetrieveEntry retrieveEntry = offlineInputEngine.getRetrieveEntry();
         assertThat(retrieveEntry, is(notNullValue()));
@@ -135,7 +135,7 @@ public class OfflineInputEngineTest {
         String response = "{\"metadata\": {\"provider\": \"Oxford\"},\"results\": [{\"id\": \"forehead\",\"language\": \"en\"}]}";
         when(dummyAPIMock.getLemmaSearchJSON()).thenReturn(response);
 
-        List<String> actual = offlineInputEngine.lemmaSearch("en", "forehead", " ", "   ");
+        List<String> actual = offlineInputEngine.lemmaSearch("en", "forehead", " ", "   ", false, false);
         assertThat(actual.size(), equalTo(0));
         RetrieveEntry retrieveEntry = offlineInputEngine.getRetrieveEntry();
         assertThat(retrieveEntry, is(notNullValue()));

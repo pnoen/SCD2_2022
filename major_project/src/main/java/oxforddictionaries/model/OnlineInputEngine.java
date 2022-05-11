@@ -36,7 +36,8 @@ public class OnlineInputEngine implements InputEngine {
     }
 
     /**
-     * Check the database if the uri exists. If it doesn't then request from the api.
+     * Check the database if the uri exists. If it doesn't then request from the api. If found, notify the user to
+     * select if they want to use it or not. When the user selects a new request, update the database.
      * Check if the response is OK. If the response errors then return the list of errors.
      * If valid, create the POJO. If it is not a history search then add it to the history
      * and move the current entry to the end if it is not a new search. Return an empty list if valid.
@@ -51,10 +52,13 @@ public class OnlineInputEngine implements InputEngine {
      * @param newSearch new search
      * @param historyEntry history search
      * @param lemma lemma search
+     * @param cacheDecided cached been decided
+     * @param useCache cache or request new data
      * @return list of error messages
      */
     public List<String> entrySearch(String lang, String word, String field, String gramFeat, String lexiCate,
-                            String domains, String registers, String match, boolean newSearch, boolean historyEntry, boolean lemma) {
+                            String domains, String registers, String match, boolean newSearch, boolean historyEntry, boolean lemma,
+                                    boolean cacheDecided, boolean useCache) {
         String uri = "https://od-api.oxforddictionaries.com/api/v2/entries/" + lang + "/" + word;
 
         uri = createUriFields(uri, field, gramFeat, lexiCate, domains, registers, match);
@@ -67,11 +71,31 @@ public class OnlineInputEngine implements InputEngine {
             cached = false;
         }
 
+        if (!cacheDecided && cached) {
+            response.clear();
+            response.add(null);
+            return response;
+        }
+
+        boolean update = false;
+        if (cacheDecided && !useCache) {
+            response = request.getRequest(uri);
+            update = true;
+        }
 //        System.out.println(response);
         if (response.size() == 2) {
             int statusCode = Integer.parseInt(response.get(0));
             if (!cached) {
                 String error = db.addEntry(uri, response.get(1), statusCode);
+                if (error != null) {
+                    response.clear();
+                    response.add(error);
+                    return response;
+                }
+            }
+
+            if (update) {
+                String error = db.updateEntry(uri, response.get(1), statusCode);
                 if (error != null) {
                     response.clear();
                     response.add(error);
@@ -117,15 +141,19 @@ public class OnlineInputEngine implements InputEngine {
 
     /**
      * Creates the uri and performs a GET request. Before requesting the api, it checks the database.
+     * If found, notify the user to select if they want to use it or not.
+     * When the user selects a new request, update the database.
      * If the response errors then return the list of errors.
      * If valid, create the POJO and return an empty list.
      * @param lang language
      * @param word word
      * @param gramFeat grammatical features
      * @param lexiCate lexical categories
+     * @param cacheDecided cached been decided
+     * @param useCache cache or request new data
      * @return list of error messages
      */
-    public List<String> lemmaSearch(String lang, String word, String gramFeat, String lexiCate) {
+    public List<String> lemmaSearch(String lang, String word, String gramFeat, String lexiCate, boolean cacheDecided, boolean useCache) {
         String uri = "https://od-api.oxforddictionaries.com/api/v2/lemmas/" + lang + "/" + word;
 
         uri = createUriFields(uri, null, gramFeat, lexiCate, null, null, null);
@@ -139,12 +167,33 @@ public class OnlineInputEngine implements InputEngine {
             cached = false;
         }
 
+        if (!cacheDecided && cached) {
+            response.clear();
+            response.add(null);
+            return response;
+        }
+
+        boolean update = false;
+        if (cacheDecided && !useCache) {
+            response = request.getRequest(uri);
+            update = true;
+        }
+
 //        System.out.println(response);
         if (response.size() == 2) {
             int statusCode = Integer.parseInt(response.get(0));
 //            System.out.println("Response body was:\n" + response.get(1));
             if (!cached) {
                 String error = db.addLemma(uri, response.get(1), statusCode);
+                if (error != null) {
+                    response.clear();
+                    response.add(error);
+                    return response;
+                }
+            }
+
+            if (update) {
+                String error = db.updateLemma(uri, response.get(1), statusCode);
                 if (error != null) {
                     response.clear();
                     response.add(error);
