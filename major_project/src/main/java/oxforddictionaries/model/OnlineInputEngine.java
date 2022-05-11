@@ -226,8 +226,8 @@ public class OnlineInputEngine implements InputEngine {
         Gson gson = new Gson();
         List<String> response = new ArrayList<>();
         response.add(code);
-        Map<String, String> errorMap = gson.fromJson(body, Map.class);
-        String msg = errorMap.get("error");
+        Map errorMap = gson.fromJson(body, Map.class);
+        String msg = String.valueOf(errorMap.get("error"));
         response.add(msg);
         return response;
     }

@@ -55,7 +55,10 @@ public class LemmaDisplayVbox {
         lexiCol.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().get(2)));
         TableColumn<List<String>, String> gramCol = new TableColumn<>("Grammatical Feature");
         gramCol.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().get(3)));
-        table.getColumns().addAll(idCol, wordCol, lexiCol, gramCol);
+        table.getColumns().add(idCol);
+        table.getColumns().add(wordCol);
+        table.getColumns().add(lexiCol);
+        table.getColumns().add(gramCol);
 
         for (TableColumn col : table.getColumns()) {
             col.setReorderable(false);

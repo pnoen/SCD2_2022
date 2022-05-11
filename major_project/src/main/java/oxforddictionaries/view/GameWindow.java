@@ -72,7 +72,7 @@ public class GameWindow {
     }
 
     /**
-     * Setups the border pane, side bar buttons and other displays. The application starts with the entry input display.
+     * Setups the border pane, sidebar buttons and other displays. The application starts with the entry input display.
      */
     public void draw() {
         setupBorderPane();
