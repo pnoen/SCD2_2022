@@ -1,5 +1,6 @@
 package oxforddictionaries.view;
 
+import javafx.scene.text.TextAlignment;
 import oxforddictionaries.model.request.responseclasses.RetrieveEntry;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -25,9 +26,9 @@ public class GameWindow {
     private OutputEngine outputEngine;
     private Scene scene;
     private BorderPane borderPane;
-    private HBox bottomHbox;
     private VBox centerVbox;
     private VBox leftVbox;
+    private HBox topVbox;
     private ScrollPane contentScrollPane;
     private EntryInputVbox entryInputVbox;
     private EntryDisplayVbox entryDisplayVbox;
@@ -36,6 +37,8 @@ public class GameWindow {
     private Button reportBtn;
     private ReportDialog reportDialog;
     private CacheConfirmation cacheConfirmation;
+    private ThemeSongPlayer themeSongPlayer;
+    private AboutDisplayVbox aboutDisplayVbox;
 
     /**
      * Creates the game window. Creates the border pane and initialises the bottom hbox, left vbox and center scroll pane.
@@ -53,15 +56,15 @@ public class GameWindow {
         this.borderPane = new BorderPane();
         this.scene = new Scene(borderPane, width, height);
 
-        this.bottomHbox = new HBox();
-        this.borderPane.setBottom(this.bottomHbox);
-
         this.contentScrollPane = new ScrollPane();
-        this.centerVbox = new VBox(this.contentScrollPane);
-        this.borderPane.setCenter(this.centerVbox);
+        this.centerVbox = new VBox(contentScrollPane);
+        this.borderPane.setCenter(centerVbox);
 
         this.leftVbox = new VBox();
-        this.borderPane.setLeft(this.leftVbox);
+        this.borderPane.setLeft(leftVbox);
+
+        this.topVbox = new HBox();
+        this.borderPane.setTop(topVbox);
     }
 
     /**
@@ -73,10 +76,10 @@ public class GameWindow {
 
     /**
      * Setups the border pane, sidebar buttons and other displays. The application starts with the entry input display.
+     * Plays the theme song in the background of the application
      */
     public void draw() {
         setupBorderPane();
-        sidebarBtns();
 
         this.entryInputVbox = new EntryInputVbox();
         this.entryDisplayVbox = new EntryDisplayVbox();
@@ -84,6 +87,12 @@ public class GameWindow {
         this.historyDisplayVbox = new HistoryDisplayVbox();
         this.reportDialog = new ReportDialog();
         this.cacheConfirmation = new CacheConfirmation();
+        this.themeSongPlayer = new ThemeSongPlayer();
+        this.aboutDisplayVbox = new AboutDisplayVbox();
+
+        themeSongPlayer.start();
+        sidebarBtns();
+        setupMenuBar();
         entry();
     }
 
@@ -100,9 +109,7 @@ public class GameWindow {
         this.leftVbox.setMinWidth(130);
         this.leftVbox.setAlignment(Pos.CENTER_LEFT);
 
-        this.bottomHbox.setPadding(insets);
-        this.bottomHbox.setMinHeight(40);
-        this.bottomHbox.setAlignment(Pos.CENTER_LEFT);
+        this.topVbox.setPadding(insets);
 
         this.contentScrollPane.setMinHeight(100);
         this.contentScrollPane.setFitToWidth(true);
@@ -110,25 +117,28 @@ public class GameWindow {
     }
 
     /**
-     * Creates the sidebar buttons Home, History and Create report
+     * Creates the sidebar buttons Home, History, Create report and Clear cache
      */
     public void sidebarBtns() {
         double btnWidth = 90.0;
 
         Button entryBtn = new Button("Home");
         entryBtn.setPrefWidth(btnWidth);
+        entryBtn.setTextAlignment(TextAlignment.CENTER);
         entryBtn.setOnAction((event -> {
             entry();
         }));
 
         Button historyBtn = new Button("History");
         historyBtn.setPrefWidth(btnWidth);
+        entryBtn.setTextAlignment(TextAlignment.CENTER);
         historyBtn.setOnAction((event -> {
             history();
         }));
 
         this.reportBtn = new Button("Create Report");
         reportBtn.setPrefWidth(btnWidth);
+        entryBtn.setTextAlignment(TextAlignment.CENTER);
         reportBtn.setOnAction((event -> {
             sendReport();
         }));
@@ -136,6 +146,7 @@ public class GameWindow {
 
         Button clearDbBtn = new Button("Clear Cache");
         clearDbBtn.setPrefWidth(btnWidth);
+        entryBtn.setTextAlignment(TextAlignment.CENTER);
         clearDbBtn.setOnAction((event -> {
             clearCache();
         }));
@@ -359,5 +370,59 @@ public class GameWindow {
         alert.setHeaderText("Success!");
         alert.setContentText("Cache has been cleared.");
         alert.showAndWait();
+    }
+
+    /**
+     * Creates the menu bar and adds the menu items home, about and pause/play theme song
+     */
+    public void setupMenuBar() {
+        Label homeMenuLbl = new Label("Home");
+        homeMenuLbl.setOnMouseClicked((event) -> {
+            entry();
+        });
+        Menu homeMenu = new Menu();
+        homeMenu.setGraphic(homeMenuLbl);
+
+        Label aboutMenuLbl = new Label("About");
+        aboutMenuLbl.setOnMouseClicked((event) -> {
+            about();
+        });
+        Menu aboutMenu = new Menu();
+        aboutMenu.setGraphic(aboutMenuLbl);
+
+        Label themeSongMenuLbl = new Label("Pause theme song");
+        themeSongMenuLbl.setOnMouseClicked((event) -> {
+            themeSongPlayer.changeState();
+            boolean paused = themeSongPlayer.getState();
+            if (paused) {
+                themeSongMenuLbl.setText("Play theme song");
+            }
+            else {
+                themeSongMenuLbl.setText("Pause theme song");
+            }
+        });
+        Menu themeSongMenu = new Menu();
+        themeSongMenu.setGraphic(themeSongMenuLbl);
+
+        MenuBar leftMenuBar = new MenuBar();
+        leftMenuBar.getMenus().addAll(homeMenu, aboutMenu);
+        MenuBar rightMenuBar = new MenuBar();
+        rightMenuBar.getMenus().add(themeSongMenu);
+
+        Pane spacer = new Pane();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        spacer.setMinWidth(5.0);
+        spacer.getStyleClass().add("menu-bar");
+
+        this.topVbox.getChildren().addAll(leftMenuBar, spacer, rightMenuBar);
+    }
+
+    /**
+     * Displays the about information
+     */
+    public void about() {
+        this.reportBtn.setDisable(true);
+        VBox aboutVbox = aboutDisplayVbox.create();
+        this.contentScrollPane.setContent(aboutVbox);
     }
 }
