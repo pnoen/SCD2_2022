@@ -72,6 +72,9 @@ public class AboutDisplayVbox {
         referencesHeadingLbl.setWrapText(true);
         referencesHeadingLbl.setFont(Font.font("Verdana", FontPosture.ITALIC, 14));
 
+        Label referLbl = new Label("Refer to the README for links to the sites and song.");
+        referLbl.setWrapText(true);
+
         Label oxfordDictLbl = new Label("  \u2022 Input engine: Oxford Dictionaries API");
         oxfordDictLbl.setWrapText(true);
 
