@@ -28,7 +28,7 @@ public class GameWindow {
     private BorderPane borderPane;
     private VBox centerVbox;
     private VBox leftVbox;
-    private HBox topVbox;
+    private HBox topHbox;
     private ScrollPane contentScrollPane;
     private EntryInputVbox entryInputVbox;
     private EntryDisplayVbox entryDisplayVbox;
@@ -63,8 +63,8 @@ public class GameWindow {
         this.leftVbox = new VBox();
         this.borderPane.setLeft(leftVbox);
 
-        this.topVbox = new HBox();
-        this.borderPane.setTop(topVbox);
+        this.topHbox = new HBox();
+        this.borderPane.setTop(topHbox);
     }
 
     /**
@@ -109,7 +109,7 @@ public class GameWindow {
         this.leftVbox.setMinWidth(130);
         this.leftVbox.setAlignment(Pos.CENTER_LEFT);
 
-        this.topVbox.setPadding(insets);
+        this.topHbox.setPadding(insets);
 
         this.contentScrollPane.setMinHeight(100);
         this.contentScrollPane.setFitToWidth(true);
@@ -414,7 +414,7 @@ public class GameWindow {
         spacer.setMinWidth(5.0);
         spacer.getStyleClass().add("menu-bar");
 
-        this.topVbox.getChildren().addAll(leftMenuBar, spacer, rightMenuBar);
+        this.topHbox.getChildren().addAll(leftMenuBar, spacer, rightMenuBar);
     }
 
     /**

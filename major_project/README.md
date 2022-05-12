@@ -30,3 +30,9 @@ not being found.
 
 # Level of Implementation
 - Pass
+- Credit
+
+# References
+- [Oxford Dictionaries API](https://developer.oxforddictionaries.com/)
+- [Pastebin API](https://pastebin.com/doc_api)
+- Theme song: [dreamy night - LilyPichu](https://www.youtube.com/watch?v=DXuNJ267Vss)
