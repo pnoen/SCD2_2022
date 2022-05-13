@@ -18,6 +18,9 @@ gradle run --args="online offline"
 
 Running the application with no arguments or arguments other than `online` or `offline` will not work.
 
+To use the `online` engines, it requires the environment variables to be set. 
+The `offline` engines can be used without the variables being set.
+
 # Quirks
 - To search a synonym or antonym, you need to double-click on the number 
 of synonym or antonym. Not the id or text as that will not search the word.
