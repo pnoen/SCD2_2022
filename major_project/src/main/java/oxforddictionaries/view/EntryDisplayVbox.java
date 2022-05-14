@@ -77,8 +77,17 @@ public class EntryDisplayVbox {
             TreeItem<CustomItem> resultsItem = new TreeItem<>(customItemBuilder.getCustomItem());
             root.getChildren().add(resultsItem);
 
+            int count = 1;
             for (HeadwordEntry result : retrieveEntry.getResults()) {
-                createHeadwordEntry(result, resultsItem);
+                customItemBuilder.newItem();
+                Label resultChildLbl = new Label(String.valueOf(count));
+                resultChildLbl.setWrapText(true);
+                customItemBuilder.setLabel(resultChildLbl);
+                TreeItem<CustomItem> resultChildItem = new TreeItem<>(customItemBuilder.getCustomItem());
+                resultsItem.getChildren().add(resultChildItem);
+
+                createHeadwordEntry(result, resultChildItem);
+                count += 1;
             }
         }
 

@@ -202,6 +202,7 @@ public class GameWindow {
                              String domain, String register, String match, boolean newSearch, boolean historySearch, boolean lemma,
                              boolean cacheDecided, boolean useCache) {
         loading();
+        reportBtn.setDisable(true);
         Thread thread = new Thread(() -> {
             List<String> error = inputEngine.entrySearch(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma,
                     cacheDecided, useCache);
@@ -282,12 +283,14 @@ public class GameWindow {
      */
     public void lemma(String word, String gramFeat, String lexiCate, boolean newSearch, boolean cacheDecided, boolean useCache) {
         loading();
+        reportBtn.setDisable(true);
         Thread thread = new Thread(() -> {
             List<String> error = inputEngine.lemmaSearch("en", word, gramFeat, lexiCate, cacheDecided, useCache);
             Platform.runLater(() -> {
                 if (error == null) {
                     List<String> errorMsg = Arrays.asList("No lemma was found for the entry.");
                     handleError(errorMsg);
+                    entry();
                     return;
                 }
                 if (error.size() > 0) {

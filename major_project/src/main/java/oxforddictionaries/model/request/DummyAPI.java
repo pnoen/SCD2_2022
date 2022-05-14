@@ -19,9 +19,9 @@ public class DummyAPI {
                 "\"text\": \"Grammar\"}],\"domains\": [{\"id\": \"grammar\",\"text\": \"Grammar\"}],\"examples\": [{\"text\": \"converting adjectives to " +
                 "nouns has always been common in English\"},{\"text\": \"you must say el gato because gato, which means cat, is a masculine noun\"},{" +
                 "\"text\": \"lucidity is a noun\"}],\"id\": \"m_en_gbus0702940.005\",\"semanticClasses\": [{\"id\": \"part_of_speech\",\"text\": " +
-                "\"Part_Of_Speech\"}],\"shortDefinitions\": [\"word used to identify people, places, or things\"]}]}],\"language\": \"en-gb\"," +
-                "\"lexicalCategory\": {\"id\": \"noun\",\"text\": \"Noun\"},\"text\": \"noun\"}],\"type\": \"headword\",\"word\": \"noun\"}]," +
-                "\"word\": \"noun\"}";
+                "\"Part_Of_Speech\"}],\"shortDefinitions\": [\"word used to identify people, places, or things\"], \"synonyms\": [{\"language\": \"en\"," +
+                "\"text\": \"criterion\"}]}]}],\"language\": \"en-gb\",\"lexicalCategory\": {\"id\": \"noun\",\"text\": \"Noun\"},\"text\": \"noun\"}]," +
+                "\"type\": \"headword\",\"word\": \"noun\"}],\"word\": \"noun\"}";
         return json;
     }
 
