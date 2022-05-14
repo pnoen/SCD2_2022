@@ -22,7 +22,7 @@ To use the `online` engines, it requires the environment variables to be set.
 The `offline` engines can be used without the variables being set.
 
 # Quirks
-- To search a synonym or antonym, you need to double-click on the number 
+- To search a synonym or antonym, you need to double-click on the **number** 
 of synonym or antonym. Not the id or text as that will not search the word.
 
 - When choosing a lemma to search for the entry, the lemmas listed includes both
@@ -34,8 +34,10 @@ not being found.
 # Level of Implementation
 - Pass
 - Credit
+- Distinction
 
 # References
 - [Oxford Dictionaries API](https://developer.oxforddictionaries.com/)
 - [Pastebin API](https://pastebin.com/doc_api)
 - Theme song: [dreamy night - LilyPichu](https://www.youtube.com/watch?v=DXuNJ267Vss)
+- Loading GIF: [Loading.io](https://loading.io/)
