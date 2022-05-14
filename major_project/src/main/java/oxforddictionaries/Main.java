@@ -59,7 +59,7 @@ public class Main extends Application {
      */
     public InputEngine getInputEngine(String engine) {
         if (engine.equals("offline")) {
-            return new OfflineInputEngine(new DummyAPI(), new LemmaProcessor());
+            return new OfflineInputEngine(new DummyAPI(), new LemmaProcessor(), new AboutData());
         }
         else if (engine.equals("online")) {
             this.inputApiAppId = System.getenv("INPUT_API_APP_ID");
@@ -68,7 +68,7 @@ public class Main extends Application {
                 System.out.println("Environment variables not set");
                 System.exit(-1);
             }
-            return new OnlineInputEngine(new Request(inputApiAppId, inputAppKey), new LemmaProcessor(), new SqlDatabase());
+            return new OnlineInputEngine(new Request(inputApiAppId, inputAppKey), new LemmaProcessor(), new SqlDatabase(), new AboutData());
         }
         return null;
     }

@@ -15,12 +15,15 @@ public class OfflineInputEngineTest {
     private OfflineInputEngine offlineInputEngine;
     private DummyAPI dummyAPIMock;
     private LemmaProcessor lemmaProcessorMock;
+    private AboutData aboutDataMock;
 
     @BeforeEach
     public void setup() {
         this.dummyAPIMock = mock(DummyAPI.class);
         this.lemmaProcessorMock = mock(LemmaProcessor.class);
-        this.offlineInputEngine = new OfflineInputEngine(dummyAPIMock, lemmaProcessorMock);
+        this.aboutDataMock = mock(AboutData.class);
+
+        this.offlineInputEngine = new OfflineInputEngine(dummyAPIMock, lemmaProcessorMock, aboutDataMock);
     }
 
     @Test

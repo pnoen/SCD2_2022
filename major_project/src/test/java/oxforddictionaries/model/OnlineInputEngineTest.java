@@ -21,13 +21,15 @@ public class OnlineInputEngineTest {
     private Request requestMock;
     private LemmaProcessor lemmaProcessorMock;
     private SqlDatabase sqlDatabaseMock;
+    private AboutData aboutDataMock;
 
     @BeforeEach
     public void setup() {
         this.requestMock = mock(Request.class);
         this.lemmaProcessorMock = mock(LemmaProcessor.class);
         this.sqlDatabaseMock = mock(SqlDatabase.class);
-        this.onlineInputEngine = new OnlineInputEngine(requestMock, lemmaProcessorMock, sqlDatabaseMock);
+        this.aboutDataMock = mock(AboutData.class);
+        this.onlineInputEngine = new OnlineInputEngine(requestMock, lemmaProcessorMock, sqlDatabaseMock, aboutDataMock);
     }
 
     @Test

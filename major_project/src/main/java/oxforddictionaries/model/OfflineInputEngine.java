@@ -16,15 +16,18 @@ public class OfflineInputEngine implements InputEngine {
     private List<List<String>> history;
     private int currentPageInd;
     private LemmaProcessor lemmaProcessor;
+    private AboutData aboutData;
 
     /**
      * Creates the offline input engine
      * @param dummyAPI dummy api
      * @param lemmaProcessor lemma processor
+     * @param aboutData about information
      */
-    public OfflineInputEngine(DummyAPI dummyAPI, LemmaProcessor lemmaProcessor) {
+    public OfflineInputEngine(DummyAPI dummyAPI, LemmaProcessor lemmaProcessor, AboutData aboutData) {
         this.dummyAPI = dummyAPI;
         this.lemmaProcessor = lemmaProcessor;
+        this.aboutData = aboutData;
         this.history = new ArrayList<>();
         setupHistory();
     }
@@ -52,7 +55,13 @@ public class OfflineInputEngine implements InputEngine {
         String json = dummyAPI.getEntrySearchJSON();
         Gson gson = new Gson();
         this.retrieveEntry = gson.fromJson(json, RetrieveEntry.class);
-        return new ArrayList<>();
+        List<String> error = new ArrayList<>();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            error.add(e.getMessage());
+        }
+        return error;
     }
 
     /**
@@ -77,7 +86,13 @@ public class OfflineInputEngine implements InputEngine {
         String json = dummyAPI.getLemmaSearchJSON();
         Gson gson = new Gson();
         this.retrieveEntry = gson.fromJson(json, RetrieveEntry.class);
-        return new ArrayList<>();
+        List<String> error = new ArrayList<>();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            error.add(e.getMessage());
+        }
+        return error;
     }
 
     /**
@@ -138,5 +153,29 @@ public class OfflineInputEngine implements InputEngine {
      */
     public String clearCache() {
         return null;
+    }
+
+    /**
+     * Gets the application name from the about data
+     * @return application name
+     */
+    public String getAboutAppName() {
+        return aboutData.getAppName();
+    }
+
+    /**
+     * Gets the developer name from the about data
+     * @return developer name
+     */
+    public String getAboutDevName() {
+        return aboutData.getDevName();
+    }
+
+    /**
+     * Gets the references from the about data
+     * @return references
+     */
+    public List<String> getAboutReferences() {
+        return aboutData.getReferences();
     }
 }

@@ -1,5 +1,6 @@
 package oxforddictionaries.view;
 
+import javafx.application.Platform;
 import javafx.scene.text.TextAlignment;
 import oxforddictionaries.model.request.responseclasses.RetrieveEntry;
 import javafx.event.ActionEvent;
@@ -39,6 +40,7 @@ public class GameWindow {
     private CacheConfirmation cacheConfirmation;
     private ThemeSongPlayer themeSongPlayer;
     private AboutDisplayVbox aboutDisplayVbox;
+    private LoadingDisplayVbox loadingDisplayVbox;
 
     /**
      * Creates the game window. Creates the border pane and initialises the bottom hbox, left vbox and center scroll pane.
@@ -89,6 +91,7 @@ public class GameWindow {
         this.cacheConfirmation = new CacheConfirmation();
         this.themeSongPlayer = new ThemeSongPlayer();
         this.aboutDisplayVbox = new AboutDisplayVbox();
+        this.loadingDisplayVbox = new LoadingDisplayVbox();
 
         themeSongPlayer.start();
         sidebarBtns();
@@ -198,50 +201,58 @@ public class GameWindow {
     public void displayEntry(String lang, String word, String field, String gramFeat, String lexiCate,
                              String domain, String register, String match, boolean newSearch, boolean historySearch, boolean lemma,
                              boolean cacheDecided, boolean useCache) {
-        List<String> error = inputEngine.entrySearch(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma,
-                cacheDecided, useCache);
+        loading();
+        Thread thread = new Thread(() -> {
+            List<String> error = inputEngine.entrySearch(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma,
+                    cacheDecided, useCache);
 //        System.out.println(error);
-        if (error == null) {
-//            System.out.println("No entry");
-            lemma(word, gramFeat, lexiCate, newSearch, false, false);
-            return;
-        }
-        if (error.size() > 0) {
-            if (error.size() == 1 && error.get(0) == null) {
-                Alert alert = cacheConfirmation.create(true);
-                Optional<ButtonType> result = alert.showAndWait();
-                if (result.isPresent()) {
-                    if (result.get() == cacheConfirmation.getYesBtnType()){
-                        displayEntry(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma,
-                                true, true);
-                    } else if (result.get() == cacheConfirmation.getNoBtnType()) {
-                        displayEntry(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma,
-                                true, false);
-                    }
+            Platform.runLater(() -> {
+                if (error == null) {
+    //            System.out.println("No entry");
+                    lemma(word, gramFeat, lexiCate, newSearch, false, false);
+                    return;
                 }
-                return;
-            }
-            handleError(error);
-            if (lemma) {
-                entry();
-            }
-            return;
-        }
-        reportBtn.setDisable(false);
-        RetrieveEntry retrieveEntry = inputEngine.getRetrieveEntry();
-        VBox contentVbox = entryDisplayVbox.create(retrieveEntry);
-        contentScrollPane.setVvalue(0);
-        contentScrollPane.setContent(contentVbox);
 
-        List<HBox> synAntHboxes = entryDisplayVbox.getSynAntHboxes();
-        for (int i = 0; i < synAntHboxes.size(); i++) {
-            int ind = i;
-            synAntHboxes.get(ind).setOnMouseClicked((event) -> {
-                String text = entryDisplayVbox.getSynAntText(ind);
-                displayEntry(lang, text, "", "", "", "", "", "", false, false, false,
-                        false, false);
+                if (error.size() > 0) {
+                    if (error.size() == 1 && error.get(0) == null) {
+                        Alert alert = cacheConfirmation.create(true);
+                        Optional<ButtonType> result = alert.showAndWait();
+                        if (result.isPresent()) {
+                            if (result.get() == cacheConfirmation.getYesBtnType()){
+                                displayEntry(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma,
+                                        true, true);
+                            } else if (result.get() == cacheConfirmation.getNoBtnType()) {
+                                displayEntry(lang, word, field, gramFeat, lexiCate, domain, register, match, newSearch, historySearch, lemma,
+                                        true, false);
+                            }
+                        }
+                        return;
+                    }
+                    handleError(error);
+                    if (lemma) {
+                        entry();
+                    }
+                    return;
+                }
+
+                reportBtn.setDisable(false);
+                RetrieveEntry retrieveEntry = inputEngine.getRetrieveEntry();
+                VBox contentVbox = entryDisplayVbox.create(retrieveEntry);
+                contentScrollPane.setVvalue(0);
+                contentScrollPane.setContent(contentVbox);
+
+                List<HBox> synAntHboxes = entryDisplayVbox.getSynAntHboxes();
+                for (int i = 0; i < synAntHboxes.size(); i++) {
+                    int ind = i;
+                    synAntHboxes.get(ind).setOnMouseClicked((event) -> {
+                        String text = entryDisplayVbox.getSynAntText(ind);
+                        displayEntry(lang, text, "", "", "", "", "", "", false, false, false,
+                                false, false);
+                    });
+                }
             });
-        }
+        });
+        thread.start();
     }
 
     /**
@@ -270,45 +281,51 @@ public class GameWindow {
      * @param useCache cache or request new data
      */
     public void lemma(String word, String gramFeat, String lexiCate, boolean newSearch, boolean cacheDecided, boolean useCache) {
-        List<String> error = inputEngine.lemmaSearch("en", word, gramFeat, lexiCate, cacheDecided, useCache);
-        if (error == null) {
-            List<String> errorMsg = Arrays.asList("No lemma was found for the entry.");
-            handleError(errorMsg);
-            return;
-        }
-        if (error.size() > 0) {
-            if (error.size() == 1 && error.get(0) == null) {
-                Alert alert = cacheConfirmation.create(false);
-                Optional<ButtonType> result = alert.showAndWait();
-                if (result.isPresent()) {
-                    if (result.get() == cacheConfirmation.getYesBtnType()){
-                        lemma(word, gramFeat, lexiCate, newSearch, true, true);
-                    } else if (result.get() == cacheConfirmation.getNoBtnType()) {
-                        lemma(word, gramFeat, lexiCate, newSearch, true, false);
-                    }
+        loading();
+        Thread thread = new Thread(() -> {
+            List<String> error = inputEngine.lemmaSearch("en", word, gramFeat, lexiCate, cacheDecided, useCache);
+            Platform.runLater(() -> {
+                if (error == null) {
+                    List<String> errorMsg = Arrays.asList("No lemma was found for the entry.");
+                    handleError(errorMsg);
+                    return;
                 }
-                return;
-            }
-            handleError(error);
-            return;
-        }
-        List<List<String>> lemmas = inputEngine.findLemmas();
-        VBox lemmaVbox = lemmaDisplayVbox.create(lemmas);
-        this.contentScrollPane.setContent(lemmaVbox);
+                if (error.size() > 0) {
+                    if (error.size() == 1 && error.get(0) == null) {
+                        Alert alert = cacheConfirmation.create(false);
+                        Optional<ButtonType> result = alert.showAndWait();
+                        if (result.isPresent()) {
+                            if (result.get() == cacheConfirmation.getYesBtnType()){
+                                lemma(word, gramFeat, lexiCate, newSearch, true, true);
+                            } else if (result.get() == cacheConfirmation.getNoBtnType()) {
+                                lemma(word, gramFeat, lexiCate, newSearch, true, false);
+                            }
+                        }
+                        return;
+                    }
+                    handleError(error);
+                    return;
+                }
+                List<List<String>> lemmas = inputEngine.findLemmas();
+                VBox lemmaVbox = lemmaDisplayVbox.create(lemmas);
+                this.contentScrollPane.setContent(lemmaVbox);
 
-        lemmaDisplayVbox.getSelectBtn().setOnAction((event) -> {
-            int id = lemmaDisplayVbox.getLemmaId();
-            List<String> lemma = lemmaDisplayVbox.getLemma(id - 1);
-            displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true",
-                    newSearch, false, true, false, false);
+                lemmaDisplayVbox.getSelectBtn().setOnAction((event) -> {
+                    int id = lemmaDisplayVbox.getLemmaId();
+                    List<String> lemma = lemmaDisplayVbox.getLemma(id - 1);
+                    displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true",
+                            newSearch, false, true, false, false);
+                });
+
+                if (lemmaDisplayVbox.getLemmaSize() == 1) {
+                    List<String> lemma = lemmaDisplayVbox.getLemma(0);
+                    displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true",
+                            newSearch, false, true, false, false);
+                    return;
+                }
+            });
         });
-
-        if (lemmaDisplayVbox.getLemmaSize() == 1) {
-            List<String> lemma = lemmaDisplayVbox.getLemma(0);
-            displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true",
-                    newSearch, false, true, false, false);
-            return;
-        }
+        thread.start();
     }
 
     /**
@@ -422,7 +439,18 @@ public class GameWindow {
      */
     public void about() {
         this.reportBtn.setDisable(true);
-        VBox aboutVbox = aboutDisplayVbox.create();
+        String appName = inputEngine.getAboutAppName();
+        String devName = inputEngine.getAboutDevName();
+        List<String> references = inputEngine.getAboutReferences();
+        VBox aboutVbox = aboutDisplayVbox.create(appName, devName, references);
         this.contentScrollPane.setContent(aboutVbox);
+    }
+
+    /**
+     * Starts the loading screen
+     */
+    public void loading() {
+        VBox loadingVbox = loadingDisplayVbox.start();
+        contentScrollPane.setContent(loadingVbox);
     }
 }

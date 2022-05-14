@@ -19,18 +19,21 @@ public class OnlineInputEngine implements InputEngine {
     private int currentPageInd;
     private LemmaProcessor lemmaProcessor;
     private SqlDatabase db;
+    private AboutData aboutData;
 
     /**
      * Creates the online input engine. Setups the database.
      * @param request request
      * @param lemmaProcessor lemma processor
      * @param db sql database
+     * @param aboutData about information
      */
-    public OnlineInputEngine(Request request, LemmaProcessor lemmaProcessor, SqlDatabase db) {
+    public OnlineInputEngine(Request request, LemmaProcessor lemmaProcessor, SqlDatabase db, AboutData aboutData) {
         this.request = request;
         this.history = new ArrayList<>();
         this.lemmaProcessor = lemmaProcessor;
         this.db = db;
+        this.aboutData = aboutData;
 
         db.setupDB();
     }
@@ -379,7 +382,30 @@ public class OnlineInputEngine implements InputEngine {
      * @return error message
      */
     public String clearCache() {
-        String error = db.clearDatabase();
-        return error;
+        return db.clearDatabase();
+    }
+
+    /**
+     * Gets the application name from the about data
+     * @return application name
+     */
+    public String getAboutAppName() {
+        return aboutData.getAppName();
+    }
+
+    /**
+     * Gets the developer name from the about data
+     * @return developer name
+     */
+    public String getAboutDevName() {
+        return aboutData.getDevName();
+    }
+
+    /**
+     * Gets the references from the about data
+     * @return references
+     */
+    public List<String> getAboutReferences() {
+        return aboutData.getReferences();
     }
 }

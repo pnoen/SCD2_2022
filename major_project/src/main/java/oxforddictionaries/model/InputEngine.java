@@ -71,4 +71,22 @@ public interface InputEngine {
      * @return error message
      */
      String clearCache();
+
+    /**
+     * Gets the application name from the about data
+     * @return application name
+     */
+     String getAboutAppName();
+
+    /**
+     * Gets the developer name from the about data
+     * @return developer name
+     */
+     String getAboutDevName();
+
+    /**
+     * Gets the references from the about data
+     * @return references
+     */
+     List<String> getAboutReferences();
 }
