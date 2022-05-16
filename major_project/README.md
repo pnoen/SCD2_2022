@@ -31,6 +31,8 @@ the api for the lemmas, the application will use the language selected
 when searching for an entry. This leads to some lemmas leading to the entry 
 not being found.
 
+- To use the menu bar buttons, you need to click on the text.
+
 # Level of Implementation
 - Pass
 - Credit
