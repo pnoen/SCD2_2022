@@ -141,6 +141,7 @@ public class GameWindow {
 
         this.reportBtn = new Button("Create Report");
         reportBtn.setPrefWidth(btnWidth);
+        reportBtn.setWrapText(true);
         entryBtn.setTextAlignment(TextAlignment.CENTER);
         reportBtn.setOnAction((event -> {
             sendReport();
@@ -149,6 +150,7 @@ public class GameWindow {
 
         Button clearDbBtn = new Button("Clear Cache");
         clearDbBtn.setPrefWidth(btnWidth);
+        clearDbBtn.setWrapText(true);
         entryBtn.setTextAlignment(TextAlignment.CENTER);
         clearDbBtn.setOnAction((event -> {
             clearCache();
