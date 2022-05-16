@@ -17,7 +17,7 @@ public class ThemeSongPlayer {
      * Creates the player and starts the playing
      */
     public void start() {
-        String[] path = {"src", "main", "resources", "dreamy night - LilyPichu.mp3"};
+        String[] path = {"src", "main", "resources", "dreamy night - LilyPichu.wav"};
         String filename = String.join(File.separator, path);
         File file = new File(filename);
         String fileUri = file.toURI().toString();
