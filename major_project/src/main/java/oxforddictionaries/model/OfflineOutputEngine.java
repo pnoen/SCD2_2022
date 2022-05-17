@@ -35,7 +35,13 @@ public class OfflineOutputEngine implements OutputEngine {
                                    String apiPasteExpireDate, String apiFolderKey) {
         String response = dummyAPI.getSendReportResponse();
         this.pastebinLink = response;
-        return new ArrayList<>();
+        List<String> error = new ArrayList<>();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            error.add(e.getMessage());
+        }
+        return error;
     }
 
     /**

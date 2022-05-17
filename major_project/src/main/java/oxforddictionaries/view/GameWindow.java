@@ -232,27 +232,15 @@ public class GameWindow {
                         return;
                     }
                     handleError(error);
-                    if (lemma) {
-                        entry();
-                    }
+//                    if (lemma) {
+//                        entry();
+//                    }
+                    entry();
                     return;
                 }
 
                 reportBtn.setDisable(false);
-                RetrieveEntry retrieveEntry = inputEngine.getRetrieveEntry();
-                VBox contentVbox = entryDisplayVbox.create(retrieveEntry);
-                contentScrollPane.setVvalue(0);
-                contentScrollPane.setContent(contentVbox);
-
-                List<HBox> synAntHboxes = entryDisplayVbox.getSynAntHboxes();
-                for (int i = 0; i < synAntHboxes.size(); i++) {
-                    int ind = i;
-                    synAntHboxes.get(ind).setOnMouseClicked((event) -> {
-                        String text = entryDisplayVbox.getSynAntText(ind);
-                        displayEntry(lang, text, "", "", "", "", "", "", false, false, false,
-                                false, false);
-                    });
-                }
+                setEntryDisplayVbox(lang);
             });
         });
         thread.start();
@@ -309,6 +297,7 @@ public class GameWindow {
                         return;
                     }
                     handleError(error);
+                    entry();
                     return;
                 }
                 List<List<String>> lemmas = inputEngine.findLemmas();
@@ -326,7 +315,6 @@ public class GameWindow {
                     List<String> lemma = lemmaDisplayVbox.getLemma(0);
                     displayEntry(entryInputVbox.getLang(), lemma.get(1), "", lemma.get(3), lemma.get(2), "", "", "true",
                             newSearch, false, true, false, false);
-                    return;
                 }
             });
         });
@@ -362,16 +350,25 @@ public class GameWindow {
     public void sendReport() {
         Dialog<String> dialog = reportDialog.create();
         reportDialog.getSendBtn().addEventFilter(ActionEvent.ACTION, event -> {
-            List<String> error = outputEngine.sendReport(inputEngine.getRetrieveEntry(), reportDialog.getPrivateVal(), reportDialog.getNameVal(),
-                    reportDialog.getUserKeyVal(), reportDialog.getExpireVal(), reportDialog.getFolderVal());
-            if (error.size() > 0) {
-                handleError(error);
-                return;
-            }
-            TextInputDialog linkDialog = new TextInputDialog(outputEngine.getPastebinLink());
-            linkDialog.setTitle("Send Report");
-            linkDialog.setHeaderText("Link to paste:");
-            linkDialog.showAndWait();
+            loading();
+            Thread thread = new Thread(() -> {
+                List<String> error = outputEngine.sendReport(inputEngine.getRetrieveEntry(), reportDialog.getPrivateVal(), reportDialog.getNameVal(),
+                        reportDialog.getUserKeyVal(), reportDialog.getExpireVal(), reportDialog.getFolderVal());
+                Platform.runLater(() -> {
+                    if (error.size() > 0) {
+                        handleError(error);
+                        setEntryDisplayVbox(entryInputVbox.getLang());
+                        return;
+                    }
+                    TextInputDialog linkDialog = new TextInputDialog(outputEngine.getPastebinLink());
+                    linkDialog.setTitle("Send Report");
+                    linkDialog.setHeaderText("Link to paste:");
+                    linkDialog.showAndWait();
+
+                    setEntryDisplayVbox(entryInputVbox.getLang());
+                });
+            });
+            thread.start();
         });
         dialog.showAndWait();
     }
@@ -457,5 +454,26 @@ public class GameWindow {
     public void loading() {
         VBox loadingVbox = loadingDisplayVbox.start();
         contentScrollPane.setContent(loadingVbox);
+    }
+
+    /**
+     * Displays the
+     * @param lang searched language
+     */
+    public void setEntryDisplayVbox(String lang) {
+        RetrieveEntry retrieveEntry = inputEngine.getRetrieveEntry();
+        VBox contentVbox = entryDisplayVbox.create(retrieveEntry);
+        contentScrollPane.setVvalue(0);
+        contentScrollPane.setContent(contentVbox);
+
+        List<HBox> synAntHboxes = entryDisplayVbox.getSynAntHboxes();
+        for (int i = 0; i < synAntHboxes.size(); i++) {
+            int ind = i;
+            synAntHboxes.get(ind).setOnMouseClicked((event) -> {
+                String text = entryDisplayVbox.getSynAntText(ind);
+                displayEntry(lang, text, "", "", "", "", "", "", false,
+                        false, false, false, false);
+            });
+        }
     }
 }
