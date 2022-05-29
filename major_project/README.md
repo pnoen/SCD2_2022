@@ -38,6 +38,14 @@ not being found.
 - Credit
 - Distinction
 
+# Previous Submissions
+- Milestone 1
+  - SHA: 94ff44908aa19e79d2e969dc402283259d268c34
+  - [URI](https://github.sydney.edu.au/rton8097/SCD2_2022/commit/94ff44908aa19e79d2e969dc402283259d268c34)
+- Milestone 2
+  - SHA: 7fa257e577e3954ae3cc528ee1fa90dd1eab0173
+  - [URI](https://github.sydney.edu.au/rton8097/SCD2_2022/commit/7fa257e577e3954ae3cc528ee1fa90dd1eab0173)
+
 # References
 - [Oxford Dictionaries API](https://developer.oxforddictionaries.com/)
 - [Pastebin API](https://pastebin.com/doc_api)
