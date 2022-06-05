@@ -20,8 +20,8 @@ URI: https://github.sydney.edu.au/rton8097/SCD2_2022/commit/94ff44908aa19e79d2e9
 
 **Milestone 1 Re-Submission:**
 ```
-SHA: 
-URI: 
+SHA: 94ff44908aa19e79d2e969dc402283259d268c34
+URI: https://github.sydney.edu.au/rton8097/SCD2_2022/commit/94ff44908aa19e79d2e969dc402283259d268c34
 ```
 **Milestone 2 Submission:**
 ```
