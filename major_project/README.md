@@ -40,8 +40,8 @@ URI: https://github.sydney.edu.au/rton8097/SCD2_2022/commit/7fa257e577e3954ae3cc
 ```
 **Exam Submission Commit:**
 ```
-SHA: 
-URI: 
+SHA: 0f1b3a765d60f03862e2e727e3da5fbc625b294a
+URI: https://github.sydney.edu.au/rton8097/SCD2_2022/commit/0f1b3a765d60f03862e2e727e3da5fbc625b294a
 ```
 
 # How to run
