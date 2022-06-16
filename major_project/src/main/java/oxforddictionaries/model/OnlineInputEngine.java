@@ -20,6 +20,7 @@ public class OnlineInputEngine implements InputEngine {
     private LemmaProcessor lemmaProcessor;
     private SqlDatabase db;
     private AboutData aboutData;
+    private List<List<String>> pronunciations;
 
     /**
      * Creates the online input engine. Setups the database.
@@ -34,6 +35,7 @@ public class OnlineInputEngine implements InputEngine {
         this.lemmaProcessor = lemmaProcessor;
         this.db = db;
         this.aboutData = aboutData;
+        this.pronunciations = new ArrayList<>();
 
         db.setupDB();
     }
@@ -407,5 +409,62 @@ public class OnlineInputEngine implements InputEngine {
      */
     public List<String> getAboutReferences() {
         return aboutData.getReferences();
+    }
+
+
+    /**
+     * Adds pronunciation to the list of pronunciations. If the uri is already in the list, return false.
+     * If the entry id is null, change the id to '-'.
+     * @param entryId Entry ID
+     * @param pronunciation Pronunciation URI
+     * @return added or not
+     */
+    public boolean addPronunciation(String entryId, String pronunciation) {
+        for (List<String> pro : pronunciations) {
+            if (pro.contains(pronunciation)) {
+                return false;
+            }
+        }
+
+        List<String> newPronunciation = new ArrayList<>();
+        String id = "-";
+        if (entryId != null) {
+            id = entryId;
+        }
+        newPronunciation.add(id);
+        newPronunciation.add(pronunciation);
+        pronunciations.add(newPronunciation);
+        return true;
+    }
+
+    /**
+     * Gets the list of pronunciations
+     * @return pronunciations
+     */
+    public List<List<String>> getPronunciations() {
+        return pronunciations;
+    }
+
+    /**
+     * Removes pronunciation from the list of pronunciations
+     * @param pronunciation Pronunciation URI
+     * @return removed or not
+     */
+    public boolean removePronunciation(String pronunciation) {
+        boolean contains = false;
+        List<String> removeList = null;
+        for (List<String> pro : pronunciations) {
+            if (pro.contains(pronunciation)) {
+                contains = true;
+                removeList = pro;
+            }
+        }
+
+        if (!contains) {
+            return false;
+        }
+
+        pronunciations.remove(removeList);
+        return true;
     }
 }

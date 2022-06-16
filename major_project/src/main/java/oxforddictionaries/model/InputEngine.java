@@ -89,4 +89,25 @@ public interface InputEngine {
      * @return references
      */
      List<String> getAboutReferences();
+
+    /**
+     * Adds pronunciation to the list of pronunciations
+     * @param entryId Entry ID
+     * @param pronunciation Pronunciation URI
+     * @return added or not
+     */
+    boolean addPronunciation(String entryId, String pronunciation);
+
+    /**
+     * Gets the list of pronunciations
+     * @return pronunciations
+     */
+    List<List<String>> getPronunciations();
+
+    /**
+     * Removes pronunciation from the list of pronunciations
+     * @param pronunciation Pronunciation URI
+     * @return removed or not
+     */
+    boolean removePronunciation(String pronunciation);
 }

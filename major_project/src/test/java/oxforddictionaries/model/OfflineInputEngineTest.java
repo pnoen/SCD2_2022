@@ -146,4 +146,12 @@ public class OfflineInputEngineTest {
 
         verify(dummyAPIMock, times(1)).getLemmaSearchJSON();
     }
+
+    @Test
+    public void setupPronunciation() {
+        List<List<String>> pronunciations = offlineInputEngine.getPronunciations();
+        assertThat(pronunciations.size(), equalTo(1));
+        assertThat(pronunciations.get(0).get(0), equalTo("noun"));
+        assertThat(pronunciations.get(0).get(1), equalTo("https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3"));
+    }
 }

@@ -1,10 +1,8 @@
 package oxforddictionaries.view;
 
+import javafx.scene.control.*;
+import oxforddictionaries.model.InputEngine;
 import oxforddictionaries.model.request.responseclasses.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
@@ -23,14 +21,18 @@ public class EntryDisplayVbox {
     private List<String> synAntTexts;
     private List<HBox> synAntHboxes;
     private CustomItemBuilder customItemBuilder;
+    private InputEngine inputEngine;
+    private String entryId;
 
     /**
      * Creates the entry display vbox.
+     * @param inputEngine Input Engine
      */
-    public EntryDisplayVbox() {
+    public EntryDisplayVbox(InputEngine inputEngine) {
         this.synAntTexts = new ArrayList<>();
         this.synAntHboxes = new ArrayList<>();
         this.customItemBuilder = new CustomItemBuilder();
+        this.inputEngine = inputEngine;
     }
 
     /**
@@ -57,6 +59,7 @@ public class EntryDisplayVbox {
         vbox.getChildren().addAll(titleLbl, entryTree);
 
         handleStringLbl(retrieveEntry.getId(), root, "ID: ", false);
+        this.entryId = retrieveEntry.getId();
 
         if (retrieveEntry.getMetadata() != null) {
             customItemBuilder.newItem();
@@ -231,7 +234,8 @@ public class EntryDisplayVbox {
     }
 
     /**
-     * Adds the attributes to the tree node
+     * Adds the attributes to the tree node. Adds a button to play the audio file and
+     * a button to add to the pronunciation list. If it can't be added then display an error.
      * @param pronunciation POJO
      * @param parent parent tree node
      */
@@ -252,7 +256,22 @@ public class EntryDisplayVbox {
             proBtn.setOnAction((event) -> {
                 proPlayer.play();
             });
-            customItemBuilder.setBtn(proBtn);
+            customItemBuilder.setProBtn(proBtn);
+
+            Button addBtn = new Button("Add to list");
+            addBtn.setOnAction((event) -> {
+                boolean added = inputEngine.addPronunciation(entryId, pronunciation.getAudioFile());
+                if (!added) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("An error has occurred!");
+                    alert.setContentText("List already contains the pronunciation.");
+                    alert.showAndWait();
+                }
+            });
+
+            customItemBuilder.setAddBtn(addBtn);
+
             TreeItem<CustomItem> audItem = new TreeItem<>(customItemBuilder.getCustomItem());
             parent.getChildren().add(audItem);
         }

@@ -41,6 +41,7 @@ public class GameWindow {
     private ThemeSongPlayer themeSongPlayer;
     private AboutDisplayVbox aboutDisplayVbox;
     private LoadingDisplayVbox loadingDisplayVbox;
+    private PronunciationListVbox pronunciationListVbox;
 
     /**
      * Creates the game window. Creates the border pane and initialises the bottom hbox, left vbox and center scroll pane.
@@ -84,7 +85,7 @@ public class GameWindow {
         setupBorderPane();
 
         this.entryInputVbox = new EntryInputVbox();
-        this.entryDisplayVbox = new EntryDisplayVbox();
+        this.entryDisplayVbox = new EntryDisplayVbox(inputEngine);
         this.lemmaDisplayVbox = new LemmaDisplayVbox();
         this.historyDisplayVbox = new HistoryDisplayVbox();
         this.reportDialog = new ReportDialog();
@@ -92,6 +93,7 @@ public class GameWindow {
         this.themeSongPlayer = new ThemeSongPlayer();
         this.aboutDisplayVbox = new AboutDisplayVbox();
         this.loadingDisplayVbox = new LoadingDisplayVbox();
+        this.pronunciationListVbox = new PronunciationListVbox(inputEngine);
 
         themeSongPlayer.start();
         sidebarBtns();
@@ -120,10 +122,10 @@ public class GameWindow {
     }
 
     /**
-     * Creates the sidebar buttons Home, History, Create report and Clear cache
+     * Creates the sidebar buttons Home, History, Pronunciation list, Create report and Clear cache
      */
     public void sidebarBtns() {
-        double btnWidth = 90.0;
+        double btnWidth = 95.0;
 
         Button entryBtn = new Button("Home");
         entryBtn.setPrefWidth(btnWidth);
@@ -137,6 +139,13 @@ public class GameWindow {
         entryBtn.setTextAlignment(TextAlignment.CENTER);
         historyBtn.setOnAction((event -> {
             history();
+        }));
+
+        Button pronunciationsBtn = new Button("Pronunciations");
+        pronunciationsBtn.setPrefWidth(btnWidth);
+        pronunciationsBtn.setTextAlignment(TextAlignment.CENTER);
+        pronunciationsBtn.setOnAction((event -> {
+            pronunciations();
         }));
 
         this.reportBtn = new Button("Create Report");
@@ -156,7 +165,7 @@ public class GameWindow {
             clearCache();
         }));
 
-        this.leftVbox.getChildren().addAll(entryBtn, historyBtn, reportBtn, clearDbBtn);
+        this.leftVbox.getChildren().addAll(entryBtn, historyBtn, pronunciationsBtn, reportBtn, clearDbBtn);
     }
 
     /**
@@ -475,5 +484,16 @@ public class GameWindow {
                         false, false, false, false);
             });
         }
+    }
+
+
+    /**
+     * Displays the pronunciation list window
+     */
+    public void pronunciations() {
+        this.reportBtn.setDisable(true);
+        List<List<String>> pronunciations = inputEngine.getPronunciations();
+        VBox pronunciationsVbox = pronunciationListVbox.create(pronunciations);
+        this.contentScrollPane.setContent(pronunciationsVbox);
     }
 }

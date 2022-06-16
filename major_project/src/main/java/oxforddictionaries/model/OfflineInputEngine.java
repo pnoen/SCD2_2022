@@ -17,6 +17,7 @@ public class OfflineInputEngine implements InputEngine {
     private int currentPageInd;
     private LemmaProcessor lemmaProcessor;
     private AboutData aboutData;
+    private List<List<String>> pronunciations;
 
     /**
      * Creates the offline input engine
@@ -29,7 +30,9 @@ public class OfflineInputEngine implements InputEngine {
         this.lemmaProcessor = lemmaProcessor;
         this.aboutData = aboutData;
         this.history = new ArrayList<>();
+        this.pronunciations = new ArrayList<>();
         setupHistory();
+        setupPronunciations();
     }
 
     /**
@@ -177,5 +180,42 @@ public class OfflineInputEngine implements InputEngine {
      */
     public List<String> getAboutReferences() {
         return aboutData.getReferences();
+    }
+
+    /**
+     * Adds pronunciation to the list of pronunciations
+     * @param entryId Entry ID
+     * @param pronunciation Pronunciation URI
+     * @return added or not
+     */
+    public boolean addPronunciation(String entryId, String pronunciation) {
+        return true;
+    }
+
+    /**
+     * Gets the list of pronunciations
+     * @return pronunciations
+     */
+    public List<List<String>> getPronunciations() {
+        return pronunciations;
+    }
+
+    /**
+     * Removes pronunciation from the list of pronunciations
+     * @param pronunciation Pronunciation URI
+     * @return removed or not
+     */
+    public boolean removePronunciation(String pronunciation) {
+        return true;
+    }
+
+    /**
+     * Creates fake pronunciation list
+     */
+    public void setupPronunciations() {
+        List<String> pronunciation = new ArrayList<>();
+        pronunciation.add("noun");
+        pronunciation.add("https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3");
+        pronunciations.add(pronunciation);
     }
 }

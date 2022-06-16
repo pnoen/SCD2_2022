@@ -9,7 +9,8 @@ import javafx.scene.layout.HBox;
  */
 public class CustomItem extends HBox {
     private Label label;
-    private Button btn;
+    private Button proBtn;
+    private Button addBtn;
 
     /**
      * Creates the custom item and inherits the super class
@@ -28,11 +29,20 @@ public class CustomItem extends HBox {
     }
 
     /**
-     * Set the button of the item
-     * @param btn javafx button
+     * Set the pronunciation button of the item
+     * @param proBtn javafx button
      */
-    public void setBtn(Button btn) {
-        this.btn = btn;
-        this.getChildren().add(btn);
+    public void setProBtn(Button proBtn) {
+        this.proBtn = proBtn;
+        this.getChildren().add(proBtn);
+    }
+
+    /**
+     * Set the add to list button of the item
+     * @param addBtn javafx button
+     */
+    public void setAddBtn(Button addBtn) {
+        this.addBtn = addBtn;
+        this.getChildren().add(addBtn);
     }
 }

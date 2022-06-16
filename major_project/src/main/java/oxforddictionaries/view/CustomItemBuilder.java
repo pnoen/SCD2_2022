@@ -32,11 +32,11 @@ public class CustomItemBuilder {
     }
 
     /**
-     * Sets the button of the item
-     * @param btn javafx button
+     * Sets the pronunciation button of the item
+     * @param proBtn javafx button
      */
-    public void setBtn(Button btn) {
-        customItem.setBtn(btn);
+    public void setProBtn(Button proBtn) {
+        customItem.setProBtn(proBtn);
     }
 
     /**
@@ -45,6 +45,14 @@ public class CustomItemBuilder {
      */
     public CustomItem getCustomItem() {
         return customItem;
+    }
+
+    /**
+     * Sets the add to list button of the item
+     * @param addBtn javafx button
+     */
+    public void setAddBtn(Button addBtn) {
+        customItem.setAddBtn(addBtn);
     }
 
 

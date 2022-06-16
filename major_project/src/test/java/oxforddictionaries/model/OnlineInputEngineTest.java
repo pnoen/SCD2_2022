@@ -1571,4 +1571,123 @@ public class OnlineInputEngineTest {
         verify(requestMock, times(0)).getRequest("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
         verify(sqlDatabaseMock, times(1)).getLemma("https://od-api.oxforddictionaries.com/api/v2/lemmas/en/forehead");
     }
+
+    @Test
+    public void addPronunciation() {
+        boolean actual = onlineInputEngine.addPronunciation("noun", "https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3");
+        assertThat(actual, is(Boolean.TRUE));
+
+        List<List<String>> pronunciations = onlineInputEngine.getPronunciations();
+        assertThat(pronunciations.size(), equalTo(1));
+        assertThat(pronunciations.get(0).get(0), equalTo("noun"));
+        assertThat(pronunciations.get(0).get(1), equalTo("https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3"));
+    }
+
+    @Test
+    public void addPronunciationNullId() {
+        boolean actual = onlineInputEngine.addPronunciation(null, "https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3");
+        assertThat(actual, is(Boolean.TRUE));
+
+        List<List<String>> pronunciations = onlineInputEngine.getPronunciations();
+        assertThat(pronunciations.size(), equalTo(1));
+        assertThat(pronunciations.get(0).get(0), equalTo("-"));
+        assertThat(pronunciations.get(0).get(1), equalTo("https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3"));
+    }
+
+    @Test
+    public void addPronunciationEmptyId() {
+        boolean actual = onlineInputEngine.addPronunciation("", "https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3");
+        assertThat(actual, is(Boolean.TRUE));
+
+        List<List<String>> pronunciations = onlineInputEngine.getPronunciations();
+        assertThat(pronunciations.size(), equalTo(1));
+        assertThat(pronunciations.get(0).get(0), equalTo(""));
+        assertThat(pronunciations.get(0).get(1), equalTo("https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3"));
+    }
+
+    @Test
+    public void addPronunciationEmptyPronunciation() {
+        boolean actual = onlineInputEngine.addPronunciation("noun", "");
+        assertThat(actual, is(Boolean.TRUE));
+
+        List<List<String>> pronunciations = onlineInputEngine.getPronunciations();
+        assertThat(pronunciations.size(), equalTo(1));
+        assertThat(pronunciations.get(0).get(0), equalTo("noun"));
+        assertThat(pronunciations.get(0).get(1), equalTo(""));
+    }
+
+    @Test
+    public void addPronunciationAddTwice() {
+        onlineInputEngine.addPronunciation("noun", "https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3");
+        boolean actual = onlineInputEngine.addPronunciation("noun", "https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3");
+        assertThat(actual, is(Boolean.FALSE));
+
+        List<List<String>> pronunciations = onlineInputEngine.getPronunciations();
+        assertThat(pronunciations.size(), equalTo(1));
+        assertThat(pronunciations.get(0).get(0), equalTo("noun"));
+        assertThat(pronunciations.get(0).get(1), equalTo("https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3"));
+    }
+
+    @Test
+    public void addPronunciationAddTwiceDiffId() {
+        onlineInputEngine.addPronunciation("noun", "https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3");
+        boolean actual = onlineInputEngine.addPronunciation("new", "https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3");
+        assertThat(actual, is(Boolean.FALSE));
+
+        List<List<String>> pronunciations = onlineInputEngine.getPronunciations();
+        assertThat(pronunciations.size(), equalTo(1));
+        assertThat(pronunciations.get(0).get(0), equalTo("noun"));
+        assertThat(pronunciations.get(0).get(1), equalTo("https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3"));
+    }
+
+    @Test
+    public void addPronunciationAddTwiceDiffPronunciation() {
+        onlineInputEngine.addPronunciation("noun", "https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3");
+        boolean actual = onlineInputEngine.addPronunciation("noun", "https://audio.oxforddictionaries.com/en/mp3/diff_gb_1.mp3");
+        assertThat(actual, is(Boolean.TRUE));
+
+        List<List<String>> pronunciations = onlineInputEngine.getPronunciations();
+        assertThat(pronunciations.size(), equalTo(2));
+        assertThat(pronunciations.get(0).get(0), equalTo("noun"));
+        assertThat(pronunciations.get(0).get(1), equalTo("https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3"));
+
+        assertThat(pronunciations.get(1).get(0), equalTo("noun"));
+        assertThat(pronunciations.get(1).get(1), equalTo("https://audio.oxforddictionaries.com/en/mp3/diff_gb_1.mp3"));
+    }
+
+    @Test
+    public void removePronunciation() {
+        onlineInputEngine.addPronunciation("noun", "https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3");
+        boolean actual = onlineInputEngine.removePronunciation("https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3");
+        assertThat(actual, is(Boolean.TRUE));
+
+        List<List<String>> pronunciations = onlineInputEngine.getPronunciations();
+        assertThat(pronunciations.size(), equalTo(0));
+    }
+
+    @Test
+    public void removePronunciationDoesntExist() {
+        onlineInputEngine.addPronunciation("noun", "https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3");
+        boolean actual = onlineInputEngine.removePronunciation("Doesn't exist");
+        assertThat(actual, is(Boolean.FALSE));
+
+        List<List<String>> pronunciations = onlineInputEngine.getPronunciations();
+        assertThat(pronunciations.size(), equalTo(1));
+        assertThat(pronunciations.get(0).get(0), equalTo("noun"));
+        assertThat(pronunciations.get(0).get(1), equalTo("https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3"));
+    }
+
+    @Test
+    public void removePronunciationNullPronunciation() {
+        onlineInputEngine.addPronunciation("noun", "https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3");
+        boolean actual = onlineInputEngine.removePronunciation(null);
+        assertThat(actual, is(Boolean.FALSE));
+
+        List<List<String>> pronunciations = onlineInputEngine.getPronunciations();
+        assertThat(pronunciations.size(), equalTo(1));
+        assertThat(pronunciations.get(0).get(0), equalTo("noun"));
+        assertThat(pronunciations.get(0).get(1), equalTo("https://audio.oxforddictionaries.com/en/mp3/noun_gb_1.mp3"));
+    }
+
+
 }
